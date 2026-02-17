@@ -1,0 +1,160 @@
+import Image from "next/image";
+import { MarkReviewedButton } from "@/app/coach/clients/[clientId]/review/[weekStartDate]/mark-reviewed-button";
+
+type Photo = {
+  id: string;
+  url: string;
+  storagePath: string;
+  sortOrder: number;
+};
+
+type CheckIn = {
+  id: string;
+  weight: number | null;
+  dietCompliance: number | null;
+  energyLevel: number | null;
+  notes: string | null;
+  status: string;
+  createdAt: Date;
+  photos: Photo[];
+};
+
+export function CheckInSummary({
+  checkIn,
+  weightDelta,
+}: {
+  checkIn: CheckIn;
+  weightDelta: number | null;
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Status bar */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${
+              checkIn.status === "REVIEWED" ? "bg-green-500" : "bg-blue-500"
+            }`}
+            aria-hidden="true"
+          />
+          <span
+            className={`text-xs font-medium ${
+              checkIn.status === "REVIEWED"
+                ? "text-green-600 dark:text-green-400"
+                : "text-blue-600 dark:text-blue-400"
+            }`}
+          >
+            {checkIn.status === "REVIEWED" ? "Reviewed" : "New"}
+          </span>
+          <span className="text-xs text-zinc-400">
+            &middot; {checkIn.createdAt.toLocaleDateString()}
+          </span>
+        </div>
+        {checkIn.status !== "REVIEWED" && (
+          <MarkReviewedButton checkInId={checkIn.id} />
+        )}
+      </div>
+
+      {/* Metrics — weight prominent */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Weight
+          </p>
+          {checkIn.weight != null ? (
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold tabular-nums leading-none">
+                {checkIn.weight}
+              </span>
+              <span className="text-xs text-zinc-400">lbs</span>
+              {weightDelta != null && weightDelta !== 0 && (
+                <span
+                  className={`text-xs font-medium ${
+                    weightDelta < 0
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-500"
+                  }`}
+                >
+                  {weightDelta < 0 ? "↓" : "↑"}{Math.abs(weightDelta)}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+          )}
+        </div>
+        <MetricCard
+          label="Diet"
+          value={checkIn.dietCompliance}
+          suffix="/10"
+        />
+        <MetricCard
+          label="Energy"
+          value={checkIn.energyLevel}
+          suffix="/10"
+        />
+      </div>
+
+      {/* Notes */}
+      {checkIn.notes && (
+        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Notes
+          </p>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">{checkIn.notes}</p>
+        </div>
+      )}
+
+      {/* Photos */}
+      {checkIn.photos.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Photos
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {checkIn.photos.map((photo) => (
+              <div
+                key={photo.id}
+                className="relative aspect-[3/4] overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800"
+              >
+                <Image
+                  src={photo.url}
+                  alt="Progress photo"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, 200px"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  suffix,
+}: {
+  label: string;
+  value: number | null;
+  suffix: string;
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+        {label}
+      </p>
+      {value != null ? (
+        <div className="mt-1 flex items-baseline gap-0.5">
+          <span className="text-2xl font-bold tabular-nums leading-none">{value}</span>
+          <span className="text-xs text-zinc-400">{suffix}</span>
+        </div>
+      ) : (
+        <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+      )}
+    </div>
+  );
+}

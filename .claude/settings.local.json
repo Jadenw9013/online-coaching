@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:clerk.com)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx next build:*)",
+      "WebFetch(domain:www.prisma.io)",
+      "Bash(npm run lint)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma validate:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

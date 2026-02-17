@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  COACH
+  CLIENT
+}
+
+enum CheckInStatus {
+  SUBMITTED
+  REVIEWED
+}
+
+model User {
+  id         String   @id @default(cuid())
+  clerkId    String   @unique
+  email      String   @unique
+  firstName  String?
+  lastName   String?
+  activeRole Role     @default(CLIENT) @map("role")
+  isCoach    Boolean  @default(false)
+  isClient   Boolean  @default(true)
+  coachCode  String?  @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  coachAssignments  CoachClient[] @relation("Coach")
+  clientAssignments CoachClient[] @relation("Client")
+  checkIns          CheckIn[]
+  clientMessages    Message[]     @relation("ClientMessages")
+  sentMessages      Message[]     @relation("SentMessages")
+  macroTargets      MacroTarget[] @relation("MacroTargets")
+  mealPlans         MealPlan[]    @relation("MealPlans")
+  foodLibrary       FoodLibraryItem[] @relation("FoodLibrary")
+}
+
+model CoachClient {
+  id         String   @id @default(cuid())
+  coachId    String
+  clientId   String
+  coachNotes String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  coach  User @relation("Coach", fields: [coachId], references: [id])
+  client User @relation("Client", fields: [clientId], references: [id])
+
+  @@unique([coachId, clientId])
+  @@index([coachId])
+  @@index([clientId])
+}
+
+model CheckIn {
+  id         String   @id @default(cuid())
+  clientId   String
+  weekOf     DateTime
+  weight     Float?
+  bodyFatPct Float?
+  status          CheckInStatus @default(SUBMITTED)
+  dietCompliance  Int?
+  energyLevel     Int?
+  notes           String?  @db.Text
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  client User           @relation(fields: [clientId], references: [id])
+  photos CheckInPhoto[]
+
+  @@unique([clientId, weekOf])
+}
+
+model MacroTarget {
+  id        String   @id @default(cuid())
+  clientId  String
+  weekOf    DateTime
+  calories  Int
+  protein   Int
+  carbs     Int
+  fats      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client User @relation("MacroTargets", fields: [clientId], references: [id])
+
+  @@unique([clientId, weekOf])
+}
+
+enum MealPlanStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model MealPlan {
+  id          String         @id @default(cuid())
+  clientId    String
+  weekOf      DateTime
+  version     Int            @default(1)
+  status      MealPlanStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  client User           @relation("MealPlans", fields: [clientId], references: [id])
+  items  MealPlanItem[]
+
+  @@index([clientId, weekOf])
+  @@index([clientId, status])
+}
+
+model MealPlanItem {
+  id                 String  @id @default(cuid())
+  mealPlanId         String
+  mealName           String
+  sortOrder          Int     @default(0)
+  foodName           String
+  quantity           String
+  unit               String
+  servingDescription String?
+  calories           Int     @default(0)
+  protein            Int     @default(0)
+  carbs              Int     @default(0)
+  fats               Int     @default(0)
+
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  @@index([mealPlanId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  clientId  String
+  weekOf    DateTime
+  senderId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  client User @relation("ClientMessages", fields: [clientId], references: [id])
+  sender User @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([clientId, weekOf])
+  @@index([senderId])
+}
+
+model CheckInPhoto {
+  id          String   @id @default(cuid())
+  checkInId   String
+  storagePath String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+
+  @@index([checkInId])
+}
+
+model FoodLibraryItem {
+  id          String   @id @default(cuid())
+  coachId     String
+  name        String
+  defaultUnit String   @default("serving")
+  createdAt   DateTime @default(now())
+
+  coach User @relation("FoodLibrary", fields: [coachId], references: [id])
+
+  @@unique([coachId, name])
+  @@index([coachId])
+}
