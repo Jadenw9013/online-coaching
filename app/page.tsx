@@ -34,7 +34,6 @@ export default async function Home() {
                 className="object-contain"
               />
             </div>
-            <span className="text-base font-bold tracking-tight">Steadfast</span>
           </Link>
           <nav className="flex items-center gap-2" aria-label="Main navigation">
             <Link
@@ -55,10 +54,10 @@ export default async function Home() {
 
       <main id="main-content">
         {/* ── Hero ── */}
-        <section className="px-4 py-20 sm:px-6 sm:py-28">
+        <section className="px-4 sm:px-6 min-h-[calc(100vh-72px)] flex items-center">
           <div className="mx-auto max-w-3xl text-center">
             {/* Hero logo — responsive: ~96px mobile, ~112px sm, ~144px md, ~176px lg */}
-            <div className="relative mx-auto mb-8 h-24 w-24 sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-44 lg:w-44">
+            <div className="relative mx-auto mb-6 h-[40vh] max-h-[520px] w-[40vh] max-w-[520px]">
               <Image
                 src="/brand/Steadfast_logo.png"
                 alt="Steadfast"
@@ -67,13 +66,12 @@ export default async function Home() {
                 className="object-contain"
               />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Structured coaching.{" "}
-              <span className="text-zinc-400">Consistent results.</span>
-            </h1>
+              <h1 className="mt-2 text-balance text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight">
+                Structured coaching. <span className="text-zinc-400">Consistent results.</span>
+              </h1>
             <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
               Steadfast connects coaches and clients with weekly check-ins,
-              personalized meal plans, and structured feedback &mdash; so
+              personalized meal plans, and structured feedback so
               nothing falls through the cracks.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
