@@ -1,6 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { Role } from "@/app/generated/prisma/enums";
 import type { Roles } from "@/types/globals.d";
 
 export async function checkRole(role: Roles): Promise<boolean> {
@@ -34,7 +33,7 @@ export async function getCurrentDbUser() {
 
   const isCoach =
     (clerkUser.publicMetadata?.role as string)?.toUpperCase() === "COACH";
-  const activeRole = isCoach ? Role.COACH : Role.CLIENT;
+  const activeRole = isCoach ? "COACH" : "CLIENT" as const;
   const coachCode = isCoach ? generateCoachCode() : undefined;
 
   return db.user.upsert({

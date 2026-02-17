@@ -1,7 +1,6 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { Role } from "@/app/generated/prisma/enums";
 
 export async function POST(req: NextRequest) {
   const evt = await verifyWebhook(req);
@@ -19,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const isCoach =
       (public_metadata?.role as string)?.toUpperCase() === "COACH";
-    const activeRole = isCoach ? Role.COACH : Role.CLIENT;
+    const activeRole = isCoach ? "COACH" : "CLIENT" as const;
 
     await db.user.upsert({
       where: { clerkId: id },
