@@ -118,6 +118,7 @@ export default async function ReviewWorkspacePage({
             effectivePlan={effectivePlan}
             foods={foods}
             coachDefaultNotify={coach.defaultNotifyOnPublish}
+            publishedMealPlanId={effectivePlan.publishedId}
           />
         </div>
       </div>

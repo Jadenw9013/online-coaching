@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MealCard } from "./meal-card";
 import { MacroToggle } from "./macro-toggle";
 import { MealPlanActions } from "./meal-plan-actions";
+import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 import {
   createDraftMealPlan,
   saveDraftMealPlan,
@@ -25,12 +26,14 @@ export function MealPlanEditorV2({
   effectivePlan,
   foods,
   coachDefaultNotify,
+  publishedMealPlanId,
 }: {
   clientId: string;
   weekStartDate: string;
   effectivePlan: EffectiveMealPlan;
   foods: FoodLibraryEntry[];
   coachDefaultNotify?: boolean;
+  publishedMealPlanId?: string | null;
 }) {
   const router = useRouter();
   const [draftId, setDraftId] = useState<string | null>(effectivePlan.draftId);
@@ -222,6 +225,12 @@ export function MealPlanEditorV2({
           )}
         </div>
         <div className="flex items-center gap-1.5">
+          {(publishedMealPlanId || draftId) && (
+            <ExportPdfButton
+              mealPlanId={(publishedMealPlanId ?? draftId)!}
+              variant="small"
+            />
+          )}
           <button
             type="button"
             onClick={undo}

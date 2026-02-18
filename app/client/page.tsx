@@ -9,6 +9,7 @@ import { BecomeCoachForm } from "@/components/client/become-coach-form";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { CheckInStatus } from "@/components/client/check-in-status";
+import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 
 export default async function ClientDashboard() {
   const user = await getCurrentDbUser();
@@ -157,12 +158,15 @@ export default async function ClientDashboard() {
           id="meal-plan"
           aria-labelledby="meal-plan-heading"
         >
-          <h2
-            id="meal-plan-heading"
-            className="mb-5 text-lg font-semibold tracking-tight"
-          >
-            Your Meal Plan
-          </h2>
+          <div className="mb-5 flex items-center justify-between">
+            <h2
+              id="meal-plan-heading"
+              className="text-lg font-semibold tracking-tight"
+            >
+              Your Meal Plan
+            </h2>
+            <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
+          </div>
           <SimpleMealPlan mealPlan={mealPlan} />
         </section>
       )}

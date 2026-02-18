@@ -39,6 +39,7 @@ export async function getMealPlanById(id: string) {
 export type EffectiveMealPlan = {
   source: "draft" | "published" | "empty";
   draftId: string | null;
+  publishedId: string | null;
   items: {
     mealName: string;
     foodName: string;
@@ -87,21 +88,26 @@ export async function getEffectiveMealPlanForReview(
     include: { items: { orderBy: { sortOrder: "asc" } } },
   });
 
-  if (draft) {
-    return { source: "draft", draftId: draft.id, items: mapItems(draft.items) };
-  }
-
-  // 2. Fall back to most recent published plan (any week)
+  // Also find latest published plan (used for export + fallback)
   const published = await db.mealPlan.findFirst({
     where: { clientId, status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
     include: { items: { orderBy: { sortOrder: "asc" } } },
   });
 
+  if (draft) {
+    return {
+      source: "draft",
+      draftId: draft.id,
+      publishedId: published?.id ?? null,
+      items: mapItems(draft.items),
+    };
+  }
+
   if (published) {
-    return { source: "published", draftId: null, items: mapItems(published.items) };
+    return { source: "published", draftId: null, publishedId: published.id, items: mapItems(published.items) };
   }
 
   // 3. No plan at all
-  return { source: "empty", draftId: null, items: [] };
+  return { source: "empty", draftId: null, publishedId: null, items: [] };
 }

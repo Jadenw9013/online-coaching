@@ -8,6 +8,7 @@ import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { CoachNotesEditor } from "@/components/coach/coach-notes-editor";
 import { WeightSparkline } from "@/components/ui/weight-sparkline";
 import { RemoveClientButton } from "@/components/coach/remove-client-button";
+import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 
 const weekStatusConfig = {
   submitted: {
@@ -253,12 +254,17 @@ export default async function ClientProfilePage({
             <h2 id="meal-plan-heading" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Current Meal Plan
             </h2>
-            <Link
-              href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-              className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
-            >
-              Edit &rarr;
-            </Link>
+            <div className="flex items-center gap-3">
+              {mealPlan && (
+                <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
+              )}
+              <Link
+                href={`/coach/clients/${clientId}/review/${weekDateStr}`}
+                className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+              >
+                Edit &rarr;
+              </Link>
+            </div>
           </div>
           {mealPlan ? (
             <SimpleMealPlan mealPlan={mealPlan} />
