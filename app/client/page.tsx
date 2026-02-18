@@ -44,26 +44,36 @@ export default async function ClientDashboard() {
     year: "numeric",
   });
 
+  // Latest weight for the performance module
+  const latestWeight = checkIns.find((c) => c.weight != null);
+  const prevWeight = latestWeight
+    ? checkIns.find((c) => c.weight != null && c.id !== latestWeight.id)
+    : null;
+  const weightDelta =
+    latestWeight?.weight && prevWeight?.weight
+      ? +(latestWeight.weight - prevWeight.weight).toFixed(1)
+      : null;
+
   return (
-    <div className="space-y-6">
-      {/* A) Context Header — greeting + coach + week */}
-      <section className="space-y-1">
+    <div className="space-y-8">
+      {/* ── Header ── */}
+      <section className="animate-fade-in space-y-1">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            {user.firstName ? `${user.firstName}'s Week` : "Your Week"}
+          <h1 className="text-3xl font-bold tracking-tight">
+            {user.firstName ? `${user.firstName}\u2019s Week` : "Your Week"}
           </h1>
           {coachAssignment && (
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold dark:bg-zinc-800">
+            <div className="flex items-center gap-2.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-[#121215]">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold dark:bg-zinc-800">
                 {coachAssignment.coach.firstName?.[0] ?? "C"}
               </div>
-              <span className="text-sm text-zinc-500">
-                {coachAssignment.coach.firstName}
+              <span className="text-xs font-medium text-zinc-500">
+                Coach {coachAssignment.coach.firstName}
               </span>
             </div>
           )}
         </div>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-zinc-400">
           Week of {weekLabel}
         </p>
       </section>
@@ -71,66 +81,121 @@ export default async function ClientDashboard() {
       {/* Coach connection (only if no coach) */}
       {!coachAssignment && <ConnectCoachBanner />}
 
-      {/* B) Dominant Next Action — check-in CTA */}
-      <CheckInStatus
-        status={weekStatus}
-        weekLabel={weekLabel}
-        checkInDate={
-          currentWeekCheckIn
-            ? currentWeekCheckIn.createdAt.toLocaleDateString()
-            : undefined
-        }
-      />
+      {/* ── Action Banner ── */}
+      <div className="animate-fade-in" style={{ animationDelay: "80ms" }}>
+        <CheckInStatus
+          status={weekStatus}
+          weekLabel={weekLabel}
+          checkInDate={
+            currentWeekCheckIn
+              ? currentWeekCheckIn.createdAt.toLocaleDateString()
+              : undefined
+          }
+        />
+      </div>
 
-      {/* Coach feedback (if available) */}
+      {/* ── Performance Module — Weight ── */}
+      {latestWeight?.weight && (
+        <section
+          className="animate-fade-in overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800/80 dark:bg-[#121215]"
+          style={{ animationDelay: "160ms" }}
+          aria-label="Weight overview"
+        >
+          <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+            Current Weight
+          </p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className="text-4xl font-bold tabular-nums tracking-tight">
+              {latestWeight.weight}
+            </p>
+            <span className="text-sm font-medium text-zinc-400">lbs</span>
+            {weightDelta != null && weightDelta !== 0 && (
+              <span
+                className={`ml-2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  weightDelta < 0
+                    ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                    : "bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400"
+                }`}
+              >
+                {weightDelta < 0 ? "\u2193" : "\u2191"} {Math.abs(weightDelta)} lbs
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-zinc-400">
+            as of {latestWeight.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </p>
+        </section>
+      )}
+
+      {/* ── Coach Feedback ── */}
       {latestCoachMessage && (
         <Link
           href={`/client/messages/${formatDateUTC(latestCoachMessage.weekOf)}`}
-          className="group block rounded-lg border border-zinc-200 bg-white px-4 py-3.5 transition-colors hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+          className="group animate-fade-in block overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30"
+          style={{ animationDelay: "240ms" }}
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
               Coach Feedback
             </p>
-            <span className="text-xs text-zinc-400 transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
+            <span className="text-xs font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
               View &rarr;
             </span>
           </div>
-          <p className="mt-1.5 text-sm leading-relaxed line-clamp-2">
+          <p className="mt-2 text-sm leading-relaxed line-clamp-2">
             {latestCoachMessage.body}
           </p>
         </Link>
       )}
 
-      {/* C) Today's Plan — current meal plan */}
+      {/* ── Meal Plan ── */}
       {mealPlan && (
-        <section id="meal-plan" aria-labelledby="meal-plan-heading">
-          <h2 id="meal-plan-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Current Meal Plan
+        <section
+          className="animate-fade-in"
+          style={{ animationDelay: "320ms" }}
+          id="meal-plan"
+          aria-labelledby="meal-plan-heading"
+        >
+          <h2
+            id="meal-plan-heading"
+            className="mb-4 text-lg font-semibold tracking-tight"
+          >
+            Your Meal Plan
           </h2>
           <SimpleMealPlan mealPlan={mealPlan} />
         </section>
       )}
 
-      {/* D) Progress Snapshot — recent check-ins */}
-      <section aria-labelledby="checkins-heading">
-        <h2 id="checkins-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+      {/* ── Recent Check-Ins ── */}
+      <section
+        className="animate-fade-in"
+        style={{ animationDelay: "400ms" }}
+        aria-labelledby="checkins-heading"
+      >
+        <h2
+          id="checkins-heading"
+          className="mb-4 text-lg font-semibold tracking-tight"
+        >
           Recent Check-Ins
         </h2>
         {checkIns.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-6 py-10 text-center dark:border-zinc-700 dark:bg-zinc-900">
-            <p className="text-sm text-zinc-500">No check-ins yet.</p>
-            <Link
-              href="/client/check-in"
-              className="mt-2 inline-block text-sm font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
-            >
-              Submit your first check-in
-            </Link>
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-14 text-center dark:border-zinc-700 dark:bg-[#121215]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800">
+              &#128203;
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-500">No check-ins yet</p>
+              <Link
+                href="/client/check-in"
+                className="mt-1 inline-block text-sm font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+              >
+                Submit your first check-in
+              </Link>
+            </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            {checkIns.map((checkIn) => {
-              const idx = checkIns.indexOf(checkIn);
+          <div className="stagger-children space-y-3">
+            {checkIns.map((checkIn, idx) => {
               const prev = checkIns[idx + 1];
               const delta =
                 prev?.weight && checkIn.weight
@@ -140,58 +205,58 @@ export default async function ClientDashboard() {
               return (
                 <div
                   key={checkIn.id}
-                  className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
+                  className="flex items-center gap-4 rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700"
                 >
-                  {/* Weight — big number */}
-                  <div className="w-20 shrink-0">
+                  {/* Weight */}
+                  <div className="w-16 shrink-0">
                     {checkIn.weight ? (
-                      <>
-                        <p className="text-lg font-semibold tabular-nums leading-tight">
-                          {checkIn.weight}
-                        </p>
-                        <p className="text-xs text-zinc-400">lbs</p>
-                      </>
+                      <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
+                        {checkIn.weight}
+                        <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
+                      </p>
                     ) : (
-                      <p className="text-lg font-semibold text-zinc-300 dark:text-zinc-600">
+                      <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
                         &mdash;
                       </p>
                     )}
                   </div>
 
-                  {/* Week label + delta + photos */}
+                  {/* Week + delta + notes */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-semibold">
                       {checkIn.weekOf.toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                       })}
                       {delta != null && delta !== 0 && (
                         <span
-                          className={`ml-2 text-xs font-medium ${
-                            delta < 0 ? "text-green-600" : "text-red-500"
+                          className={`ml-2 text-xs font-semibold ${
+                            delta < 0
+                              ? "text-emerald-500"
+                              : "text-red-400"
                           }`}
                         >
-                          {delta < 0 ? "↓" : "↑"}{Math.abs(delta)}
+                          {delta < 0 ? "\u2193" : "\u2191"} {Math.abs(delta)}
                         </span>
                       )}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-zinc-400">
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-400">
                       {checkIn._count.photos > 0 && (
                         <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
                       )}
                       {checkIn.notes && (
-                        <span className="truncate max-w-[200px]">{checkIn.notes}</span>
+                        <span className="truncate max-w-[180px]">{checkIn.notes}</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Status + actions */}
+                  {/* Status + delete */}
                   <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         checkIn.status === "REVIEWED"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                          : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
                       }`}
                     >
                       {checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
@@ -205,8 +270,12 @@ export default async function ClientDashboard() {
         )}
       </section>
 
-      {/* Become a Coach (de-emphasized at bottom) */}
-      {!user.isCoach && <BecomeCoachForm />}
+      {/* Become a Coach */}
+      {!user.isCoach && (
+        <div className="animate-fade-in" style={{ animationDelay: "480ms" }}>
+          <BecomeCoachForm />
+        </div>
+      )}
     </div>
   );
 }

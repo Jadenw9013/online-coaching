@@ -46,9 +46,13 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
   );
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* Filter bar */}
-      <div className="flex gap-1.5 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800/50" role="tablist" aria-label="Filter clients">
+      <div
+        className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800/60"
+        role="tablist"
+        aria-label="Filter clients"
+      >
         {filters.map((f, i) => {
           const count =
             f.key === "all"
@@ -63,14 +67,14 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
               tabIndex={activeFilter === f.key ? 0 : -1}
               onClick={() => setActiveFilter(f.key)}
               onKeyDown={(e) => handleKeyDown(e, i)}
-              className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
                 activeFilter === f.key
                   ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
                   : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
               }`}
             >
               {f.label}
-              <span className="ml-1.5 text-xs tabular-nums opacity-60">
+              <span className="ml-1.5 inline-block min-w-[1.25rem] rounded-md bg-zinc-200/60 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums dark:bg-zinc-700/60">
                 {count}
               </span>
             </button>
@@ -78,16 +82,19 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
         })}
       </div>
 
-      {/* Client list */}
-      <div className="mt-4 space-y-2" role="tabpanel">
+      {/* Client cards */}
+      <div role="tabpanel">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-400">
-            No clients match this filter.
-          </p>
+          <div className="animate-fade-in flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-300 py-16 dark:border-zinc-700">
+            <p className="text-sm font-medium text-zinc-400">No clients match this filter</p>
+            <p className="text-xs text-zinc-400/70">Try selecting a different category above.</p>
+          </div>
         ) : (
-          filtered.map((client) => (
-            <InboxClientCard key={client.id} client={client} />
-          ))
+          <div className="stagger-children space-y-3">
+            {filtered.map((client) => (
+              <InboxClientCard key={client.id} client={client} />
+            ))}
+          </div>
         )}
       </div>
     </div>

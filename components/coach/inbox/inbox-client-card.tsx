@@ -21,19 +21,19 @@ export type InboxClient = {
 
 const statusConfig = {
   new: {
-    label: "New",
-    dot: "bg-blue-500",
-    text: "text-blue-600 dark:text-blue-400",
+    label: "Ready for review",
+    ring: "ring-blue-500/40",
+    pill: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
   },
   reviewed: {
     label: "Reviewed",
-    dot: "bg-green-500",
-    text: "text-green-600 dark:text-green-400",
+    ring: "ring-emerald-500/40",
+    pill: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
   },
   missing: {
-    label: "Missing",
-    dot: "bg-zinc-400 dark:bg-zinc-500",
-    text: "text-zinc-500 dark:text-zinc-400",
+    label: "No check-in yet",
+    ring: "ring-zinc-300/50 dark:ring-zinc-600/40",
+    pill: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
   },
 } as const;
 
@@ -44,7 +44,7 @@ function formatTimeAgo(date: Date): string {
   if (diffHours < 1) return "just now";
   if (diffHours < 24) return `${diffHours}h ago`;
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "1d ago";
+  if (diffDays === 1) return "yesterday";
   return `${diffDays}d ago`;
 }
 
@@ -52,88 +52,71 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
   const weekDateStr = formatDateUTC(client.weekOf);
   const profileHref = `/coach/clients/${client.id}`;
   const reviewHref = `/coach/clients/${client.id}/review/${weekDateStr}`;
-
   const status = statusConfig[client.weekStatus];
 
   return (
-    <div className="group flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
-      {/* Clickable profile area */}
+    <div className="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-4 transition-all duration-200 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 sm:p-5 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30">
       <Link
         href={profileHref}
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+        className="flex items-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:rounded-xl"
+        aria-label={`${client.firstName} ${client.lastName} — ${status.label}`}
       >
-        {/* Avatar */}
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold dark:bg-zinc-800">
-          {client.firstName?.[0] ?? "?"}
-        </div>
-
-        {/* Name + time */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium truncate">
-              {client.firstName} {client.lastName}
-            </p>
-            {client.hasClientMessage && (
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-500" aria-label="Has message" />
-            )}
-          </div>
-          {client.submittedAt && (
-            <p className="text-xs text-zinc-400">
-              {formatTimeAgo(client.submittedAt)}
-            </p>
+        {/* Avatar with status ring */}
+        <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 ring-2 ${status.ring} text-sm font-bold dark:bg-zinc-800`}>
+          {client.firstName?.[0]?.toUpperCase() ?? "?"}
+          {client.hasClientMessage && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-60" />
+              <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white bg-purple-500 dark:border-[#121215]" />
+            </span>
           )}
         </div>
 
-        {/* Metrics — compact */}
-        {client.weekStatus !== "missing" && (
-          <div className="hidden items-center gap-4 text-xs tabular-nums text-zinc-500 sm:flex">
-            {client.weight != null && (
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                {client.weight}
-                <span className="ml-0.5 font-normal text-zinc-400">lbs</span>
-                {client.weightChange != null && client.weightChange !== 0 && (
-                  <span
-                    className={`ml-1 ${
-                      client.weightChange < 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-500"
-                    }`}
-                    aria-label={`Weight change: ${client.weightChange > 0 ? "+" : ""}${client.weightChange} lbs`}
-                  >
-                    {client.weightChange > 0 ? "+" : ""}{client.weightChange}
-                  </span>
-                )}
-              </span>
-            )}
-            {client.dietCompliance != null && (
-              <span>D:{client.dietCompliance}</span>
-            )}
-            {client.energyLevel != null && (
-              <span>E:{client.energyLevel}</span>
+        {/* Name + submission time */}
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-semibold leading-snug truncate">
+            {client.firstName} {client.lastName}
+          </p>
+          <p className="mt-0.5 text-xs text-zinc-400">
+            {client.submittedAt
+              ? `Checked in ${formatTimeAgo(client.submittedAt)}`
+              : "Waiting for submission"}
+          </p>
+        </div>
+
+        {/* Weight metric — desktop */}
+        {client.weekStatus !== "missing" && client.weight != null && (
+          <div className="hidden text-right sm:block">
+            <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
+              {client.weight}
+              <span className="ml-0.5 text-xs font-normal text-zinc-400">lbs</span>
+            </p>
+            {client.weightChange != null && client.weightChange !== 0 && (
+              <p className="mt-0.5 text-xs font-medium tabular-nums">
+                <span className={client.weightChange < 0 ? "text-emerald-500" : "text-red-400"}>
+                  {client.weightChange < 0 ? "\u2193" : "\u2191"} {Math.abs(client.weightChange)} lbs
+                </span>
+              </p>
             )}
           </div>
         )}
 
-        {/* Status */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className={`inline-block h-2 w-2 rounded-full ${status.dot}`} aria-hidden="true" />
-          <span
-            className={`text-xs font-medium ${status.text}`}
-            aria-label={`Status: ${status.label}`}
-          >
-            {status.label}
-          </span>
-        </div>
+        {/* Status pill */}
+        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${status.pill}`}>
+          {status.label}
+        </span>
       </Link>
 
-      {/* Secondary action: Review This Week */}
+      {/* Review CTA — floating on hover for non-missing */}
       {client.weekStatus !== "missing" && (
-        <Link
-          href={reviewHref}
-          className="hidden shrink-0 rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:block dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
-        >
-          Review
-        </Link>
+        <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:right-5">
+          <Link
+            href={reviewHref}
+            className="rounded-xl bg-zinc-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-zinc-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            Review
+          </Link>
+        </div>
       )}
     </div>
   );

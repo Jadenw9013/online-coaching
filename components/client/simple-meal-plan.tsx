@@ -22,25 +22,28 @@ export function SimpleMealPlan({ mealPlan }: { mealPlan: MealPlan }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {Array.from(grouped).map(([mealName, items]) => (
         <div
           key={mealName}
-          className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+          className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-[#121215]"
         >
-          <div className="border-b border-zinc-100 px-4 py-2 dark:border-zinc-800">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{mealName}</h3>
+          <div className="border-b border-zinc-100 px-5 py-3 dark:border-zinc-800">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+              {mealName}
+            </h3>
           </div>
-          <ul className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
+          <ul className="divide-y divide-zinc-100/80 dark:divide-zinc-800/60">
             {items.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between px-4 py-2"
+                className="flex items-center gap-3 px-5 py-3"
               >
-                <div className="min-w-0">
+                <span className="flex h-2 w-2 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" aria-hidden="true" />
+                <div className="min-w-0 flex-1">
                   <span className="text-sm font-medium">{item.foodName}</span>
                   {item.servingDescription && (
-                    <p className="text-xs text-zinc-400">
+                    <p className="mt-0.5 text-xs text-zinc-400">
                       {item.servingDescription}
                     </p>
                   )}
@@ -53,7 +56,7 @@ export function SimpleMealPlan({ mealPlan }: { mealPlan: MealPlan }) {
 
       {mealPlan.publishedAt && (
         <p className="text-xs text-zinc-400">
-          Published{" "}
+          Updated{" "}
           {mealPlan.publishedAt.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",

@@ -13,18 +13,18 @@ export function CheckInStatus({
     return (
       <Link
         href="/client/check-in"
-        className="group block rounded-xl bg-zinc-900 px-5 py-5 text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className="group relative block overflow-hidden rounded-2xl bg-zinc-900 px-6 py-6 text-white transition-all hover:shadow-xl hover:shadow-zinc-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-200 dark:text-zinc-900 dark:hover:shadow-zinc-100/10"
         role="status"
         aria-live="polite"
       >
-        <div className="flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-base font-semibold sm:text-lg">Submit Your Weekly Check-In</p>
-            <p className="mt-0.5 text-sm opacity-70">
+            <p className="text-lg font-bold sm:text-xl">Submit Your Weekly Check-In</p>
+            <p className="mt-1 text-sm opacity-60">
               Week of {weekLabel}
             </p>
           </div>
-          <span className="text-2xl transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xl transition-transform group-hover:translate-x-1 dark:bg-zinc-900/10" aria-hidden="true">
             &rarr;
           </span>
         </div>
@@ -35,21 +35,23 @@ export function CheckInStatus({
   if (status === "submitted") {
     return (
       <div
-        className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800/50 dark:bg-amber-950/50"
+        className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50/50 px-6 py-5 dark:border-amber-800/40 dark:from-amber-950/40 dark:to-orange-950/20"
         role="status"
         aria-live="polite"
       >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-200 dark:bg-amber-800/50">
-          <span className="text-sm" aria-hidden="true">&#9203;</span>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-            Waiting for coach review
-          </p>
-          <p className="text-xs text-amber-600 dark:text-amber-400">
-            Week of {weekLabel}
-            {checkInDate && <span className="ml-1 opacity-70">&middot; submitted {checkInDate}</span>}
-          </p>
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200/80 dark:bg-amber-800/40">
+            <span className="text-base" aria-hidden="true">&#9203;</span>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
+              Waiting for coach review
+            </p>
+            <p className="mt-0.5 text-xs text-amber-600/80 dark:text-amber-400/80">
+              Week of {weekLabel}
+              {checkInDate && <span> &middot; submitted {checkInDate}</span>}
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -58,24 +60,26 @@ export function CheckInStatus({
   return (
     <Link
       href="/client/check-in"
-      className="group flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-4 transition-colors hover:bg-green-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:border-green-800/50 dark:bg-green-950/50 dark:hover:bg-green-900/50"
+      className="group relative block overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-green-50/50 px-6 py-5 transition-all hover:shadow-lg hover:shadow-emerald-100/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-emerald-800/40 dark:from-emerald-950/40 dark:to-green-950/20 dark:hover:shadow-emerald-900/20"
       role="status"
       aria-live="polite"
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-200 dark:bg-green-800/50">
-        <span className="text-sm" aria-hidden="true">&#10003;</span>
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-200/80 dark:bg-emerald-800/40">
+          <span className="text-base" aria-hidden="true">&#10003;</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
+            Your coach reviewed this week
+          </p>
+          <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400/80">
+            Week of {weekLabel} &middot; tap to view feedback
+          </p>
+        </div>
+        <span className="text-emerald-400 transition-transform group-hover:translate-x-1 dark:text-emerald-600" aria-hidden="true">
+          &rarr;
+        </span>
       </div>
-      <div className="flex-1">
-        <p className="text-sm font-semibold text-green-800 dark:text-green-200">
-          Coach reviewed your check-in!
-        </p>
-        <p className="text-xs text-green-600 dark:text-green-400">
-          Week of {weekLabel} &middot; view feedback
-        </p>
-      </div>
-      <span className="text-green-400 transition-transform group-hover:translate-x-0.5 dark:text-green-600" aria-hidden="true">
-        &rarr;
-      </span>
     </Link>
   );
 }

@@ -4,6 +4,27 @@ import { CoachCodeDisplay } from "@/components/coach/coach-code-display";
 import { CoachInbox } from "@/components/coach/inbox/coach-inbox";
 import type { InboxClient } from "@/components/coach/inbox/inbox-client-card";
 
+function KpiCard({
+  value,
+  label,
+  accent,
+}: {
+  value: number;
+  label: string;
+  accent: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800/80 dark:bg-[#121215] ${accent}`}
+    >
+      <p className="text-3xl font-bold tabular-nums tracking-tight">{value}</p>
+      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 export default async function CoachDashboard() {
   const user = await getCurrentDbUser();
   const coachCode = await ensureCoachCode(user.id);
@@ -20,55 +41,76 @@ export default async function CoachDashboard() {
     year: "numeric",
   });
 
+  const totalCount = clients.length;
   const newCount = clients.filter((c) => c.weekStatus === "new").length;
   const reviewedCount = clients.filter((c) => c.weekStatus === "reviewed").length;
   const missingCount = clients.filter((c) => c.weekStatus === "missing").length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Inbox</h1>
-          {weekLabel && (
-            <p className="mt-0.5 text-sm text-zinc-500">
-              Week of {weekLabel}
-            </p>
-          )}
-        </div>
-        {clients.length > 0 && (
-          <div className="flex items-center gap-3 text-sm tabular-nums" role="status" aria-label="Client check-in summary">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />
-              <span className="font-semibold">{newCount}</span>
-              <span className="text-zinc-400">new</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
-              <span className="font-semibold">{reviewedCount}</span>
-              <span className="text-zinc-400">reviewed</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-zinc-400" aria-hidden="true" />
-              <span className="font-semibold">{missingCount}</span>
-              <span className="text-zinc-400">missing</span>
-            </span>
-          </div>
+      <div className="animate-fade-in">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        {weekLabel && (
+          <p className="mt-1 text-sm text-zinc-500">
+            Week of {weekLabel}
+          </p>
         )}
       </div>
 
-      <CoachCodeDisplay code={coachCode} />
+      {/* KPI Cards */}
+      {clients.length > 0 && (
+        <div
+          className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
+          role="status"
+          aria-label="Client check-in summary"
+        >
+          <KpiCard
+            value={totalCount}
+            label="Total Clients"
+            accent=""
+          />
+          <KpiCard
+            value={newCount}
+            label="Ready for Review"
+            accent="border-l-2 border-l-blue-500"
+          />
+          <KpiCard
+            value={reviewedCount}
+            label="Reviewed"
+            accent="border-l-2 border-l-emerald-500"
+          />
+          <KpiCard
+            value={missingCount}
+            label="No Check-In"
+            accent="border-l-2 border-l-zinc-400 dark:border-l-zinc-600"
+          />
+        </div>
+      )}
 
-      {/* Client list with filters */}
+      {/* Coach Code */}
+      <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
+        <CoachCodeDisplay code={coachCode} />
+      </div>
+
+      {/* Client list */}
       {clients.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-6 py-10 text-center dark:border-zinc-700 dark:bg-zinc-900">
-          <p className="font-medium text-zinc-500">No clients assigned yet.</p>
-          <p className="mt-1 text-sm text-zinc-400">
-            Share your coach code to get started.
-          </p>
+        <div className="animate-fade-in-up flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-[#121215]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl dark:bg-zinc-800">
+            &#128101;
+          </div>
+          <div>
+            <p className="text-base font-semibold text-zinc-600 dark:text-zinc-300">No clients yet</p>
+            <p className="mt-1 text-sm text-zinc-400">
+              Share your coach code above to start receiving check-ins.
+            </p>
+          </div>
         </div>
       ) : (
-        <CoachInbox clients={clients} />
+        <section aria-label="Client inbox">
+          <h2 className="mb-4 text-lg font-semibold tracking-tight">Clients</h2>
+          <CoachInbox clients={clients} />
+        </section>
       )}
     </div>
   );
