@@ -15,10 +15,10 @@ function KpiCard({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800/80 dark:bg-[#121215] ${accent}`}
+      className={`overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800/80 dark:bg-[#121215] ${accent}`}
     >
       <p className="text-3xl font-bold tabular-nums tracking-tight">{value}</p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+      <p className="mt-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
         {label}
       </p>
     </div>
@@ -47,33 +47,33 @@ export default async function CoachDashboard() {
   const missingCount = clients.filter((c) => c.weekStatus === "missing").length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      <section className="animate-fade-in">
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         {weekLabel && (
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1.5 text-sm text-zinc-500">
             Week of {weekLabel}
           </p>
         )}
-      </div>
+      </section>
 
       {/* KPI Cards */}
       {clients.length > 0 && (
         <div
-          className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
+          className="stagger-children grid grid-cols-2 gap-4 sm:grid-cols-4"
           role="status"
           aria-label="Client check-in summary"
         >
           <KpiCard
-            value={totalCount}
-            label="Total Clients"
-            accent=""
+            value={newCount}
+            label="Awaiting Review"
+            accent="border-l-2 border-l-blue-500"
           />
           <KpiCard
-            value={newCount}
-            label="Ready for Review"
-            accent="border-l-2 border-l-blue-500"
+            value={missingCount}
+            label="Missing Check-In"
+            accent="border-l-2 border-l-amber-500"
           />
           <KpiCard
             value={reviewedCount}
@@ -81,9 +81,9 @@ export default async function CoachDashboard() {
             accent="border-l-2 border-l-emerald-500"
           />
           <KpiCard
-            value={missingCount}
-            label="No Check-In"
-            accent="border-l-2 border-l-zinc-400 dark:border-l-zinc-600"
+            value={totalCount}
+            label="Total Clients"
+            accent=""
           />
         </div>
       )}
@@ -95,20 +95,20 @@ export default async function CoachDashboard() {
 
       {/* Client list */}
       {clients.length === 0 ? (
-        <div className="animate-fade-in-up flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-[#121215]">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl dark:bg-zinc-800">
+        <div className="animate-fade-in-up flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-300 bg-white px-8 py-20 text-center dark:border-zinc-700 dark:bg-[#121215]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 text-2xl dark:bg-zinc-800">
             &#128101;
           </div>
           <div>
-            <p className="text-base font-semibold text-zinc-600 dark:text-zinc-300">No clients yet</p>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="text-base font-semibold">No clients yet</p>
+            <p className="mt-1.5 text-sm text-zinc-500">
               Share your coach code above to start receiving check-ins.
             </p>
           </div>
         </div>
       ) : (
         <section aria-label="Client inbox">
-          <h2 className="mb-4 text-lg font-semibold tracking-tight">Clients</h2>
+          <h2 className="mb-5 text-lg font-semibold tracking-tight">Clients</h2>
           <CoachInbox clients={clients} />
         </section>
       )}

@@ -3,7 +3,7 @@ import { createServiceClient } from "./server";
 const BUCKET = "meal-plan-uploads";
 
 /** Check if a Supabase storage error indicates the bucket does not exist. */
-function isBucketMissing(message: string | undefined): boolean {
+export function isBucketMissing(message: string | undefined): boolean {
   if (!message) return false;
   const lower = message.toLowerCase();
   return (

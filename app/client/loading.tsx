@@ -3,9 +3,8 @@ import Image from "next/image";
 export default function ClientLoading() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        {/* Logo — responsive: ~80px mobile, ~96px tablet, ~112px desktop */}
-        <div className="relative h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28">
+      <div className="flex flex-col items-center gap-5">
+        <div className="relative h-20 w-20 sm:h-24 sm:w-24">
           <Image
             src="/brand/Steadfast_logo_pictoral.png"
             alt=""
@@ -14,7 +13,11 @@ export default function ClientLoading() {
             className="object-contain animate-splash-pulse"
           />
         </div>
-        <span className="text-xs text-zinc-400">Loading...</span>
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400" />
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400" style={{ animationDelay: "150ms" }} />
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400" style={{ animationDelay: "300ms" }} />
+        </div>
       </div>
     </div>
   );

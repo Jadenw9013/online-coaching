@@ -37,9 +37,11 @@ function fileExtLabel(file: File): string {
 
 export function UploadStep({
   clientId,
+  onProcessing,
   onDraftReady,
 }: {
   clientId: string;
+  onProcessing?: () => void;
   onDraftReady: (uploadId: string) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -164,6 +166,7 @@ export function UploadStep({
 
       // 3. Trigger parse
       setStatus("processing");
+      onProcessing?.();
 
       const parseRes = await fetch("/api/mealplans/parse", {
         method: "POST",

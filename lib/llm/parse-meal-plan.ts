@@ -121,7 +121,7 @@ export async function parseMealPlanTextToJson(
 }
 
 /** Normalize raw LLM output before schema validation */
-function normalizeLlmOutput(raw: unknown): unknown {
+export function normalizeLlmOutput(raw: unknown): unknown {
   if (raw == null || typeof raw !== "object") return raw;
 
   if (Array.isArray(raw)) return raw.map(normalizeLlmOutput);

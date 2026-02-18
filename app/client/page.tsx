@@ -55,15 +55,15 @@ export default async function ClientDashboard() {
       : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* ── Header ── */}
-      <section className="animate-fade-in space-y-1">
+      <section className="animate-fade-in">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight">
             {user.firstName ? `${user.firstName}\u2019s Week` : "Your Week"}
           </h1>
           {coachAssignment && (
-            <div className="flex items-center gap-2.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-[#121215]">
+            <div className="flex items-center gap-2.5 rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 dark:border-zinc-800 dark:bg-[#121215]">
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold dark:bg-zinc-800">
                 {coachAssignment.coach.firstName?.[0] ?? "C"}
               </div>
@@ -73,7 +73,7 @@ export default async function ClientDashboard() {
             </div>
           )}
         </div>
-        <p className="text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-zinc-500">
           Week of {weekLabel}
         </p>
       </section>
@@ -101,10 +101,10 @@ export default async function ClientDashboard() {
           style={{ animationDelay: "160ms" }}
           aria-label="Weight overview"
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Current Weight
           </p>
-          <div className="mt-2 flex items-baseline gap-2">
+          <div className="mt-2.5 flex items-baseline gap-2">
             <p className="text-4xl font-bold tabular-nums tracking-tight">
               {latestWeight.weight}
             </p>
@@ -121,7 +121,7 @@ export default async function ClientDashboard() {
               </span>
             )}
           </div>
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1.5 text-xs text-zinc-400">
             as of {latestWeight.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </p>
         </section>
@@ -131,18 +131,18 @@ export default async function ClientDashboard() {
       {latestCoachMessage && (
         <Link
           href={`/client/messages/${formatDateUTC(latestCoachMessage.weekOf)}`}
-          className="group animate-fade-in block overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30"
+          className="group animate-fade-in block overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30"
           style={{ animationDelay: "240ms" }}
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Coach Feedback
             </p>
             <span className="text-xs font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
               View &rarr;
             </span>
           </div>
-          <p className="mt-2 text-sm leading-relaxed line-clamp-2">
+          <p className="mt-3 text-sm leading-relaxed line-clamp-2">
             {latestCoachMessage.body}
           </p>
         </Link>
@@ -158,7 +158,7 @@ export default async function ClientDashboard() {
         >
           <h2
             id="meal-plan-heading"
-            className="mb-4 text-lg font-semibold tracking-tight"
+            className="mb-5 text-lg font-semibold tracking-tight"
           >
             Your Meal Plan
           </h2>
@@ -174,20 +174,20 @@ export default async function ClientDashboard() {
       >
         <h2
           id="checkins-heading"
-          className="mb-4 text-lg font-semibold tracking-tight"
+          className="mb-5 text-lg font-semibold tracking-tight"
         >
           Recent Check-Ins
         </h2>
         {checkIns.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-14 text-center dark:border-zinc-700 dark:bg-[#121215]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-300 bg-white px-8 py-16 text-center dark:border-zinc-700 dark:bg-[#121215]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl dark:bg-zinc-800">
               &#128203;
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-500">No check-ins yet</p>
+              <p className="text-sm font-semibold">No check-ins yet</p>
               <Link
                 href="/client/check-in"
-                className="mt-1 inline-block text-sm font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                className="mt-1.5 inline-block text-sm font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 Submit your first check-in
               </Link>

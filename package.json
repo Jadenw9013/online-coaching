@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
+    "test": "vitest run",
     "release-check": "bash release.sh"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "prisma": "^7.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

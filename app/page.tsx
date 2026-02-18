@@ -15,17 +15,16 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#09090b]">
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/95">
-        <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <header className="sticky top-0 z-30 border-b border-zinc-200/60 bg-white/90 backdrop-blur-md dark:border-zinc-800/60 dark:bg-[#09090b]/90">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link
             href="/"
             className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
             aria-label="Steadfast home"
           >
-            {/* Nav logo — responsive: ~32px mobile, ~36px sm, ~40px md+ */}
-            <div className="relative h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10">
+            <div className="relative h-8 w-8 sm:h-9 sm:w-9">
               <Image
                 src="/brand/Steadfast_logo_pictoral.png"
                 alt=""
@@ -35,16 +34,16 @@ export default async function Home() {
               />
             </div>
           </Link>
-          <nav className="flex items-center gap-2" aria-label="Main navigation">
+          <nav className="flex items-center gap-3" aria-label="Main navigation">
             <Link
               href="/sign-in"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:hover:bg-zinc-800"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-100"
             >
               Sign In
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-lg bg-zinc-900 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="rounded-lg bg-zinc-900 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
               Get Started
             </Link>
@@ -54,10 +53,9 @@ export default async function Home() {
 
       <main id="main-content">
         {/* ── Hero ── */}
-        <section className="px-4 sm:px-6 min-h-[calc(100vh-72px)] flex items-center">
+        <section className="flex min-h-[calc(100vh-64px)] items-center px-5 sm:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            {/* Hero logo — responsive: ~96px mobile, ~112px sm, ~144px md, ~176px lg */}
-            <div className="relative mx-auto mb-6 h-[40vh] max-h-[520px] w-[40vh] max-w-[520px]">
+            <div className="relative mx-auto mb-8 h-[32vh] max-h-[400px] w-[32vh] max-w-[400px] animate-fade-in">
               <Image
                 src="/brand/Steadfast_logo.png"
                 alt="Steadfast"
@@ -66,24 +64,24 @@ export default async function Home() {
                 className="object-contain"
               />
             </div>
-              <h1 className="mt-2 text-balance text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight">
-                Structured coaching. <span className="text-zinc-400">Consistent results.</span>
-              </h1>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
-              Steadfast connects coaches and clients with weekly check-ins,
-              personalized meal plans, and structured feedback so
-              nothing falls through the cracks.
+            <h1 className="animate-fade-in text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
+              Structured coaching.{" "}
+              <span className="text-zinc-400">Consistent results.</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl animate-fade-in text-lg leading-relaxed text-zinc-500 dark:text-zinc-400" style={{ animationDelay: "100ms" }}>
+              Weekly check-ins, personalized meal plans, and structured feedback
+              — so nothing falls through the cracks.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex animate-fade-in flex-col items-center justify-center gap-3 sm:flex-row" style={{ animationDelay: "200ms" }}>
               <Link
                 href="/sign-up"
-                className="w-full rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 sm:w-auto"
+                className="w-full rounded-xl bg-zinc-900 px-8 py-3.5 text-sm font-semibold text-white transition-all hover:bg-zinc-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 sm:w-auto"
               >
                 Create Free Account
               </Link>
               <a
                 href="#how-it-works"
-                className="w-full rounded-xl border border-zinc-300 px-6 py-3 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:w-auto"
+                className="w-full rounded-xl border border-zinc-300 px-8 py-3.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:w-auto"
               >
                 See How It Works
               </a>
@@ -91,74 +89,91 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ── Features ── */}
-        <section className="border-t border-zinc-200 bg-white px-4 py-16 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6 sm:py-20">
+        {/* ── How It Works ── */}
+        <section id="how-it-works" className="border-t border-zinc-200/60 px-5 py-24 dark:border-zinc-800/60 sm:px-8">
           <div className="mx-auto max-w-5xl">
-            <h2 className="text-center text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Everything you need
-            </h2>
-            <p className="mt-2 text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Built for real coaching workflows
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              How it works
             </p>
-            <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight">
+              Simple weekly rhythm
+            </h2>
+
+            {/* Two workflows */}
+            <div className="mt-16 grid gap-16 lg:grid-cols-2">
+              {/* Coach workflow */}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">For coaches</p>
+                <div className="mt-6 space-y-6">
+                  <WorkflowStep number={1} title="Collect check-ins" description="Clients submit weight, photos, and notes every week. Everything lands in your inbox." />
+                  <WorkflowStep number={2} title="Review and respond" description="See metrics, track trends, and leave feedback — all from one workspace." />
+                  <WorkflowStep number={3} title="Publish meal plans" description="Build or import meal plans. Clients see exactly what to eat." />
+                </div>
+              </div>
+
+              {/* Client workflow */}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">For clients</p>
+                <div className="mt-6 space-y-6">
+                  <WorkflowStep number={1} title="Submit your check-in" description="Log weight, progress photos, and how your week went. Takes 2 minutes." />
+                  <WorkflowStep number={2} title="Follow your plan" description="View your personalized meal plan with clear portions and structure." />
+                  <WorkflowStep number={3} title="Track your progress" description="See weight trends and coach feedback week over week." />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Features ── */}
+        <section className="border-t border-zinc-200/60 bg-white px-5 py-24 dark:border-zinc-800/60 dark:bg-[#0f0f11] sm:px-8">
+          <div className="mx-auto max-w-5xl">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              Built for real coaching
+            </p>
+            <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight">
+              Everything you need, nothing you don&apos;t
+            </h2>
+            <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <FeatureCard
                 title="Weekly Check-Ins"
-                description="Clients log weight, progress photos, diet compliance, and notes each week. Coaches see everything in one place."
-                icon="&#9745;"
+                description="Weight, photos, diet compliance, energy, and notes. Structured data every week."
+              />
+              <FeatureCard
+                title="Coach Inbox"
+                description="See who needs review at a glance. Filter by status. One-click to review."
               />
               <FeatureCard
                 title="Meal Plan Editor"
-                description="Build, duplicate, and publish meal plans in minutes. Clients see exactly what to eat &mdash; no confusion."
-                icon="&#9783;"
+                description="Build meals from a food library. Duplicate, reorder, and publish in minutes."
               />
               <FeatureCard
-                title="Coach Feedback Loop"
-                description="Review check-ins, track weight trends, and message clients &mdash; all from a single review workspace."
-                icon="&#8634;"
+                title="PDF/Photo Import"
+                description="Upload a meal plan image or PDF. OCR extracts the foods automatically."
+              />
+              <FeatureCard
+                title="Secure Uploads"
+                description="Progress photos stored in private buckets. Server-signed URLs only."
+              />
+              <FeatureCard
+                title="Weight Tracking"
+                description="Automatic trend calculation with visual deltas week over week."
               />
             </div>
-          </div>
-        </section>
-
-        {/* ── How It Works ── */}
-        <section id="how-it-works" className="px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-center text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              How it works
-            </h2>
-            <p className="mt-2 text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Four steps. Every week.
-            </p>
-            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              <StepCard number={1} title="Coach assigns" description="Set up meal plans and macro targets for each client." />
-              <StepCard number={2} title="Client follows" description="Follow the plan throughout the week with clear guidance." />
-              <StepCard number={3} title="Weekly check-in" description="Client logs weight, photos, and notes every week." />
-              <StepCard number={4} title="Coach reviews" description="Review progress, adjust plans, and send feedback." />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Social Proof ── */}
-        <section className="border-t border-zinc-200 bg-white px-4 py-12 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-medium text-zinc-500">
-              Trusted by coaches and clients building lasting discipline.
-            </p>
           </div>
         </section>
 
         {/* ── Bottom CTA ── */}
-        <section className="px-4 py-16 sm:px-6 sm:py-20">
+        <section className="border-t border-zinc-200/60 px-5 py-24 dark:border-zinc-800/60 sm:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h2 className="text-3xl font-semibold tracking-tight">
               Ready to get started?
             </h2>
-            <p className="mt-3 text-base text-zinc-500">
+            <p className="mt-4 text-base text-zinc-500">
               Create your free account and connect with your coach today.
             </p>
             <Link
               href="/sign-up"
-              className="mt-6 inline-block rounded-xl bg-zinc-900 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="mt-8 inline-block rounded-xl bg-zinc-900 px-10 py-3.5 text-sm font-semibold text-white transition-all hover:bg-zinc-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
               Create Free Account
             </Link>
@@ -167,10 +182,10 @@ export default async function Home() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between sm:px-6">
-          <div className="flex items-center gap-2">
-            <div className="relative h-6 w-6 opacity-50">
+      <footer className="border-t border-zinc-200/60 dark:border-zinc-800/60">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 py-10 sm:flex-row sm:justify-between sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="relative h-5 w-5 opacity-40">
               <Image
                 src="/brand/Steadfast_logo_pictoral.png"
                 alt=""
@@ -181,8 +196,11 @@ export default async function Home() {
             <span className="text-xs text-zinc-400">
               &copy; {new Date().getFullYear()} Steadfast
             </span>
+            <span className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] font-medium text-zinc-400 dark:border-zinc-700">
+              Beta
+            </span>
           </div>
-          <nav className="flex items-center gap-4 text-xs text-zinc-400" aria-label="Footer navigation">
+          <nav className="flex items-center gap-5 text-xs text-zinc-400" aria-label="Footer navigation">
             <Link href="/sign-in" className="transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
               Sign In
             </Link>
@@ -200,24 +218,21 @@ export default async function Home() {
 function FeatureCard({
   title,
   description,
-  icon,
 }: {
   title: string;
   description: string;
-  icon: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-6 dark:border-zinc-700 dark:bg-zinc-800">
-      <span className="text-2xl" aria-hidden="true">{icon}</span>
-      <h3 className="mt-3 text-sm font-semibold">{title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+    <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50 p-6 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
         {description}
       </p>
     </div>
   );
 }
 
-function StepCard({
+function WorkflowStep({
   number,
   title,
   description,
@@ -227,14 +242,16 @@ function StepCard({
   description: string;
 }) {
   return (
-    <div className="text-center">
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-sm font-bold text-white dark:bg-zinc-100 dark:text-zinc-900">
+    <div className="flex gap-4">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-xs font-bold text-white dark:bg-zinc-100 dark:text-zinc-900">
         {number}
       </div>
-      <h3 className="mt-3 text-sm font-semibold">{title}</h3>
-      <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-        {description}
-      </p>
+      <div>
+        <h3 className="text-sm font-semibold">{title}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
+      </div>
     </div>
   );
 }
