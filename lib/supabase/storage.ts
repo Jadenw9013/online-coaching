@@ -2,6 +2,17 @@ import { createServiceClient } from "./server";
 
 const BUCKET = "check-in-photos";
 
+/** Check if a Supabase storage error indicates the bucket does not exist. */
+function isBucketMissing(message: string | undefined): boolean {
+  if (!message) return false;
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("bucket not found") ||
+    lower.includes("the related resource does not exist") ||
+    (lower.includes("not found") && lower.includes("bucket"))
+  );
+}
+
 export async function createSignedUploadUrls(
   paths: string[]
 ): Promise<{ path: string; signedUrl: string; token: string }[]> {
@@ -14,9 +25,9 @@ export async function createSignedUploadUrls(
       .createSignedUploadUrl(path);
 
     if (error || !data) {
-      if (error?.message?.includes("Bucket not found")) {
+      if (isBucketMissing(error?.message)) {
         throw new Error(
-          `Storage bucket "${BUCKET}" not found. Please verify your Supabase storage configuration.`
+          `Storage bucket "${BUCKET}" not found. Create it in Supabase Dashboard → Storage → New bucket → "${BUCKET}" (private).`
         );
       }
       throw new Error(`Failed to create upload URL for ${path}: ${error?.message}`);

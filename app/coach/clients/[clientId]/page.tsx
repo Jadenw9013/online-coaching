@@ -1,12 +1,40 @@
 import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
 import { getClientProfile } from "@/lib/queries/client-profile";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
-import { getCurrentWeekMonday, formatDateUTC } from "@/lib/utils/date";
+import { formatDateUTC } from "@/lib/utils/date";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { CoachNotesEditor } from "@/components/coach/coach-notes-editor";
 import { WeightSparkline } from "@/components/ui/weight-sparkline";
+
+const weekStatusConfig = {
+  submitted: {
+    label: "Submitted",
+    bg: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  },
+  reviewed: {
+    label: "Reviewed",
+    bg: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  },
+  missing: {
+    label: "Missing",
+    bg: "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400",
+  },
+} as const;
+
+const checkInStatusConfig = {
+  SUBMITTED: {
+    label: "Submitted",
+    dot: "bg-blue-500",
+    text: "text-blue-600 dark:text-blue-400",
+  },
+  REVIEWED: {
+    label: "Reviewed",
+    dot: "bg-green-500",
+    text: "text-green-600 dark:text-green-400",
+  },
+} as const;
 
 export default async function ClientProfilePage({
   params,
@@ -19,27 +47,33 @@ export default async function ClientProfilePage({
   if (!profile) notFound();
 
   const mealPlan = await getCurrentPublishedMealPlan(clientId);
-  const weekOf = getCurrentWeekMonday();
-  const weekDateStr = formatDateUTC(weekOf);
+  const weekDateStr = formatDateUTC(profile.currentWeekOf);
 
-  const { client, latestCheckIn, previousCheckIn, weightDelta, recentCheckIns, lastMessageAt } = profile;
+  const {
+    client,
+    latestCheckIn,
+    previousCheckIn,
+    weightDelta,
+    checkIns,
+    currentWeekStatus,
+    lastMessageAt,
+  } = profile;
 
-  const sparklineData = recentCheckIns
+  const sparklineData = checkIns
     .filter((c): c is typeof c & { weight: number } => c.weight != null)
-    .map((c) => ({
-      weekOf: c.weekOf.toISOString(),
-      weight: c.weight,
-    }));
+    .map((c) => ({ weekOf: c.weekOf.toISOString(), weight: c.weight }));
+
+  const statusBadge = weekStatusConfig[currentWeekStatus];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/coach/dashboard"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-            aria-label="Back to inbox"
+            aria-label="Back to dashboard"
           >
             &larr;
           </Link>
@@ -47,17 +81,27 @@ export default async function ClientProfilePage({
             {client.firstName?.[0] ?? "?"}
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight">
-              {client.firstName} {client.lastName}
-            </h1>
-            <p className="text-xs text-zinc-500">{client.email}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold tracking-tight">
+                {client.firstName} {client.lastName}
+              </h1>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge.bg}`}
+              >
+                {statusBadge.label}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-zinc-500">
+              <span>{client.email}</span>
+              {lastMessageAt && (
+                <>
+                  <span className="text-zinc-300 dark:text-zinc-700">&middot;</span>
+                  <span>Last msg {timeAgo(lastMessageAt)}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
-        {lastMessageAt && (
-          <p className="text-xs text-zinc-400">
-            Last msg: {timeAgo(lastMessageAt)}
-          </p>
-        )}
       </div>
 
       {/* Quick actions */}
@@ -75,51 +119,31 @@ export default async function ClientProfilePage({
           Message
         </Link>
         <Link
-          href={`/coach/clients/${clientId}/check-ins`}
+          href={`/coach/clients/${clientId}/import-meal-plan`}
           className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
         >
-          History
+          Import Meal Plan
         </Link>
       </div>
 
-      {/* Weight overview — big numbers */}
+      {/* Weight overview */}
       <section aria-labelledby="weight-heading">
         <h2 id="weight-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
           Weight Overview
         </h2>
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Current</p>
-            {latestCheckIn?.weight ? (
-              <div className="mt-1">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold tabular-nums">{latestCheckIn.weight}</span>
-                  <span className="text-xs text-zinc-400">lbs</span>
-                </div>
-                <p className="text-xs text-zinc-400">
-                  {latestCheckIn.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </p>
-              </div>
-            ) : (
-              <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
-            )}
-          </div>
-          <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Previous</p>
-            {previousCheckIn?.weight ? (
-              <div className="mt-1">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold tabular-nums">{previousCheckIn.weight}</span>
-                  <span className="text-xs text-zinc-400">lbs</span>
-                </div>
-                <p className="text-xs text-zinc-400">
-                  {previousCheckIn.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </p>
-              </div>
-            ) : (
-              <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
-            )}
-          </div>
+          <MetricCard
+            label="Current"
+            value={latestCheckIn?.weight}
+            suffix="lbs"
+            subtext={latestCheckIn?.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          />
+          <MetricCard
+            label="Previous"
+            value={previousCheckIn?.weight}
+            suffix="lbs"
+            subtext={previousCheckIn?.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          />
           <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
             <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Change</p>
             {weightDelta != null ? (
@@ -154,33 +178,87 @@ export default async function ClientProfilePage({
           </h2>
           <div className="flex gap-3">
             {latestCheckIn.dietCompliance != null && (
-              <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Diet</p>
-                <div className="mt-1 flex items-baseline gap-0.5">
-                  <span className="text-2xl font-bold tabular-nums">{latestCheckIn.dietCompliance}</span>
-                  <span className="text-xs text-zinc-400">/10</span>
-                </div>
-              </div>
+              <MetricCard label="Diet" value={latestCheckIn.dietCompliance} suffix="/10" />
             )}
             {latestCheckIn.energyLevel != null && (
-              <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Energy</p>
-                <div className="mt-1 flex items-baseline gap-0.5">
-                  <span className="text-2xl font-bold tabular-nums">{latestCheckIn.energyLevel}</span>
-                  <span className="text-xs text-zinc-400">/10</span>
-                </div>
-              </div>
+              <MetricCard label="Energy" value={latestCheckIn.energyLevel} suffix="/10" />
             )}
           </div>
         </section>
       )}
 
+      {/* Check-in History — inline */}
+      <section aria-labelledby="history-heading">
+        <h2 id="history-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Check-in History
+        </h2>
+        {checkIns.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-6 py-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
+            <p className="text-sm text-zinc-400">No check-ins yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {checkIns.map((checkIn) => {
+              const weekStr = formatDateUTC(checkIn.weekOf);
+              const cfg = checkInStatusConfig[checkIn.status];
+              return (
+                <Link
+                  key={checkIn.id}
+                  href={`/coach/clients/${clientId}/review/${weekStr}`}
+                  className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">
+                      Week of{" "}
+                      {checkIn.weekOf.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+
+                  {/* Weight */}
+                  {checkIn.weight != null && (
+                    <span className="text-sm font-medium tabular-nums text-zinc-700 dark:text-zinc-300">
+                      {checkIn.weight}
+                      <span className="ml-0.5 text-xs font-normal text-zinc-400">lbs</span>
+                    </span>
+                  )}
+
+                  {/* Photo count */}
+                  {checkIn._count.photos > 0 && (
+                    <span className="text-xs text-zinc-400">
+                      {checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}
+                    </span>
+                  )}
+
+                  {/* Status badge */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className={`inline-block h-2 w-2 rounded-full ${cfg.dot}`} aria-hidden="true" />
+                    <span className={`text-xs font-medium ${cfg.text}`}>{cfg.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {/* Two-column: meal plan + notes */}
       <div className="grid gap-5 lg:grid-cols-2">
         <section aria-labelledby="meal-plan-heading">
-          <h2 id="meal-plan-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Current Meal Plan
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 id="meal-plan-heading" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              Current Meal Plan
+            </h2>
+            <Link
+              href={`/coach/clients/${clientId}/review/${weekDateStr}`}
+              className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+            >
+              Edit &rarr;
+            </Link>
+          </div>
           {mealPlan ? (
             <SimpleMealPlan mealPlan={mealPlan} />
           ) : (
@@ -200,6 +278,35 @@ export default async function ClientProfilePage({
           />
         </section>
       </div>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  suffix,
+  subtext,
+}: {
+  label: string;
+  value: number | null | undefined;
+  suffix: string;
+  subtext?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">{label}</p>
+      {value != null ? (
+        <div className="mt-1">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-2xl font-bold tabular-nums">{value}</span>
+            <span className="text-xs text-zinc-400">{suffix}</span>
+          </div>
+          {subtext && <p className="text-xs text-zinc-400">{subtext}</p>}
+        </div>
+      ) : (
+        <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+      )}
     </div>
   );
 }

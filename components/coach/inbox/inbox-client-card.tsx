@@ -50,80 +50,91 @@ function formatTimeAgo(date: Date): string {
 
 export function InboxClientCard({ client }: { client: InboxClient }) {
   const weekDateStr = formatDateUTC(client.weekOf);
-  const href =
-    client.weekStatus === "missing"
-      ? `/coach/clients/${client.id}/check-ins`
-      : `/coach/clients/${client.id}/review/${weekDateStr}`;
+  const profileHref = `/coach/clients/${client.id}`;
+  const reviewHref = `/coach/clients/${client.id}/review/${weekDateStr}`;
 
   const status = statusConfig[client.weekStatus];
 
   return (
-    <Link
-      href={href}
-      className="group flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
-    >
-      {/* Avatar */}
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold dark:bg-zinc-800">
-        {client.firstName?.[0] ?? "?"}
-      </div>
+    <div className="group flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
+      {/* Clickable profile area */}
+      <Link
+        href={profileHref}
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+      >
+        {/* Avatar */}
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold dark:bg-zinc-800">
+          {client.firstName?.[0] ?? "?"}
+        </div>
 
-      {/* Name + time */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium truncate">
-            {client.firstName} {client.lastName}
-          </p>
-          {client.hasClientMessage && (
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-500" aria-label="Has message" />
+        {/* Name + time */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium truncate">
+              {client.firstName} {client.lastName}
+            </p>
+            {client.hasClientMessage && (
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-500" aria-label="Has message" />
+            )}
+          </div>
+          {client.submittedAt && (
+            <p className="text-xs text-zinc-400">
+              {formatTimeAgo(client.submittedAt)}
+            </p>
           )}
         </div>
-        {client.submittedAt && (
-          <p className="text-xs text-zinc-400">
-            {formatTimeAgo(client.submittedAt)}
-          </p>
+
+        {/* Metrics — compact */}
+        {client.weekStatus !== "missing" && (
+          <div className="hidden items-center gap-4 text-xs tabular-nums text-zinc-500 sm:flex">
+            {client.weight != null && (
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                {client.weight}
+                <span className="ml-0.5 font-normal text-zinc-400">lbs</span>
+                {client.weightChange != null && client.weightChange !== 0 && (
+                  <span
+                    className={`ml-1 ${
+                      client.weightChange < 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-500"
+                    }`}
+                    aria-label={`Weight change: ${client.weightChange > 0 ? "+" : ""}${client.weightChange} lbs`}
+                  >
+                    {client.weightChange > 0 ? "+" : ""}{client.weightChange}
+                  </span>
+                )}
+              </span>
+            )}
+            {client.dietCompliance != null && (
+              <span>D:{client.dietCompliance}</span>
+            )}
+            {client.energyLevel != null && (
+              <span>E:{client.energyLevel}</span>
+            )}
+          </div>
         )}
-      </div>
 
-      {/* Metrics — compact */}
-      {client.weekStatus !== "missing" && (
-        <div className="hidden items-center gap-4 text-xs tabular-nums text-zinc-500 sm:flex">
-          {client.weight != null && (
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">
-              {client.weight}
-              <span className="ml-0.5 font-normal text-zinc-400">lbs</span>
-              {client.weightChange != null && client.weightChange !== 0 && (
-                <span
-                  className={`ml-1 ${
-                    client.weightChange < 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-500"
-                  }`}
-                  aria-label={`Weight change: ${client.weightChange > 0 ? "+" : ""}${client.weightChange} lbs`}
-                >
-                  {client.weightChange > 0 ? "+" : ""}{client.weightChange}
-                </span>
-              )}
-            </span>
-          )}
-          {client.dietCompliance != null && (
-            <span>D:{client.dietCompliance}</span>
-          )}
-          {client.energyLevel != null && (
-            <span>E:{client.energyLevel}</span>
-          )}
+        {/* Status */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className={`inline-block h-2 w-2 rounded-full ${status.dot}`} aria-hidden="true" />
+          <span
+            className={`text-xs font-medium ${status.text}`}
+            aria-label={`Status: ${status.label}`}
+          >
+            {status.label}
+          </span>
         </div>
-      )}
+      </Link>
 
-      {/* Status */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <span className={`inline-block h-2 w-2 rounded-full ${status.dot}`} aria-hidden="true" />
-        <span
-          className={`text-xs font-medium ${status.text}`}
-          aria-label={`Status: ${status.label}`}
+      {/* Secondary action: Review This Week */}
+      {client.weekStatus !== "missing" && (
+        <Link
+          href={reviewHref}
+          className="hidden shrink-0 rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:block dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
-          {status.label}
-        </span>
-      </div>
-    </Link>
+          Review
+        </Link>
+      )}
+    </div>
   );
 }

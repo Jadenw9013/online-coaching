@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { getCurrentWeekMonday } from "@/lib/utils/date";
 
 export async function getClientProfile(coachId: string, clientId: string) {
   const assignment = await db.coachClient.findUnique({
@@ -14,12 +15,14 @@ export async function getClientProfile(coachId: string, clientId: string) {
 
   if (!assignment) return null;
 
-  // Latest 4 non-deleted check-ins for weight history + sparkline
-  const [recentCheckIns, lastMessage] = await Promise.all([
+  const weekOf = getCurrentWeekMonday();
+
+  // Fetch 12 check-ins for history + last message in parallel
+  const [checkIns, lastMessage] = await Promise.all([
     db.checkIn.findMany({
       where: { clientId, deletedAt: null },
       orderBy: { weekOf: "desc" },
-      take: 4,
+      take: 12,
       select: {
         id: true,
         weekOf: true,
@@ -27,7 +30,9 @@ export async function getClientProfile(coachId: string, clientId: string) {
         dietCompliance: true,
         energyLevel: true,
         status: true,
+        notes: true,
         createdAt: true,
+        _count: { select: { photos: true } },
       },
     }),
     db.message.findFirst({
@@ -37,12 +42,25 @@ export async function getClientProfile(coachId: string, clientId: string) {
     }),
   ]);
 
-  const latestCheckIn = recentCheckIns[0] ?? null;
-  const previousCheckIn = recentCheckIns[1] ?? null;
+  const latestCheckIn = checkIns[0] ?? null;
+  const previousCheckIn = checkIns[1] ?? null;
   const weightDelta =
     latestCheckIn?.weight != null && previousCheckIn?.weight != null
       ? +(latestCheckIn.weight - previousCheckIn.weight).toFixed(1)
       : null;
+
+  // Determine current-week status
+  const currentWeekCheckIn = checkIns.find(
+    (c) => c.weekOf.getTime() === weekOf.getTime()
+  );
+  let currentWeekStatus: "submitted" | "reviewed" | "missing";
+  if (!currentWeekCheckIn) {
+    currentWeekStatus = "missing";
+  } else if (currentWeekCheckIn.status === "REVIEWED") {
+    currentWeekStatus = "reviewed";
+  } else {
+    currentWeekStatus = "submitted";
+  }
 
   return {
     client: assignment.client,
@@ -50,7 +68,9 @@ export async function getClientProfile(coachId: string, clientId: string) {
     latestCheckIn,
     previousCheckIn,
     weightDelta,
-    recentCheckIns,
+    checkIns,
+    currentWeekStatus,
+    currentWeekOf: weekOf,
     lastMessageAt: lastMessage?.createdAt ?? null,
   };
 }

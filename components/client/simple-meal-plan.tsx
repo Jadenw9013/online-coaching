@@ -45,9 +45,6 @@ export function SimpleMealPlan({ mealPlan }: { mealPlan: MealPlan }) {
                     </p>
                   )}
                 </div>
-                <span className="shrink-0 text-sm tabular-nums text-zinc-500">
-                  {item.quantity}{item.unit}
-                </span>
               </li>
             ))}
           </ul>

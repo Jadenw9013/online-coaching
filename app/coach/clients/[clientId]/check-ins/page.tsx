@@ -23,10 +23,10 @@ export default async function ClientCheckInsPage({
     <div>
       <div className="mb-8">
         <Link
-          href="/coach/dashboard"
-          className="text-sm text-zinc-500 hover:text-zinc-700"
+          href={`/coach/clients/${clientId}`}
+          className="text-sm text-zinc-500 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
-          &larr; Back to clients
+          &larr; Back to profile
         </Link>
         <h1 className="mt-2 text-2xl font-bold">
           {client.firstName} {client.lastName}

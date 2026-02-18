@@ -38,6 +38,8 @@ model User {
   macroTargets      MacroTarget[] @relation("MacroTargets")
   mealPlans         MealPlan[]    @relation("MealPlans")
   foodLibrary       FoodLibraryItem[] @relation("FoodLibrary")
+  coachUploads      MealPlanUpload[] @relation("CoachUploads")
+  clientUploads     MealPlanUpload[] @relation("ClientUploads")
 }
 
 model CoachClient {
@@ -170,4 +172,44 @@ model FoodLibraryItem {
 
   @@unique([coachId, name])
   @@index([coachId])
+}
+
+enum MealPlanUploadStatus {
+  UPLOADED
+  PROCESSING
+  NEEDS_REVIEW
+  IMPORTED
+  FAILED
+}
+
+model MealPlanUpload {
+  id               String               @id @default(cuid())
+  coachId          String
+  clientId         String
+  storageBucket    String               @default("meal-plan-uploads")
+  storagePath      String
+  originalFilename String?
+  mimeType         String?
+  status           MealPlanUploadStatus @default(UPLOADED)
+  errorMessage     String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  coach  User            @relation("CoachUploads", fields: [coachId], references: [id])
+  client User            @relation("ClientUploads", fields: [clientId], references: [id])
+  draft  MealPlanDraft?
+
+  @@index([coachId])
+  @@index([clientId])
+}
+
+model MealPlanDraft {
+  id            String   @id @default(cuid())
+  uploadId      String   @unique
+  extractedText String?  @db.Text
+  parsedJson    Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  upload MealPlanUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
 }
