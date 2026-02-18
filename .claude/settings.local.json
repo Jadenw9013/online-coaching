@@ -14,7 +14,8 @@
       "Bash(npm run build:*)",
       "Bash(node:*)",
       "Bash(ls:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(bash:*)"
     ]
   }
 }

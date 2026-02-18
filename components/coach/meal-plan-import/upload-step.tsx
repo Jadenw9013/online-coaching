@@ -345,11 +345,13 @@ export function UploadStep({
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm dark:border-red-900 dark:bg-red-950/50"
         >
           <p className="font-medium text-red-700 dark:text-red-400">
-            {error.includes("worker") || error.includes("Worker")
-              ? "PDF processing is temporarily unavailable."
-              : error.includes("bucket") || error.includes("Bucket") || error.includes("storage")
-                ? "Storage is not configured."
-                : "Upload failed"}
+            {error.includes("bucket") || error.includes("Bucket") || error.includes("storage")
+              ? "Storage is not configured."
+              : error.includes("No text detected")
+                ? "Could not read text from file."
+                : error.includes("billing") || error.includes("BILLING")
+                  ? "OCR service is not configured."
+                  : "Processing failed"}
           </p>
           <p className="mt-1 text-xs text-red-600 dark:text-red-400/80">
             {error}
@@ -364,9 +366,7 @@ export function UploadStep({
           <p className="text-sm text-zinc-600 dark:text-zinc-300">
             {status === "uploading"
               ? "Uploading file..."
-              : isPdf
-                ? "Extracting text from PDF and structuring meal plan..."
-                : "Running OCR and structuring meal plan..."}
+              : "Running OCR and structuring meal plan..."}
           </p>
         </div>
       )}

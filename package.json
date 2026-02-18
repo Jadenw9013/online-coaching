@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "release-check": "bash release.sh"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.4",
@@ -16,7 +17,6 @@
     "@prisma/client": "^7.4.0",
     "@supabase/supabase-js": "^2.95.3",
     "next": "16.1.6",
-    "pdf-parse": "^2.4.5",
     "pg": "^8.18.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",

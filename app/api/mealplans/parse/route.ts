@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db, prismaErrorMessage } from "@/lib/db";
 import { downloadMealPlanFile } from "@/lib/supabase/meal-plan-storage";
-import { extractTextFromImage, extractTextFromPdf } from "@/lib/ocr/google-vision";
+import { extractText } from "@/lib/ocr/google-vision";
 import { parseMealPlanTextToJson } from "@/lib/llm/parse-meal-plan";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -39,17 +39,9 @@ export async function POST(req: NextRequest) {
       // 1. Download file from Supabase
       const fileBytes = await downloadMealPlanFile(upload.storagePath);
 
-      // 2. Extract text
-      let extractedText: string;
+      // 2. Extract text (Vision API handles both images and PDFs)
       const mime = upload.mimeType ?? "";
-
-      if (mime === "application/pdf") {
-        extractedText = await extractTextFromPdf(fileBytes);
-      } else if (mime.startsWith("image/")) {
-        extractedText = await extractTextFromImage(fileBytes);
-      } else {
-        throw new Error(`Unsupported file type: ${mime}`);
-      }
+      const extractedText = await extractText(fileBytes, mime);
 
       // 3. Send to LLM for structuring
       const parsedJson = await parseMealPlanTextToJson(extractedText);

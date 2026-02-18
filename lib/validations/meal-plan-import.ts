@@ -2,7 +2,10 @@ import { z } from "zod";
 
 export const parsedMealItemSchema = z.object({
   food: z.string().min(1),
-  portion: z.string().min(1),
+  portion: z.preprocess(
+    (v) => (typeof v === "string" ? v.trim() : v ?? ""),
+    z.string().default("")
+  ),
   notes: z.string().optional(),
 });
 
@@ -43,6 +46,7 @@ export function validateUploadFile(mimeType: string, size?: number) {
 /** Split a portion string like "6 oz" into quantity + unit */
 export function splitPortion(portion: string): { quantity: string; unit: string } {
   const trimmed = portion.trim();
+  if (!trimmed) return { quantity: "1", unit: "serving" };
   const match = trimmed.match(/^([\d.\/½¼¾⅓⅔]+)\s*(.+)$/);
   if (match) {
     return { quantity: match[1], unit: match[2].trim() || "serving" };

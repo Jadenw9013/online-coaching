@@ -115,11 +115,11 @@ export function DraftReview({
   async function handleImport() {
     if (!draftId || !plan) return;
 
-    // Validate: all items must have food and portion
+    // Validate: all items must have a food name (portion can be empty)
     for (const meal of plan.meals) {
       for (const item of meal.items) {
-        if (!item.food.trim() || !item.portion.trim()) {
-          setError("All items must have a food name and portion.");
+        if (!item.food.trim()) {
+          setError("All items must have a food name.");
           return;
         }
       }
@@ -272,8 +272,12 @@ export function DraftReview({
                       type="text"
                       value={item.portion}
                       onChange={(e) => updateItem(mealIdx, itemIdx, "portion", e.target.value)}
-                      placeholder="Portion (e.g., 6 oz)"
-                      className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 sm:w-40 dark:border-zinc-700 dark:bg-zinc-800"
+                      placeholder="Portion not detected"
+                      className={`w-full rounded-lg border px-2.5 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 sm:w-40 ${
+                        !item.portion.trim()
+                          ? "border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/30"
+                          : "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800"
+                      }`}
                       aria-label={`Portion, meal ${mealIdx + 1}, item ${itemIdx + 1}`}
                     />
                   </div>
