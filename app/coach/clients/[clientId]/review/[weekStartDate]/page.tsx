@@ -117,6 +117,7 @@ export default async function ReviewWorkspacePage({
             weekStartDate={formatDateUTC(weekOf)}
             effectivePlan={effectivePlan}
             foods={foods}
+            coachDefaultNotify={coach.defaultNotifyOnPublish}
           />
         </div>
       </div>

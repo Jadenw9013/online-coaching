@@ -7,6 +7,7 @@ import Link from "next/link";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { CoachNotesEditor } from "@/components/coach/coach-notes-editor";
 import { WeightSparkline } from "@/components/ui/weight-sparkline";
+import { RemoveClientButton } from "@/components/coach/remove-client-button";
 
 const weekStatusConfig = {
   submitted: {
@@ -278,6 +279,20 @@ export default async function ClientProfilePage({
           />
         </section>
       </div>
+
+      {/* Danger Zone */}
+      <section className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900/50">
+        <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-500">
+          Danger Zone
+        </h2>
+        <p className="mb-4 text-sm text-zinc-500">
+          Removing a client disconnects them from your roster. Historical data is preserved.
+        </p>
+        <RemoveClientButton
+          clientId={clientId}
+          clientName={`${client.firstName ?? ""} ${client.lastName ?? ""}`.trim() || "this client"}
+        />
+      </section>
     </div>
   );
 }

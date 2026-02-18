@@ -1,0 +1,52 @@
+import { getCurrentDbUser } from "@/lib/auth/roles";
+import { db } from "@/lib/db";
+import { NotificationSettings } from "@/components/client/notification-settings";
+import { LeaveCoachButton } from "@/components/client/leave-coach-button";
+
+export default async function ClientSettingsPage() {
+  const user = await getCurrentDbUser();
+
+  const coachAssignment = await db.coachClient.findFirst({
+    where: { clientId: user.id },
+    include: {
+      coach: { select: { firstName: true, lastName: true } },
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+        Settings
+      </h1>
+
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
+          Email Notifications
+        </h2>
+        <NotificationSettings
+          initialMealPlanUpdates={user.emailMealPlanUpdates}
+          initialCheckInReminders={user.emailCheckInReminders}
+        />
+      </div>
+
+      {coachAssignment && (
+        <div className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900/50">
+          <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-500">
+            Danger Zone
+          </h2>
+          <p className="mb-4 text-sm text-zinc-500">
+            Leaving your coach disconnects you from their coaching roster. Your
+            existing check-ins and meal plans are preserved.
+          </p>
+          <LeaveCoachButton
+            coachClientId={coachAssignment.id}
+            coachName={
+              `${coachAssignment.coach.firstName ?? ""} ${coachAssignment.coach.lastName ?? ""}`.trim() ||
+              "your coach"
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+}

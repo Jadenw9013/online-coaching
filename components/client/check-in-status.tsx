@@ -4,10 +4,12 @@ export function CheckInStatus({
   status,
   weekLabel,
   checkInDate,
+  checkInId,
 }: {
   status: "none" | "submitted" | "reviewed";
   weekLabel: string;
   checkInDate?: string;
+  checkInId?: string;
 }) {
   if (status === "none") {
     return (
@@ -57,10 +59,37 @@ export function CheckInStatus({
     );
   }
 
+  if (checkInId) {
+    return (
+      <Link
+        href={`/client/check-ins/${checkInId}`}
+        className="group relative block overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-green-50/50 px-6 py-5 transition-all hover:shadow-lg hover:shadow-emerald-100/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-emerald-800/40 dark:from-emerald-950/40 dark:to-green-950/20 dark:hover:shadow-emerald-900/20"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-200/80 dark:bg-emerald-800/40">
+            <span className="text-base" aria-hidden="true">&#10003;</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
+              Your coach reviewed this week
+            </p>
+            <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400/80">
+              Week of {weekLabel} &middot; tap to view feedback
+            </p>
+          </div>
+          <span className="text-emerald-400 transition-transform group-hover:translate-x-1 dark:text-emerald-600" aria-hidden="true">
+            &rarr;
+          </span>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <Link
-      href="/client/check-in"
-      className="group relative block overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-green-50/50 px-6 py-5 transition-all hover:shadow-lg hover:shadow-emerald-100/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-emerald-800/40 dark:from-emerald-950/40 dark:to-green-950/20 dark:hover:shadow-emerald-900/20"
+    <div
+      className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-green-50/50 px-6 py-5 dark:border-emerald-800/40 dark:from-emerald-950/40 dark:to-green-950/20"
       role="status"
       aria-live="polite"
     >
@@ -73,13 +102,10 @@ export function CheckInStatus({
             Your coach reviewed this week
           </p>
           <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400/80">
-            Week of {weekLabel} &middot; tap to view feedback
+            Week of {weekLabel}
           </p>
         </div>
-        <span className="text-emerald-400 transition-transform group-hover:translate-x-1 dark:text-emerald-600" aria-hidden="true">
-          &rarr;
-        </span>
       </div>
-    </Link>
+    </div>
   );
 }

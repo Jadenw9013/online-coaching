@@ -91,6 +91,7 @@ export default async function ClientDashboard() {
               ? currentWeekCheckIn.createdAt.toLocaleDateString()
               : undefined
           }
+          checkInId={currentWeekCheckIn?.id}
         />
       </div>
 
@@ -202,58 +203,64 @@ export default async function ClientDashboard() {
                   ? +(checkIn.weight - prev.weight).toFixed(1)
                   : null;
 
+              const dateLabel = checkIn.weekOf.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
+
               return (
                 <div
                   key={checkIn.id}
-                  className="flex items-center gap-4 rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700"
+                  className="flex items-center gap-4 rounded-2xl border border-zinc-200/80 bg-white transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700"
                 >
-                  {/* Weight */}
-                  <div className="w-16 shrink-0">
-                    {checkIn.weight ? (
-                      <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
-                        {checkIn.weight}
-                        <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
-                      </p>
-                    ) : (
-                      <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
-                        &mdash;
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Week + delta + notes */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
-                      {checkIn.weekOf.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                      {delta != null && delta !== 0 && (
-                        <span
-                          className={`ml-2 text-xs font-semibold ${
-                            delta < 0
-                              ? "text-emerald-500"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {delta < 0 ? "\u2193" : "\u2191"} {Math.abs(delta)}
-                        </span>
-                      )}
-                    </p>
-                    <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-400">
-                      {checkIn._count.photos > 0 && (
-                        <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
-                      )}
-                      {checkIn.notes && (
-                        <span className="truncate max-w-[180px]">{checkIn.notes}</span>
+                  <Link
+                    href={`/client/check-ins/${checkIn.id}`}
+                    className="flex flex-1 items-center gap-4 px-5 py-4 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
+                    aria-label={`View check-in from ${dateLabel}`}
+                  >
+                    {/* Weight */}
+                    <div className="w-16 shrink-0">
+                      {checkIn.weight ? (
+                        <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
+                          {checkIn.weight}
+                          <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
+                        </p>
+                      ) : (
+                        <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
+                          &mdash;
+                        </p>
                       )}
                     </div>
-                  </div>
 
-                  {/* Status + delete */}
-                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Week + delta + notes */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold">
+                        {dateLabel}
+                        {delta != null && delta !== 0 && (
+                          <span
+                            className={`ml-2 text-xs font-semibold ${
+                              delta < 0
+                                ? "text-emerald-500"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {delta < 0 ? "\u2193" : "\u2191"} {Math.abs(delta)}
+                          </span>
+                        )}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-400">
+                        {checkIn._count.photos > 0 && (
+                          <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
+                        )}
+                        {checkIn.notes && (
+                          <span className="truncate max-w-[180px]">{checkIn.notes}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status badge */}
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         checkIn.status === "REVIEWED"
                           ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                           : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
@@ -261,6 +268,10 @@ export default async function ClientDashboard() {
                     >
                       {checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
                     </span>
+                  </Link>
+
+                  {/* Delete button (separate from link) */}
+                  <div className="shrink-0 pr-3">
                     <DeleteCheckInButton checkInId={checkIn.id} />
                   </div>
                 </div>

@@ -17,6 +17,16 @@ enum CheckInStatus {
   REVIEWED
 }
 
+enum NotificationType {
+  MEAL_PLAN_UPDATE
+  CHECKIN_REMINDER
+}
+
+enum ReminderStage {
+  PRE_DUE
+  OVERDUE
+}
+
 model User {
   id         String   @id @default(cuid())
   clerkId    String   @unique
@@ -27,6 +37,9 @@ model User {
   isCoach    Boolean  @default(false)
   isClient   Boolean  @default(true)
   coachCode  String?  @unique
+  emailMealPlanUpdates  Boolean @default(true)
+  emailCheckInReminders Boolean @default(true)
+  defaultNotifyOnPublish Boolean @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -40,6 +53,7 @@ model User {
   foodLibrary       FoodLibraryItem[] @relation("FoodLibrary")
   coachUploads      MealPlanUpload[] @relation("CoachUploads")
   clientUploads     MealPlanUpload[] @relation("ClientUploads")
+  notificationLogs  NotificationLog[]
 }
 
 model CoachClient {
@@ -212,4 +226,20 @@ model MealPlanDraft {
   updatedAt     DateTime @updatedAt
 
   upload MealPlanUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+}
+
+model NotificationLog {
+  id              String           @id @default(cuid())
+  type            NotificationType
+  clientId        String
+  mealPlanId      String?
+  windowStartDate DateTime?
+  stage           ReminderStage?
+  sentAt          DateTime         @default(now())
+  metadata        Json?
+
+  client User @relation(fields: [clientId], references: [id])
+
+  @@unique([clientId, windowStartDate, type, stage], name: "reminder_dedupe")
+  @@index([clientId, type])
 }

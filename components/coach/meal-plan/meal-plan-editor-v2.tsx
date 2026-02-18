@@ -24,11 +24,13 @@ export function MealPlanEditorV2({
   weekStartDate,
   effectivePlan,
   foods,
+  coachDefaultNotify,
 }: {
   clientId: string;
   weekStartDate: string;
   effectivePlan: EffectiveMealPlan;
   foods: FoodLibraryEntry[];
+  coachDefaultNotify?: boolean;
 }) {
   const router = useRouter();
   const [draftId, setDraftId] = useState<string | null>(effectivePlan.draftId);
@@ -39,6 +41,7 @@ export function MealPlanEditorV2({
   const [showMacros, setShowMacros] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [notifyClient, setNotifyClient] = useState(coachDefaultNotify ?? true);
 
   const isUnsaved = draftId === null;
   const totalItems = meals.reduce((sum, m) => sum + m.items.length, 0);
@@ -111,7 +114,7 @@ export function MealPlanEditorV2({
         mealPlanId: id,
         items: flattenMeals(meals),
       });
-      await publishMealPlan({ mealPlanId: id });
+      await publishMealPlan({ mealPlanId: id, notifyClient });
       router.refresh();
     } finally {
       setPublishing(false);
@@ -286,6 +289,8 @@ export function MealPlanEditorV2({
         publishing={publishing}
         itemCount={totalItems}
         isUnsaved={isUnsaved}
+        notifyClient={notifyClient}
+        onNotifyChange={setNotifyClient}
         onSave={handleSave}
         onPublish={handlePublish}
       />

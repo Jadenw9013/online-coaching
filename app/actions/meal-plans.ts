@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { parseWeekStartDate } from "@/lib/utils/date";
 import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
 import { revalidatePath } from "next/cache";
+import { notifyMealPlanUpdate } from "@/lib/email/notify";
 
 const mealPlanItemSchema = z.object({
   mealName: z.string().min(1).max(100),
@@ -134,6 +135,7 @@ export async function saveDraftMealPlan(input: unknown) {
 
 const publishSchema = z.object({
   mealPlanId: z.string().min(1),
+  notifyClient: z.boolean().optional(),
 });
 
 export async function publishMealPlan(input: unknown) {
@@ -159,6 +161,17 @@ export async function publishMealPlan(input: unknown) {
 
   revalidatePath("/coach", "layout");
   revalidatePath("/client", "layout");
+
+  if (parsed.data.notifyClient) {
+    try {
+      await notifyMealPlanUpdate({
+        clientId: plan.clientId,
+        mealPlanId: parsed.data.mealPlanId,
+      });
+    } catch {
+      // Email failure must not fail the publish
+    }
+  }
 
   return { success: true };
 }
