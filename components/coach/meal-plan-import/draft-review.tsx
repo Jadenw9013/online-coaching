@@ -129,15 +129,24 @@ export function DraftReview({
     setError(null);
 
     try {
-      const res = await fetch("/api/mealplans/import", {
+      const res = await fetch("/api/mealplans/import-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ draftId, parsedJson: plan }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Import failed");
+        // Handle non-JSON responses (e.g. Vercel HTML 404 pages)
+        const text = await res.text();
+        let message = `Import failed (${res.status})`;
+        try {
+          const data = JSON.parse(text);
+          if (data.error) message = data.error;
+        } catch {
+          // Non-JSON response — include status for debugging
+          if (res.status === 404) message = "Import endpoint not found (404). Try redeploying.";
+        }
+        throw new Error(message);
       }
 
       const data = await res.json();

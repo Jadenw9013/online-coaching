@@ -45,10 +45,8 @@ export default async function ReviewWorkspacePage({
       getPreviousBodyweight(clientId, weekOf),
     ]);
 
-  if (!checkIn) notFound();
-
   const weightDelta =
-    checkIn.weight != null && previousWeight?.weight != null
+    checkIn?.weight != null && previousWeight?.weight != null
       ? +(checkIn.weight - previousWeight.weight).toFixed(1)
       : null;
 

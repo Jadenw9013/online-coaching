@@ -23,9 +23,23 @@ export function CheckInSummary({
   checkIn,
   weightDelta,
 }: {
-  checkIn: CheckIn;
+  checkIn: CheckIn | null;
   weightDelta: number | null;
 }) {
+  if (!checkIn) {
+    return (
+      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center dark:border-zinc-700 dark:bg-[#121215]">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800">
+          &#128203;
+        </div>
+        <p className="mt-3 text-sm font-semibold">No check-in submitted yet</p>
+        <p className="mt-1 text-xs text-zinc-500">
+          You can still prepare this week&apos;s meal plan.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Status bar */}
