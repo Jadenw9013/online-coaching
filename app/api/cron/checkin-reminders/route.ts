@@ -31,12 +31,13 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
-    // Check if this client already submitted a check-in for this week
+    // Check if this client already submitted a primary check-in for this week
     const existing = await db.checkIn.findFirst({
       where: {
         clientId: assignment.clientId,
         weekOf: weekMonday,
         deletedAt: null,
+        isPrimary: true,
       },
       select: { id: true },
     });

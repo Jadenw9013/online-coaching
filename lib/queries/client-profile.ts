@@ -1,26 +1,33 @@
 import { db } from "@/lib/db";
 import { getCurrentWeekMonday } from "@/lib/utils/date";
+import { getEffectiveScheduleDays } from "@/lib/scheduling/periods";
 
 export async function getClientProfile(coachId: string, clientId: string) {
-  const assignment = await db.coachClient.findUnique({
-    where: {
-      coachId_clientId: { coachId, clientId },
-    },
-    include: {
-      client: {
-        select: { id: true, firstName: true, lastName: true, email: true },
+  const [assignment, coach] = await Promise.all([
+    db.coachClient.findUnique({
+      where: {
+        coachId_clientId: { coachId, clientId },
       },
-    },
-  });
+      include: {
+        client: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
+    }),
+    db.user.findUnique({
+      where: { id: coachId },
+      select: { checkInDaysOfWeek: true },
+    }),
+  ]);
 
-  if (!assignment) return null;
+  if (!assignment || !coach) return null;
 
   const weekOf = getCurrentWeekMonday();
 
-  // Fetch 12 check-ins for history + last message in parallel
+  // Fetch 12 primary check-ins for history + last message in parallel
   const [checkIns, lastMessage] = await Promise.all([
     db.checkIn.findMany({
-      where: { clientId, deletedAt: null },
+      where: { clientId, deletedAt: null, isPrimary: true },
       orderBy: { weekOf: "desc" },
       take: 12,
       select: {
@@ -62,6 +69,11 @@ export async function getClientProfile(coachId: string, clientId: string) {
     currentWeekStatus = "submitted";
   }
 
+  const effectiveScheduleDays = getEffectiveScheduleDays(
+    coach.checkInDaysOfWeek,
+    assignment.checkInDaysOfWeekOverride
+  );
+
   return {
     client: assignment.client,
     coachNotes: assignment.coachNotes,
@@ -72,5 +84,8 @@ export async function getClientProfile(coachId: string, clientId: string) {
     currentWeekStatus,
     currentWeekOf: weekOf,
     lastMessageAt: lastMessage?.createdAt ?? null,
+    coachScheduleDays: coach.checkInDaysOfWeek,
+    clientScheduleOverride: assignment.checkInDaysOfWeekOverride,
+    effectiveScheduleDays,
   };
 }

@@ -1,14 +1,17 @@
 import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
 import { getClientProfile } from "@/lib/queries/client-profile";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
+import { getWeightHistory } from "@/lib/queries/weight-history";
 import { formatDateUTC } from "@/lib/utils/date";
+import { getCurrentPeriod } from "@/lib/scheduling/periods";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { CoachNotesEditor } from "@/components/coach/coach-notes-editor";
-import { WeightSparkline } from "@/components/ui/weight-sparkline";
+import { WeightProgress } from "@/components/charts/weight-progress";
 import { RemoveClientButton } from "@/components/coach/remove-client-button";
 import { ExportPdfButton } from "@/components/ui/export-pdf-button";
+import { ClientSchedule } from "@/components/coach/client-schedule";
 
 const weekStatusConfig = {
   submitted: {
@@ -48,7 +51,10 @@ export default async function ClientProfilePage({
   const profile = await getClientProfile(coach.id, clientId);
   if (!profile) notFound();
 
-  const mealPlan = await getCurrentPublishedMealPlan(clientId);
+  const [mealPlan, weightHistory] = await Promise.all([
+    getCurrentPublishedMealPlan(clientId),
+    getWeightHistory(clientId),
+  ]);
   const weekDateStr = formatDateUTC(profile.currentWeekOf);
 
   const {
@@ -59,11 +65,10 @@ export default async function ClientProfilePage({
     checkIns,
     currentWeekStatus,
     lastMessageAt,
+    coachScheduleDays,
+    clientScheduleOverride,
+    effectiveScheduleDays,
   } = profile;
-
-  const sparklineData = checkIns
-    .filter((c): c is typeof c & { weight: number } => c.weight != null)
-    .map((c) => ({ weekOf: c.weekOf.toISOString(), weight: c.weight }));
 
   const statusBadge = weekStatusConfig[currentWeekStatus];
 
@@ -164,12 +169,24 @@ export default async function ClientProfilePage({
             )}
           </div>
         </div>
-        {sparklineData.length >= 2 && (
-          <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-400">Trend</p>
-            <WeightSparkline data={sparklineData} width={200} height={40} />
-          </div>
-        )}
+        <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+          <WeightProgress data={weightHistory} clientId={clientId} />
+        </div>
+      </section>
+
+      {/* Schedule */}
+      <section aria-labelledby="schedule-heading">
+        <h2 id="schedule-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Check-in Schedule
+        </h2>
+        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+          <ClientSchedule
+            clientId={clientId}
+            coachDays={coachScheduleDays}
+            clientOverride={clientScheduleOverride}
+            effectiveDays={effectiveScheduleDays}
+          />
+        </div>
       </section>
 
       {/* Latest metrics */}
@@ -211,12 +228,7 @@ export default async function ClientProfilePage({
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">
-                      Week of{" "}
-                      {checkIn.weekOf.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {getCurrentPeriod(checkIn.weekOf, [1]).label}
                     </p>
                   </div>
 

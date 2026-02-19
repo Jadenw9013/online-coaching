@@ -164,7 +164,7 @@ export function CheckInForm({
         {/* Week selector — compact */}
         <div>
           <label htmlFor="weekOf" className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-1.5">
-            Week Of
+            Check-in Period
           </label>
           <input
             id="weekOf"

@@ -2,6 +2,8 @@ import { getCurrentDbUser } from "@/lib/auth/roles";
 import { getClientCheckInsLight, getLatestCoachMessage } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
 import { getCurrentWeekMonday, formatDateUTC } from "@/lib/utils/date";
+import { getWeightHistory } from "@/lib/queries/weight-history";
+import { getCurrentPeriod } from "@/lib/scheduling/periods";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
@@ -10,6 +12,7 @@ import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { CheckInStatus } from "@/components/client/check-in-status";
 import { ExportPdfButton } from "@/components/ui/export-pdf-button";
+import { WeightProgress } from "@/components/charts/weight-progress";
 
 export default async function ClientDashboard() {
   const user = await getCurrentDbUser();
@@ -21,13 +24,16 @@ export default async function ClientDashboard() {
     },
   });
 
-  const [checkIns, mealPlan, latestCoachMessage] = await Promise.all([
+  const [checkIns, mealPlan, latestCoachMessage, weightHistory] = await Promise.all([
     getClientCheckInsLight(user.id),
     getCurrentPublishedMealPlan(user.id),
     getLatestCoachMessage(user.id),
+    getWeightHistory(user.id),
   ]);
 
   const currentWeekDate = getCurrentWeekMonday();
+  const period = getCurrentPeriod(new Date(), [1]);
+  const weekLabel = period.label;
 
   // Determine current week check-in status
   const currentWeekCheckIn = checkIns.find(
@@ -38,12 +44,6 @@ export default async function ClientDashboard() {
     : currentWeekCheckIn.status === "REVIEWED"
       ? "reviewed"
       : "submitted";
-
-  const weekLabel = currentWeekDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 
   // Latest weight for the performance module
   const latestWeight = checkIns.find((c) => c.weight != null);
@@ -75,7 +75,7 @@ export default async function ClientDashboard() {
           )}
         </div>
         <p className="mt-1.5 text-sm text-zinc-500">
-          Week of {weekLabel}
+          {weekLabel}
         </p>
       </section>
 
@@ -126,6 +126,11 @@ export default async function ClientDashboard() {
           <p className="mt-1.5 text-xs text-zinc-400">
             as of {latestWeight.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </p>
+          <WeightProgress
+            data={weightHistory}
+            clientId={user.id}
+            className="mt-5"
+          />
         </section>
       )}
 
@@ -207,10 +212,8 @@ export default async function ClientDashboard() {
                   ? +(checkIn.weight - prev.weight).toFixed(1)
                   : null;
 
-              const dateLabel = checkIn.weekOf.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              });
+              const ciPeriod = getCurrentPeriod(checkIn.weekOf, [1]);
+              const dateLabel = ciPeriod.label;
 
               return (
                 <div

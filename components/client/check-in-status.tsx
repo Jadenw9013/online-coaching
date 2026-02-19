@@ -23,7 +23,7 @@ export function CheckInStatus({
           <div>
             <p className="text-lg font-bold sm:text-xl">Submit Your Weekly Check-In</p>
             <p className="mt-1 text-sm opacity-60">
-              Week of {weekLabel}
+              {weekLabel}
             </p>
           </div>
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xl transition-transform group-hover:translate-x-1 dark:bg-zinc-900/10" aria-hidden="true">
@@ -50,9 +50,15 @@ export function CheckInStatus({
               Waiting for coach review
             </p>
             <p className="mt-0.5 text-xs text-amber-600/80 dark:text-amber-400/80">
-              Week of {weekLabel}
+              {weekLabel}
               {checkInDate && <span> &middot; submitted {checkInDate}</span>}
             </p>
+            <Link
+              href="/client/check-in"
+              className="mt-1 inline-block text-xs font-medium text-amber-700 underline underline-offset-2 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100"
+            >
+              Submit another
+            </Link>
           </div>
         </div>
       </div>
@@ -76,7 +82,7 @@ export function CheckInStatus({
               Your coach reviewed this week
             </p>
             <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400/80">
-              Week of {weekLabel} &middot; tap to view feedback
+              {weekLabel} &middot; tap to view feedback
             </p>
           </div>
           <span className="text-emerald-400 transition-transform group-hover:translate-x-1 dark:text-emerald-600" aria-hidden="true">
@@ -102,7 +108,7 @@ export function CheckInStatus({
             Your coach reviewed this week
           </p>
           <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400/80">
-            Week of {weekLabel}
+            {weekLabel}
           </p>
         </div>
       </div>

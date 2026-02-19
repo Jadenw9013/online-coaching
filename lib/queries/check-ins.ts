@@ -15,7 +15,7 @@ export async function getClientCheckIns(clientId: string) {
 
 export async function getClientCheckInsLight(clientId: string) {
   return db.checkIn.findMany({
-    where: { clientId, deletedAt: null },
+    where: { clientId, deletedAt: null, isPrimary: true },
     orderBy: { weekOf: "desc" },
     select: {
       id: true,
@@ -37,6 +37,7 @@ export async function getPreviousBodyweight(
     where: {
       clientId,
       deletedAt: null,
+      isPrimary: true,
       weekOf: { lt: beforeWeekOf },
       weight: { not: null },
     },
@@ -113,7 +114,7 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       client: {
         include: {
           checkIns: {
-            where: { deletedAt: null },
+            where: { deletedAt: null, isPrimary: true },
             orderBy: { weekOf: "desc" },
             take: 2,
             select: {
@@ -180,9 +181,12 @@ export async function getCheckInByClientAndWeek(
   clientId: string,
   weekOf: Date
 ) {
-  const checkIn = await db.checkIn.findUnique({
+  const checkIn = await db.checkIn.findFirst({
     where: {
-      clientId_weekOf: { clientId, weekOf },
+      clientId,
+      weekOf,
+      deletedAt: null,
+      isPrimary: true,
     },
     include: {
       client: true,
@@ -190,7 +194,7 @@ export async function getCheckInByClientAndWeek(
     },
   });
 
-  if (!checkIn || checkIn.deletedAt) return null;
+  if (!checkIn) return null;
 
   const photosWithUrls = await Promise.all(
     checkIn.photos.map(async (photo) => ({
@@ -200,6 +204,31 @@ export async function getCheckInByClientAndWeek(
   );
 
   return { ...checkIn, photos: photosWithUrls };
+}
+
+export async function getCheckInsByClientAndWeek(
+  clientId: string,
+  weekOf: Date
+) {
+  const checkIns = await db.checkIn.findMany({
+    where: { clientId, weekOf, deletedAt: null },
+    orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
+    include: {
+      photos: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+
+  return Promise.all(
+    checkIns.map(async (checkIn) => ({
+      ...checkIn,
+      photos: await Promise.all(
+        checkIn.photos.map(async (photo) => ({
+          ...photo,
+          url: await getSignedDownloadUrl(photo.storagePath),
+        }))
+      ),
+    }))
+  );
 }
 
 export async function verifyCoachAccessToClient(clientId: string) {

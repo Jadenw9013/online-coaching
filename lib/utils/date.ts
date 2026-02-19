@@ -34,3 +34,13 @@ export function parseWeekStartDate(dateStr: string): Date {
 export function formatDateUTC(date: Date): string {
   return date.toISOString().split("T")[0];
 }
+
+/**
+ * Get the Sunday end-of-week (23:59:59.999 UTC) for a given Monday.
+ */
+export function getWeekEnd(monday: Date): Date {
+  const end = new Date(monday);
+  end.setUTCDate(end.getUTCDate() + 6);
+  end.setUTCHours(23, 59, 59, 999);
+  return end;
+}

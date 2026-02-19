@@ -3,6 +3,7 @@ import { getCoachClientsWithWeekStatus } from "@/lib/queries/check-ins";
 import { CoachCodeDisplay } from "@/components/coach/coach-code-display";
 import { CoachInbox } from "@/components/coach/inbox/coach-inbox";
 import type { InboxClient } from "@/components/coach/inbox/inbox-client-card";
+import { getCurrentPeriod } from "@/lib/scheduling/periods";
 
 function KpiCard({
   value,
@@ -35,11 +36,8 @@ export default async function CoachDashboard() {
     weekOf: c.weekOf,
   }));
 
-  const weekLabel = clients[0]?.weekOf.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  const period = getCurrentPeriod(new Date(), [1]);
+  const weekLabel = period.label;
 
   const totalCount = clients.length;
   const newCount = clients.filter((c) => c.weekStatus === "new").length;
@@ -51,11 +49,9 @@ export default async function CoachDashboard() {
       {/* Header */}
       <section className="animate-fade-in">
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-        {weekLabel && (
-          <p className="mt-1.5 text-sm text-zinc-500">
-            Week of {weekLabel}
-          </p>
-        )}
+        <p className="mt-1.5 text-sm text-zinc-500">
+          {weekLabel}
+        </p>
       </section>
 
       {/* KPI Cards */}

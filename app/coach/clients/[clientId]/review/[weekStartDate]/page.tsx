@@ -1,10 +1,12 @@
 import {
   verifyCoachAccessToClient,
   getCheckInByClientAndWeek,
+  getCheckInsByClientAndWeek,
   getPreviousBodyweight,
 } from "@/lib/queries/check-ins";
 import { getMessages } from "@/lib/queries/messages";
 import { parseWeekStartDate, formatDateUTC } from "@/lib/utils/date";
+import { getCurrentPeriod } from "@/lib/scheduling/periods";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import Link from "next/link";
@@ -36,14 +38,17 @@ export default async function ReviewWorkspacePage({
     notFound();
   }
 
-  const [checkIn, effectivePlan, messages, foodLibrary, previousWeight] =
+  const [checkIn, allCheckIns, effectivePlan, messages, foodLibrary, previousWeight] =
     await Promise.all([
       getCheckInByClientAndWeek(clientId, weekOf),
+      getCheckInsByClientAndWeek(clientId, weekOf),
       getEffectiveMealPlanForReview(clientId, weekOf),
       getMessages(clientId, weekOf),
       getFoodLibrary(coach.id),
       getPreviousBodyweight(clientId, weekOf),
     ]);
+
+  const additionalCheckIns = allCheckIns.filter((c) => !c.isPrimary);
 
   const weightDelta =
     checkIn?.weight != null && previousWeight?.weight != null
@@ -57,11 +62,7 @@ export default async function ReviewWorkspacePage({
     sender: m.sender,
   }));
 
-  const weekLabel = weekOf.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  const weekLabel = getCurrentPeriod(weekOf, [1]).label;
 
   const foods = foodLibrary.map((f) => ({
     id: f.id,
@@ -92,7 +93,7 @@ export default async function ReviewWorkspacePage({
             <h1 className="text-base font-bold tracking-tight sm:text-lg">
               {client.firstName} {client.lastName}
             </h1>
-            <p className="text-xs text-zinc-500">Week of {weekLabel}</p>
+            <p className="text-xs text-zinc-500">{weekLabel}</p>
           </div>
         </div>
       </div>
@@ -101,7 +102,7 @@ export default async function ReviewWorkspacePage({
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Left column: check-in data + messages */}
         <div className="space-y-5">
-          <CheckInSummary checkIn={checkIn} weightDelta={weightDelta} />
+          <CheckInSummary checkIn={checkIn} weightDelta={weightDelta} additionalCheckIns={additionalCheckIns} />
           <MessageThread
             messages={serializedMessages}
             clientId={clientId}

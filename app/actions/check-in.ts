@@ -39,20 +39,6 @@ export async function createCheckIn(input: unknown) {
 
   const weekDate = parseWeekStartDate(weekOf);
 
-  // Look up by compound unique key (includes soft-deleted rows)
-  const existing = await db.checkIn.findUnique({
-    where: {
-      clientId_weekOf: { clientId: user.id, weekOf: weekDate },
-    },
-    select: { id: true, deletedAt: true },
-  });
-
-  // Active (non-deleted) check-in already exists — block duplicate
-  if (existing && !existing.deletedAt) {
-    const weekLabel = weekDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return { error: { weekOf: [`You already submitted a check-in for the week of ${weekLabel}. Delete the existing one first to resubmit.`] } };
-  }
-
   const checkInFields = {
     weight,
     dietCompliance: typeof dietCompliance === "number" ? dietCompliance : null,
@@ -60,14 +46,31 @@ export async function createCheckIn(input: unknown) {
     notes: notes || null,
   };
 
-  if (existing) {
-    // Revive soft-deleted row: reset fields, clear deletedAt, replace photos
+  // Check for existing active check-ins this period
+  const existingActive = await db.checkIn.findMany({
+    where: { clientId: user.id, weekOf: weekDate, deletedAt: null },
+    select: { id: true },
+  });
+
+  // Check for a soft-deleted primary to revive
+  const deletedPrimary = existingActive.length === 0
+    ? await db.checkIn.findFirst({
+        where: { clientId: user.id, weekOf: weekDate, isPrimary: true, deletedAt: { not: null } },
+        select: { id: true },
+      })
+    : null;
+
+  const isPrimary = existingActive.length === 0;
+
+  if (deletedPrimary && isPrimary) {
+    // Revive soft-deleted primary: reset fields, clear deletedAt, replace photos
     const [, updated] = await db.$transaction([
-      db.checkInPhoto.deleteMany({ where: { checkInId: existing.id } }),
+      db.checkInPhoto.deleteMany({ where: { checkInId: deletedPrimary.id } }),
       db.checkIn.update({
-        where: { id: existing.id },
+        where: { id: deletedPrimary.id },
         data: {
           ...checkInFields,
+          isPrimary: true,
           status: "SUBMITTED",
           deletedAt: null,
           photos: {
@@ -82,11 +85,12 @@ export async function createCheckIn(input: unknown) {
     return { checkInId: updated.id };
   }
 
-  // No existing row — create fresh
+  // Create new check-in (primary if first, secondary otherwise)
   const checkIn = await db.checkIn.create({
     data: {
       clientId: user.id,
       weekOf: weekDate,
+      isPrimary,
       ...checkInFields,
       photos: {
         create: photoPaths.map((path, i) => ({
