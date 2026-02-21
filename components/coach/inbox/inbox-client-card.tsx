@@ -101,13 +101,13 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
           </div>
         )}
 
-        {/* Status pill */}
-        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${status.pill}`}>
+        {/* Status pill — fades out on hover for non-missing clients */}
+        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-opacity duration-200 ${client.weekStatus !== "missing" ? "group-hover:opacity-0" : ""} ${status.pill}`}>
           {status.label}
         </span>
       </Link>
 
-      {/* Review CTA — floating on hover for non-missing */}
+      {/* Review CTA — fades in over the pill position on hover */}
       {client.weekStatus !== "missing" && (
         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:right-5">
           <Link

@@ -10,7 +10,6 @@ import { createSignedUploadUrls } from "@/app/actions/storage";
 import { createCheckIn } from "@/app/actions/check-in";
 
 const formSchema = z.object({
-  weekOf: z.string().min(1, "Required"),
   weight: z.string().min(1, "Weight is required"),
   dietCompliance: z.string().optional(),
   energyLevel: z.string().optional(),
@@ -18,15 +17,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-function getDefaultWeekOf() {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  return monday.toISOString().split("T")[0];
-}
 
 export function CheckInForm({
   previousWeight,
@@ -52,9 +42,7 @@ export function CheckInForm({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      weekOf: getDefaultWeekOf(),
-    },
+    defaultValues: {},
   });
 
   async function withRetry<T>(
@@ -113,7 +101,6 @@ export function CheckInForm({
     setUploadState("submitting");
 
     const result = await createCheckIn({
-      weekOf: values.weekOf,
       weight: parseFloat(values.weight),
       dietCompliance: values.dietCompliance ? parseInt(values.dietCompliance) : undefined,
       energyLevel: values.energyLevel ? parseInt(values.energyLevel) : undefined,
@@ -278,24 +265,6 @@ export function CheckInForm({
 
         <fieldset className="space-y-5">
           <legend className="sr-only">Check-in details</legend>
-
-          {/* Week selector — compact */}
-          <div>
-            <label htmlFor="weekOf" className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-1.5">
-              Week Of
-            </label>
-            <input
-              id="weekOf"
-              type="date"
-              {...register("weekOf")}
-              aria-invalid={errors.weekOf ? "true" : undefined}
-              aria-describedby={errors.weekOf ? "weekOf-error" : undefined}
-              className="block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
-            />
-            {errors.weekOf && (
-              <p id="weekOf-error" className="mt-1 text-sm text-red-500">{errors.weekOf.message}</p>
-            )}
-          </div>
 
           {/* Weight — most prominent field */}
           <div>

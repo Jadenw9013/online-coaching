@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createCheckInSchema } from "@/lib/validations/check-in";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
-import { parseWeekStartDate, getLocalDate } from "@/lib/utils/date";
+import { normalizeToMonday, getLocalDate } from "@/lib/utils/date";
 import { verifyCoachAccessToCheckIn } from "@/lib/queries/check-ins";
 import { revalidatePath } from "next/cache";
 
@@ -34,10 +34,10 @@ export async function createCheckIn(input: unknown) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { weekOf, weight, dietCompliance, energyLevel, notes, photoPaths, overwriteToday } = parsed.data;
+  const { weight, dietCompliance, energyLevel, notes, photoPaths, overwriteToday } = parsed.data;
 
-  const weekDate = parseWeekStartDate(weekOf);
   const now = new Date();
+  const weekDate = normalizeToMonday(now);
   const tz = user.timezone || "America/Los_Angeles";
   const localDate = getLocalDate(now, tz);
 
