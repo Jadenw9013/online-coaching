@@ -23,10 +23,12 @@ export default async function ClientCheckInDetailPage({
 
   const coachMessages = messages.filter((m) => m.senderId !== user.id);
 
-  const weekLabel = checkIn.weekOf.toLocaleDateString("en-US", {
+  const submittedLabel = checkIn.submittedAt.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 
   return (
@@ -42,15 +44,10 @@ export default async function ClientCheckInDetailPage({
         </Link>
         <div>
           <h1 className="text-lg font-bold tracking-tight">
-            Check-In: Week of {weekLabel}
+            Check-In
           </h1>
           <p className="text-xs text-zinc-500">
-            Submitted{" "}
-            {checkIn.createdAt.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {submittedLabel}
           </p>
         </div>
       </div>

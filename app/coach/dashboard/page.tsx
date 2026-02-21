@@ -3,7 +3,7 @@ import { getCoachClientsWithWeekStatus } from "@/lib/queries/check-ins";
 import { CoachCodeDisplay } from "@/components/coach/coach-code-display";
 import { CoachInbox } from "@/components/coach/inbox/coach-inbox";
 import type { InboxClient } from "@/components/coach/inbox/inbox-client-card";
-import { getCurrentPeriod } from "@/lib/scheduling/periods";
+import { computeCurrentPeriod } from "@/lib/scheduling/periods";
 
 function KpiCard({
   value,
@@ -36,7 +36,7 @@ export default async function CoachDashboard() {
     weekOf: c.weekOf,
   }));
 
-  const period = getCurrentPeriod(new Date(), [1]);
+  const period = computeCurrentPeriod([1], new Date(), "America/Los_Angeles");
   const weekLabel = period.label;
 
   const totalCount = clients.length;

@@ -21,7 +21,7 @@ export function CheckInStatus({
       >
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-lg font-bold sm:text-xl">Submit Your Weekly Check-In</p>
+            <p className="text-lg font-bold sm:text-xl">Submit Your Check-In</p>
             <p className="mt-1 text-sm opacity-60">
               {weekLabel}
             </p>
@@ -57,7 +57,7 @@ export function CheckInStatus({
               href="/client/check-in"
               className="mt-1 inline-block text-xs font-medium text-amber-700 underline underline-offset-2 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100"
             >
-              Submit another
+              Update check-in
             </Link>
           </div>
         </div>

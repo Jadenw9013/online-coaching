@@ -1,15 +1,11 @@
 import Link from "next/link";
 import { CheckInForm } from "@/components/check-in/check-in-form";
 import { getCurrentDbUser } from "@/lib/auth/roles";
-import { getPreviousBodyweight } from "@/lib/queries/check-ins";
-import { getCurrentWeekMonday } from "@/lib/utils/date";
+import { getLatestCheckIn } from "@/lib/queries/check-ins";
 
 export default async function ClientCheckInPage() {
   const user = await getCurrentDbUser();
-  const previousWeight = await getPreviousBodyweight(
-    user.id,
-    getCurrentWeekMonday()
-  );
+  const latest = await getLatestCheckIn(user.id);
 
   return (
     <div className="mx-auto max-w-lg space-y-5">
@@ -33,10 +29,10 @@ export default async function ClientCheckInPage() {
       <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
         <CheckInForm
           previousWeight={
-            previousWeight
+            latest?.weight
               ? {
-                  weight: previousWeight.weight!,
-                  weekOf: previousWeight.weekOf.toISOString(),
+                  weight: latest.weight,
+                  date: latest.submittedAt.toISOString(),
                 }
               : null
           }

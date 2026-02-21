@@ -162,6 +162,18 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* ── Scripture ── */}
+        <section className="border-t border-zinc-200/60 px-5 py-20 dark:border-zinc-800/60 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <blockquote className="text-lg italic leading-relaxed text-zinc-500 dark:text-zinc-400">
+              &ldquo;Blessed is the one who perseveres under trial because, having stood the test, that person will receive the crown of life that the Lord has promised to those who love him.&rdquo;
+            </blockquote>
+            <p className="mt-4 text-sm font-semibold tracking-wide text-zinc-400">
+              &mdash; James 1:12
+            </p>
+          </div>
+        </section>
+
         {/* ── Bottom CTA ── */}
         <section className="border-t border-zinc-200/60 px-5 py-24 dark:border-zinc-800/60 sm:px-8">
           <div className="mx-auto max-w-2xl text-center">

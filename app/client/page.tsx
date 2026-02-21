@@ -1,9 +1,9 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
-import { getClientCheckInsLight, getLatestCoachMessage } from "@/lib/queries/check-ins";
+import { getClientCheckInsLight, getLatestCoachMessage, getCheckInForLocalDate } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
-import { getCurrentWeekMonday, formatDateUTC } from "@/lib/utils/date";
+import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getWeightHistory } from "@/lib/queries/weight-history";
-import { getCurrentPeriod } from "@/lib/scheduling/periods";
+import { getEffectiveScheduleDays } from "@/lib/scheduling/periods";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
@@ -11,8 +11,15 @@ import { BecomeCoachForm } from "@/components/client/become-coach-form";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { CheckInStatus } from "@/components/client/check-in-status";
+import { CheckInScheduleBanner } from "@/components/client/check-in-schedule-banner";
 import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 import { WeightProgress } from "@/components/charts/weight-progress";
+import dayjs from "dayjs";
+import utcPlugin from "dayjs/plugin/utc";
+import timezonePlugin from "dayjs/plugin/timezone";
+
+dayjs.extend(utcPlugin);
+dayjs.extend(timezonePlugin);
 
 export default async function ClientDashboard() {
   const user = await getCurrentDbUser();
@@ -20,7 +27,7 @@ export default async function ClientDashboard() {
   const coachAssignment = await db.coachClient.findFirst({
     where: { clientId: user.id },
     include: {
-      coach: { select: { firstName: true, lastName: true, email: true } },
+      coach: { select: { firstName: true, lastName: true, email: true, checkInDaysOfWeek: true } },
     },
   });
 
@@ -31,19 +38,31 @@ export default async function ClientDashboard() {
     getWeightHistory(user.id),
   ]);
 
-  const currentWeekDate = getCurrentWeekMonday();
-  const period = getCurrentPeriod(new Date(), [1]);
-  const weekLabel = period.label;
+  // Schedule data
+  const tz = user.timezone || "America/Los_Angeles";
+  const checkInDays = coachAssignment
+    ? getEffectiveScheduleDays(
+        coachAssignment.coach.checkInDaysOfWeek,
+        coachAssignment.checkInDaysOfWeekOverride
+      )
+    : [1];
 
-  // Determine current week check-in status
-  const currentWeekCheckIn = checkIns.find(
-    (c) => c.weekOf.getTime() === currentWeekDate.getTime()
-  );
-  const weekStatus: "none" | "submitted" | "reviewed" = !currentWeekCheckIn
+  // Banner: show if today is a scheduled day and no check-in exists for today's localDate
+  const localDayOfWeek = dayjs(new Date()).tz(tz).day();
+  const todayLocalDate = getLocalDate(new Date(), tz);
+  const todayCheckIn = await getCheckInForLocalDate(user.id, todayLocalDate);
+  const checkedInToday = !!todayCheckIn;
+
+  // Current status: based on latest check-in
+  const latestCheckIn = checkIns[0] ?? null;
+  const weekStatus: "none" | "submitted" | "reviewed" = !latestCheckIn
     ? "none"
-    : currentWeekCheckIn.status === "REVIEWED"
+    : latestCheckIn.status === "REVIEWED"
       ? "reviewed"
       : "submitted";
+
+  // Date label for action banner
+  const todayLabel = dayjs(new Date()).tz(tz).format("MMM D, YYYY");
 
   // Latest weight for the performance module
   const latestWeight = checkIns.find((c) => c.weight != null);
@@ -57,7 +76,7 @@ export default async function ClientDashboard() {
 
   return (
     <div className="space-y-10">
-      {/* ── Header ── */}
+      {/* Header */}
       <section className="animate-fade-in">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-semibold tracking-tight">
@@ -75,28 +94,39 @@ export default async function ClientDashboard() {
           )}
         </div>
         <p className="mt-1.5 text-sm text-zinc-500">
-          {weekLabel}
+          {todayLabel}
         </p>
       </section>
 
       {/* Coach connection (only if no coach) */}
       {!coachAssignment && <ConnectCoachBanner />}
 
-      {/* ── Action Banner ── */}
+      {/* Check-in schedule reminder */}
+      {coachAssignment && (
+        <div className="animate-fade-in" style={{ animationDelay: "60ms" }}>
+          <CheckInScheduleBanner
+            checkInDays={checkInDays}
+            checkedInToday={checkedInToday}
+            todayDayOfWeek={localDayOfWeek}
+          />
+        </div>
+      )}
+
+      {/* Action Banner */}
       <div className="animate-fade-in" style={{ animationDelay: "80ms" }}>
         <CheckInStatus
           status={weekStatus}
-          weekLabel={weekLabel}
+          weekLabel={todayLabel}
           checkInDate={
-            currentWeekCheckIn
-              ? currentWeekCheckIn.createdAt.toLocaleDateString()
+            latestCheckIn
+              ? latestCheckIn.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
               : undefined
           }
-          checkInId={currentWeekCheckIn?.id}
+          checkInId={latestCheckIn?.id}
         />
       </div>
 
-      {/* ── Performance Module — Weight ── */}
+      {/* Performance Module — Weight */}
       {latestWeight?.weight && (
         <section
           className="animate-fade-in overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800/80 dark:bg-[#121215]"
@@ -124,7 +154,7 @@ export default async function ClientDashboard() {
             )}
           </div>
           <p className="mt-1.5 text-xs text-zinc-400">
-            as of {latestWeight.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            as of {latestWeight.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </p>
           <WeightProgress
             data={weightHistory}
@@ -134,7 +164,7 @@ export default async function ClientDashboard() {
         </section>
       )}
 
-      {/* ── Coach Feedback ── */}
+      {/* Coach Feedback */}
       {latestCoachMessage && (
         <Link
           href={`/client/messages/${formatDateUTC(latestCoachMessage.weekOf)}`}
@@ -155,7 +185,7 @@ export default async function ClientDashboard() {
         </Link>
       )}
 
-      {/* ── Meal Plan ── */}
+      {/* Meal Plan */}
       {mealPlan && (
         <section
           className="animate-fade-in"
@@ -176,7 +206,7 @@ export default async function ClientDashboard() {
         </section>
       )}
 
-      {/* ── Recent Check-Ins ── */}
+      {/* Recent Check-Ins — flat list with submission dates */}
       <section
         className="animate-fade-in"
         style={{ animationDelay: "400ms" }}
@@ -212,8 +242,12 @@ export default async function ClientDashboard() {
                   ? +(checkIn.weight - prev.weight).toFixed(1)
                   : null;
 
-              const ciPeriod = getCurrentPeriod(checkIn.weekOf, [1]);
-              const dateLabel = ciPeriod.label;
+              const dateLabel = checkIn.submittedAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              });
 
               return (
                 <div
@@ -239,7 +273,7 @@ export default async function ClientDashboard() {
                       )}
                     </div>
 
-                    {/* Week + delta + notes */}
+                    {/* Date + delta + notes */}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold">
                         {dateLabel}

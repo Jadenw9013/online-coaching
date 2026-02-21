@@ -1,35 +1,22 @@
-import {
-  verifyCoachAccessToClient,
-  getCheckInByClientAndWeek,
-  getCheckInsByClientAndWeek,
-  getPreviousBodyweight,
-} from "@/lib/queries/check-ins";
-import { getMessages } from "@/lib/queries/messages";
-import { parseWeekStartDate, formatDateUTC } from "@/lib/utils/date";
-import { getCurrentPeriod } from "@/lib/scheduling/periods";
+import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
+import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
+import { parseWeekStartDate } from "@/lib/utils/date";
 import { db } from "@/lib/db";
-import Link from "next/link";
-import { MessageThread } from "@/components/messages/message-thread";
-import { MealPlanEditorV2 } from "@/components/coach/meal-plan/meal-plan-editor-v2";
-import { CheckInSummary } from "@/components/coach/review/check-in-summary";
-import { getFoodLibrary } from "@/lib/queries/food-library";
-import { getEffectiveMealPlanForReview } from "@/lib/queries/meal-plans";
 
-export default async function ReviewWorkspacePage({
+/**
+ * Legacy route: /coach/clients/[clientId]/review/[weekStartDate]
+ * Redirects to /coach/clients/[clientId]/check-ins/[checkInId]
+ * by finding the latest check-in for the given client and week.
+ */
+export default async function ReviewRedirectPage({
   params,
 }: {
   params: Promise<{ clientId: string; weekStartDate: string }>;
 }) {
   const { clientId, weekStartDate } = await params;
 
-  const coach = await verifyCoachAccessToClient(clientId);
-
-  const client = await db.user.findUnique({
-    where: { id: clientId },
-    select: { id: true, firstName: true, lastName: true },
-  });
-  if (!client) notFound();
+  await verifyCoachAccessToClient(clientId);
 
   let weekOf: Date;
   try {
@@ -38,91 +25,17 @@ export default async function ReviewWorkspacePage({
     notFound();
   }
 
-  const [checkIn, allCheckIns, effectivePlan, messages, foodLibrary, previousWeight] =
-    await Promise.all([
-      getCheckInByClientAndWeek(clientId, weekOf),
-      getCheckInsByClientAndWeek(clientId, weekOf),
-      getEffectiveMealPlanForReview(clientId, weekOf),
-      getMessages(clientId, weekOf),
-      getFoodLibrary(coach.id),
-      getPreviousBodyweight(clientId, weekOf),
-    ]);
+  // Find the latest check-in for this client in this week
+  const checkIn = await db.checkIn.findFirst({
+    where: { clientId, weekOf, deletedAt: null },
+    orderBy: { submittedAt: "desc" },
+    select: { id: true },
+  });
 
-  const additionalCheckIns = allCheckIns.filter((c) => !c.isPrimary);
+  if (!checkIn) {
+    // No check-in for this week — fall back to client profile
+    redirect(`/coach/clients/${clientId}`);
+  }
 
-  const weightDelta =
-    checkIn?.weight != null && previousWeight?.weight != null
-      ? +(checkIn.weight - previousWeight.weight).toFixed(1)
-      : null;
-
-  const serializedMessages = messages.map((m) => ({
-    id: m.id,
-    body: m.body,
-    createdAt: m.createdAt.toISOString(),
-    sender: m.sender,
-  }));
-
-  const weekLabel = getCurrentPeriod(weekOf, [1]).label;
-
-  const foods = foodLibrary.map((f) => ({
-    id: f.id,
-    name: f.name,
-    defaultUnit: f.defaultUnit,
-  }));
-
-  return (
-    <div className="space-y-5">
-      {/* Header — compact breadcrumb */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/coach/dashboard"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-            aria-label="Back to inbox"
-          >
-            &larr;
-          </Link>
-          <Link
-            href={`/coach/clients/${clientId}`}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-            aria-label="View client profile"
-          >
-            {client.firstName?.[0] ?? "?"}
-          </Link>
-          <div>
-            <h1 className="text-base font-bold tracking-tight sm:text-lg">
-              {client.firstName} {client.lastName}
-            </h1>
-            <p className="text-xs text-zinc-500">{weekLabel}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* 2-column layout */}
-      <div className="grid gap-5 lg:grid-cols-2">
-        {/* Left column: check-in data + messages */}
-        <div className="space-y-5">
-          <CheckInSummary checkIn={checkIn} weightDelta={weightDelta} additionalCheckIns={additionalCheckIns} />
-          <MessageThread
-            messages={serializedMessages}
-            clientId={clientId}
-            weekStartDate={formatDateUTC(weekOf)}
-            currentUserId={coach.id}
-          />
-        </div>
-
-        {/* Right column: meal plan editor */}
-        <div>
-          <MealPlanEditorV2
-            clientId={clientId}
-            weekStartDate={formatDateUTC(weekOf)}
-            effectivePlan={effectivePlan}
-            foods={foods}
-            coachDefaultNotify={coach.defaultNotifyOnPublish}
-            publishedMealPlanId={effectivePlan.publishedId}
-          />
-        </div>
-      </div>
-    </div>
-  );
+  redirect(`/coach/clients/${clientId}/check-ins/${checkIn.id}`);
 }

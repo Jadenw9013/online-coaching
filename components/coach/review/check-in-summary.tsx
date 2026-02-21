@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MarkReviewedButton } from "@/app/coach/clients/[clientId]/review/[weekStartDate]/mark-reviewed-button";
+import { MarkReviewedButton } from "@/components/coach/review/mark-reviewed-button";
 
 type Photo = {
   id: string;
@@ -23,11 +23,9 @@ type CheckIn = {
 export function CheckInSummary({
   checkIn,
   weightDelta,
-  additionalCheckIns,
 }: {
   checkIn: CheckIn | null;
   weightDelta: number | null;
-  additionalCheckIns?: CheckIn[];
 }) {
   if (!checkIn) {
     return (
@@ -147,57 +145,6 @@ export function CheckInSummary({
         </div>
       )}
 
-      {/* Additional Check-Ins */}
-      {additionalCheckIns && additionalCheckIns.length > 0 && (
-        <details className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          <summary className="cursor-pointer px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
-            Additional Check-Ins ({additionalCheckIns.length})
-          </summary>
-          <div className="space-y-3 px-4 pb-4">
-            {additionalCheckIns.map((ci) => (
-              <div
-                key={ci.id}
-                className="rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">
-                    {ci.createdAt.toLocaleDateString()}
-                  </span>
-                  {ci.weight != null && (
-                    <span className="text-sm font-medium tabular-nums">
-                      {ci.weight}
-                      <span className="ml-0.5 text-xs text-zinc-400">lbs</span>
-                    </span>
-                  )}
-                </div>
-                {ci.notes && (
-                  <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">
-                    {ci.notes}
-                  </p>
-                )}
-                {ci.photos.length > 0 && (
-                  <div className="mt-2 grid grid-cols-3 gap-1">
-                    {ci.photos.map((photo) => (
-                      <div
-                        key={photo.id}
-                        className="relative aspect-square overflow-hidden rounded border border-zinc-200 dark:border-zinc-700"
-                      >
-                        <Image
-                          src={photo.url}
-                          alt="Progress photo"
-                          fill
-                          className="object-cover"
-                          sizes="80px"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
     </div>
   );
 }

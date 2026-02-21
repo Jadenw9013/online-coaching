@@ -1,7 +1,6 @@
 import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
 import { getClientCheckIns } from "@/lib/queries/check-ins";
 import { db } from "@/lib/db";
-import { formatDateUTC } from "@/lib/utils/date";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -43,7 +42,7 @@ export default async function ClientCheckInsPage({
           {checkIns.map((checkIn) => (
             <Link
               key={checkIn.id}
-              href={`/coach/clients/${clientId}/review/${formatDateUTC(checkIn.weekOf)}`}
+              href={`/coach/clients/${clientId}/check-ins/${checkIn.id}`}
               className="block rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
             >
               <div className="flex items-center justify-between">

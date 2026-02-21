@@ -43,7 +43,7 @@ export function WeightProgress({
     }
   }
 
-  if (data.length < 2) {
+  if (chartData.length < 2) {
     return (
       <div className={className}>
         <p className="text-sm text-zinc-400">

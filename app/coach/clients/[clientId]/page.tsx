@@ -3,7 +3,6 @@ import { getClientProfile } from "@/lib/queries/client-profile";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { formatDateUTC } from "@/lib/utils/date";
-import { getCurrentPeriod } from "@/lib/scheduling/periods";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
@@ -113,18 +112,33 @@ export default async function ClientProfilePage({
 
       {/* Quick actions */}
       <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
-          Review This Week
-        </Link>
-        <Link
-          href={`/coach/clients/${clientId}/review/${weekDateStr}#messages`}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-          Message
-        </Link>
+        {latestCheckIn ? (
+          <Link
+            href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          >
+            Review Latest
+          </Link>
+        ) : (
+          <span className="rounded-lg bg-zinc-200 px-4 py-2 text-sm font-medium text-zinc-400 dark:bg-zinc-800">
+            No check-in to review
+          </span>
+        )}
+        {latestCheckIn ? (
+          <Link
+            href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}#messages`}
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Message
+          </Link>
+        ) : (
+          <Link
+            href={`/coach/clients/${clientId}/review/${weekDateStr}#messages`}
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Message
+          </Link>
+        )}
         <Link
           href={`/coach/clients/${clientId}/import-meal-plan`}
           className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
@@ -143,13 +157,13 @@ export default async function ClientProfilePage({
             label="Current"
             value={latestCheckIn?.weight}
             suffix="lbs"
-            subtext={latestCheckIn?.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            subtext={latestCheckIn?.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           />
           <MetricCard
             label="Previous"
             value={previousCheckIn?.weight}
             suffix="lbs"
-            subtext={previousCheckIn?.weekOf.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            subtext={previousCheckIn?.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           />
           <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
             <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Change</p>
@@ -218,17 +232,16 @@ export default async function ClientProfilePage({
         ) : (
           <div className="space-y-1.5">
             {checkIns.map((checkIn) => {
-              const weekStr = formatDateUTC(checkIn.weekOf);
               const cfg = checkInStatusConfig[checkIn.status];
               return (
                 <Link
                   key={checkIn.id}
-                  href={`/coach/clients/${clientId}/review/${weekStr}`}
+                  href={`/coach/clients/${clientId}/check-ins/${checkIn.id}`}
                   className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">
-                      {getCurrentPeriod(checkIn.weekOf, [1]).label}
+                      {checkIn.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                     </p>
                   </div>
 
@@ -270,12 +283,21 @@ export default async function ClientProfilePage({
               {mealPlan && (
                 <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
               )}
-              <Link
-                href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-                className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
-              >
-                Edit &rarr;
-              </Link>
+              {latestCheckIn ? (
+                <Link
+                  href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
+                  className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+                >
+                  Edit &rarr;
+                </Link>
+              ) : (
+                <Link
+                  href={`/coach/clients/${clientId}/review/${weekDateStr}`}
+                  className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+                >
+                  Edit &rarr;
+                </Link>
+              )}
             </div>
           </div>
           {mealPlan ? (

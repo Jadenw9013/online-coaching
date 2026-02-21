@@ -6,7 +6,7 @@ import { getCurrentWeekMonday } from "@/lib/utils/date";
 export async function getClientCheckIns(clientId: string) {
   return db.checkIn.findMany({
     where: { clientId, deletedAt: null },
-    orderBy: { weekOf: "desc" },
+    orderBy: { submittedAt: "desc" },
     include: {
       photos: { orderBy: { sortOrder: "asc" } },
     },
@@ -15,8 +15,8 @@ export async function getClientCheckIns(clientId: string) {
 
 export async function getClientCheckInsLight(clientId: string) {
   return db.checkIn.findMany({
-    where: { clientId, deletedAt: null, isPrimary: true },
-    orderBy: { weekOf: "desc" },
+    where: { clientId, deletedAt: null },
+    orderBy: { submittedAt: "desc" },
     select: {
       id: true,
       weekOf: true,
@@ -24,6 +24,8 @@ export async function getClientCheckInsLight(clientId: string) {
       status: true,
       notes: true,
       createdAt: true,
+      submittedAt: true,
+      localDate: true,
       _count: { select: { photos: true } },
     },
   });
@@ -43,6 +45,27 @@ export async function getPreviousBodyweight(
     },
     orderBy: { weekOf: "desc" },
     select: { weight: true, weekOf: true },
+  });
+}
+
+/** Latest check-in by submission time (for "Previous BW" display). */
+export async function getLatestCheckIn(clientId: string) {
+  return db.checkIn.findFirst({
+    where: { clientId, deletedAt: null, weight: { not: null } },
+    orderBy: { submittedAt: "desc" },
+    select: { weight: true, submittedAt: true },
+  });
+}
+
+/** Check if client already has a check-in for a given local date. */
+export async function getCheckInForLocalDate(
+  clientId: string,
+  localDate: string
+) {
+  return db.checkIn.findFirst({
+    where: { clientId, localDate, deletedAt: null },
+    orderBy: { submittedAt: "desc" },
+    select: { id: true, submittedAt: true },
   });
 }
 
@@ -87,9 +110,9 @@ export async function getCoachClients(coachId: string) {
         include: {
           checkIns: {
             where: { deletedAt: null },
-            orderBy: { weekOf: "desc" },
+            orderBy: { submittedAt: "desc" },
             take: 1,
-            select: { weekOf: true, createdAt: true },
+            select: { weekOf: true, submittedAt: true },
           },
         },
       },
@@ -114,8 +137,8 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       client: {
         include: {
           checkIns: {
-            where: { deletedAt: null, isPrimary: true },
-            orderBy: { weekOf: "desc" },
+            where: { deletedAt: null },
+            orderBy: { submittedAt: "desc" },
             take: 2,
             select: {
               id: true,
@@ -124,7 +147,7 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
               weight: true,
               dietCompliance: true,
               energyLevel: true,
-              createdAt: true,
+              submittedAt: true,
             },
           },
           clientMessages: {
@@ -137,26 +160,22 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
   });
 
   return assignments.map((a) => {
-    const currentCheckIn = a.client.checkIns.find(
-      (c) => c.weekOf.getTime() === weekOf.getTime()
-    ) ?? null;
-    const previousCheckIn = a.client.checkIns.find(
-      (c) => c.weekOf.getTime() !== weekOf.getTime()
-    ) ?? null;
+    const latestCheckIn = a.client.checkIns[0] ?? null;
+    const previousCheckIn = a.client.checkIns[1] ?? null;
 
     let weekStatus: "new" | "reviewed" | "missing";
-    if (!currentCheckIn) {
+    if (!latestCheckIn) {
       weekStatus = "missing";
-    } else if (currentCheckIn.status === "REVIEWED") {
+    } else if (latestCheckIn.status === "REVIEWED") {
       weekStatus = "reviewed";
     } else {
       weekStatus = "new";
     }
 
-    const weight = currentCheckIn?.weight ?? null;
+    const weight = latestCheckIn?.weight ?? null;
     const weightChange =
-      currentCheckIn?.weight != null && previousCheckIn?.weight != null
-        ? +(currentCheckIn.weight - previousCheckIn.weight).toFixed(1)
+      latestCheckIn?.weight != null && previousCheckIn?.weight != null
+        ? +(latestCheckIn.weight - previousCheckIn.weight).toFixed(1)
         : null;
 
     return {
@@ -166,13 +185,13 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       email: a.client.email,
       weekStatus,
       hasClientMessage: a.client.clientMessages.length > 0,
-      checkInId: currentCheckIn?.id ?? null,
+      checkInId: latestCheckIn?.id ?? null,
       weekOf,
       weight,
       weightChange,
-      dietCompliance: currentCheckIn?.dietCompliance ?? null,
-      energyLevel: currentCheckIn?.energyLevel ?? null,
-      submittedAt: currentCheckIn?.createdAt ?? null,
+      dietCompliance: latestCheckIn?.dietCompliance ?? null,
+      energyLevel: latestCheckIn?.energyLevel ?? null,
+      submittedAt: latestCheckIn?.submittedAt ?? null,
     };
   });
 }

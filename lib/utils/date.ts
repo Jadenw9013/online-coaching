@@ -1,3 +1,18 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+/**
+ * Compute the local date string (YYYY-MM-DD) for a given instant in a given timezone.
+ * DST-safe via dayjs timezone plugin.
+ */
+export function getLocalDate(instant: Date, tz: string): string {
+  return dayjs(instant).tz(tz).format("YYYY-MM-DD");
+}
+
 /**
  * Normalize any date to the Monday of its ISO week at midnight UTC.
  */

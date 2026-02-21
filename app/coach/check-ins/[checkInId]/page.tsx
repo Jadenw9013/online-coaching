@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { formatDateUTC } from "@/lib/utils/date";
 
-export default async function CheckInDetailRedirect({
+/**
+ * Legacy route: /coach/check-ins/[checkInId]
+ * Redirects to /coach/clients/[clientId]/check-ins/[checkInId]
+ */
+export default async function CheckInRedirectPage({
   params,
 }: {
   params: Promise<{ checkInId: string }>;
@@ -12,11 +15,10 @@ export default async function CheckInDetailRedirect({
 
   const checkIn = await db.checkIn.findUnique({
     where: { id: checkInId },
-    select: { clientId: true, weekOf: true },
+    select: { clientId: true },
   });
 
   if (!checkIn) notFound();
 
-  const weekDateStr = formatDateUTC(checkIn.weekOf);
-  redirect(`/coach/clients/${checkIn.clientId}/review/${weekDateStr}`);
+  redirect(`/coach/clients/${checkIn.clientId}/check-ins/${checkInId}`);
 }

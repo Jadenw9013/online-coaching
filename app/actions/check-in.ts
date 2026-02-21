@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createCheckInSchema } from "@/lib/validations/check-in";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
-import { parseWeekStartDate } from "@/lib/utils/date";
+import { parseWeekStartDate, getLocalDate } from "@/lib/utils/date";
 import { verifyCoachAccessToCheckIn } from "@/lib/queries/check-ins";
 import { revalidatePath } from "next/cache";
 
@@ -16,11 +16,10 @@ export async function createCheckIn(input: unknown) {
   }
 
   // Require an assigned coach
-  const hasCoach = await db.coachClient.findFirst({
+  const coachAssignment = await db.coachClient.findFirst({
     where: { clientId: user.id },
-    select: { id: true },
   });
-  if (!hasCoach) {
+  if (!coachAssignment) {
     return {
       error: {
         weekOf: [
@@ -35,9 +34,12 @@ export async function createCheckIn(input: unknown) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { weekOf, weight, dietCompliance, energyLevel, notes, photoPaths } = parsed.data;
+  const { weekOf, weight, dietCompliance, energyLevel, notes, photoPaths, overwriteToday } = parsed.data;
 
   const weekDate = parseWeekStartDate(weekOf);
+  const now = new Date();
+  const tz = user.timezone || "America/Los_Angeles";
+  const localDate = getLocalDate(now, tz);
 
   const checkInFields = {
     weight,
@@ -46,33 +48,39 @@ export async function createCheckIn(input: unknown) {
     notes: notes || null,
   };
 
-  // Check for existing active check-ins this period
-  const existingActive = await db.checkIn.findMany({
-    where: { clientId: user.id, weekOf: weekDate, deletedAt: null },
-    select: { id: true },
+  // Check for existing check-in today (same localDate)
+  const existingToday = await db.checkIn.findFirst({
+    where: { clientId: user.id, localDate, deletedAt: null },
+    orderBy: { submittedAt: "desc" },
+    select: { id: true, submittedAt: true },
   });
 
-  // Check for a soft-deleted primary to revive
-  const deletedPrimary = existingActive.length === 0
-    ? await db.checkIn.findFirst({
-        where: { clientId: user.id, weekOf: weekDate, isPrimary: true, deletedAt: { not: null } },
-        select: { id: true },
-      })
-    : null;
+  // If a check-in already exists today and caller hasn't chosen what to do
+  if (existingToday && overwriteToday === undefined) {
+    return {
+      conflict: {
+        code: "CHECKIN_EXISTS_TODAY" as const,
+        existing: {
+          id: existingToday.id,
+          submittedAt: existingToday.submittedAt.toISOString(),
+        },
+      },
+    };
+  }
 
-  const isPrimary = existingActive.length === 0;
-
-  if (deletedPrimary && isPrimary) {
-    // Revive soft-deleted primary: reset fields, clear deletedAt, replace photos
+  // Overwrite: update the latest check-in for today
+  if (existingToday && overwriteToday === true) {
     const [, updated] = await db.$transaction([
-      db.checkInPhoto.deleteMany({ where: { checkInId: deletedPrimary.id } }),
+      db.checkInPhoto.deleteMany({ where: { checkInId: existingToday.id } }),
       db.checkIn.update({
-        where: { id: deletedPrimary.id },
+        where: { id: existingToday.id },
         data: {
           ...checkInFields,
-          isPrimary: true,
+          weekOf: weekDate,
+          submittedAt: now,
+          localDate,
+          timezone: tz,
           status: "SUBMITTED",
-          deletedAt: null,
           photos: {
             create: photoPaths.map((path, i) => ({
               storagePath: path,
@@ -82,15 +90,21 @@ export async function createCheckIn(input: unknown) {
         },
       }),
     ]);
-    return { checkInId: updated.id };
+
+    revalidatePath("/client", "layout");
+    revalidatePath("/coach", "layout");
+    return { checkInId: updated.id, overwritten: true };
   }
 
-  // Create new check-in (primary if first, secondary otherwise)
+  // Add as new (overwriteToday === false) or no existing today
   const checkIn = await db.checkIn.create({
     data: {
       clientId: user.id,
       weekOf: weekDate,
-      isPrimary,
+      isPrimary: true,
+      submittedAt: now,
+      localDate,
+      timezone: tz,
       ...checkInFields,
       photos: {
         create: photoPaths.map((path, i) => ({
@@ -101,6 +115,8 @@ export async function createCheckIn(input: unknown) {
     },
   });
 
+  revalidatePath("/client", "layout");
+  revalidatePath("/coach", "layout");
   return { checkInId: checkIn.id };
 }
 

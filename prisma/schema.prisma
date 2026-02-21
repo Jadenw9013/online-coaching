@@ -88,12 +88,20 @@ model CheckIn {
   createdAt       DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  isPrimary  Boolean  @default(true)
+  isPrimary       Boolean  @default(true)
+  submittedAt     DateTime @default(now())
+  localDate       String   @default("")
+  timezone        String   @default("America/Los_Angeles")
+  periodStartDate String   @default("")  // "YYYY-MM-DD" start of schedule-defined period
+  periodEndDate   String   @default("")  // "YYYY-MM-DD" next scheduled day (exclusive end)
 
   client User           @relation(fields: [clientId], references: [id])
   photos CheckInPhoto[]
 
   @@index([clientId, weekOf])
+  @@index([clientId, submittedAt])
+  @@index([clientId, localDate])
+  @@index([clientId, periodStartDate])
 }
 
 model MacroTarget {

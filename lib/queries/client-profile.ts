@@ -24,11 +24,11 @@ export async function getClientProfile(coachId: string, clientId: string) {
 
   const weekOf = getCurrentWeekMonday();
 
-  // Fetch 12 primary check-ins for history + last message in parallel
+  // Fetch 12 check-ins for history + last message in parallel
   const [checkIns, lastMessage] = await Promise.all([
     db.checkIn.findMany({
-      where: { clientId, deletedAt: null, isPrimary: true },
-      orderBy: { weekOf: "desc" },
+      where: { clientId, deletedAt: null },
+      orderBy: { submittedAt: "desc" },
       take: 12,
       select: {
         id: true,
@@ -39,6 +39,8 @@ export async function getClientProfile(coachId: string, clientId: string) {
         status: true,
         notes: true,
         createdAt: true,
+        submittedAt: true,
+        localDate: true,
         _count: { select: { photos: true } },
       },
     }),
@@ -56,7 +58,7 @@ export async function getClientProfile(coachId: string, clientId: string) {
       ? +(latestCheckIn.weight - previousCheckIn.weight).toFixed(1)
       : null;
 
-  // Determine current-week status
+  // Determine current-week status based on weekOf
   const currentWeekCheckIn = checkIns.find(
     (c) => c.weekOf.getTime() === weekOf.getTime()
   );

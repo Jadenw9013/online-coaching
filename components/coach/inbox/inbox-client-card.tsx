@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { formatDateUTC } from "@/lib/utils/date";
 
 type WeekStatus = "new" | "reviewed" | "missing";
 
@@ -49,9 +48,10 @@ function formatTimeAgo(date: Date): string {
 }
 
 export function InboxClientCard({ client }: { client: InboxClient }) {
-  const weekDateStr = formatDateUTC(client.weekOf);
   const profileHref = `/coach/clients/${client.id}`;
-  const reviewHref = `/coach/clients/${client.id}/review/${weekDateStr}`;
+  const reviewHref = client.checkInId
+    ? `/coach/clients/${client.id}/check-ins/${client.checkInId}`
+    : `/coach/clients/${client.id}`;
   const status = statusConfig[client.weekStatus];
 
   return (

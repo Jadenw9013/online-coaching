@@ -7,7 +7,6 @@ export async function getWeightHistory(
   const where: Record<string, unknown> = {
     clientId,
     deletedAt: null,
-    isPrimary: true,
     weight: { not: null },
   };
 
@@ -16,17 +15,18 @@ export async function getWeightHistory(
     const cutoff = new Date();
     cutoff.setUTCDate(cutoff.getUTCDate() - days);
     cutoff.setUTCHours(0, 0, 0, 0);
-    where.weekOf = { gte: cutoff };
+    where.submittedAt = { gte: cutoff };
   }
 
   const checkIns = await db.checkIn.findMany({
     where,
-    orderBy: { weekOf: "asc" },
-    select: { weekOf: true, weight: true },
+    orderBy: { submittedAt: "asc" },
+    select: { submittedAt: true, weight: true },
+    take: 100,
   });
 
   return checkIns.map((c) => ({
-    date: c.weekOf.toLocaleDateString("en-US", {
+    date: c.submittedAt.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       timeZone: "UTC",
