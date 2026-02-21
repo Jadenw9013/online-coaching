@@ -76,16 +76,10 @@ export default async function ClientCheckInDetailPage({
         >
           Metrics
         </h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <MetricItem
             label="Weight"
             value={checkIn.weight != null ? `${checkIn.weight} lbs` : null}
-          />
-          <MetricItem
-            label="Body Fat"
-            value={
-              checkIn.bodyFatPct != null ? `${checkIn.bodyFatPct}%` : null
-            }
           />
           <MetricItem
             label="Diet Compliance"
