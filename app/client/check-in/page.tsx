@@ -2,10 +2,27 @@ import Link from "next/link";
 import { CheckInForm } from "@/components/check-in/check-in-form";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { getLatestCheckIn } from "@/lib/queries/check-ins";
+import { getActiveTemplateForClient } from "@/lib/queries/check-in-templates";
+
+type TemplateQuestion = {
+  id: string;
+  type: string;
+  label: string;
+  required: boolean;
+  sortOrder: number;
+  config: Record<string, unknown>;
+};
 
 export default async function ClientCheckInPage() {
   const user = await getCurrentDbUser();
-  const latest = await getLatestCheckIn(user.id);
+  const [latest, template] = await Promise.all([
+    getLatestCheckIn(user.id),
+    getActiveTemplateForClient(user.id),
+  ]);
+
+  const templateQuestions = template
+    ? (template.questions as TemplateQuestion[])
+    : undefined;
 
   return (
     <div className="mx-auto max-w-lg space-y-5">
@@ -36,6 +53,8 @@ export default async function ClientCheckInPage() {
                 }
               : null
           }
+          templateId={template?.id}
+          templateQuestions={templateQuestions}
         />
       </div>
     </div>

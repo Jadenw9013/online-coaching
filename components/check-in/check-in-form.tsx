@@ -18,10 +18,23 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+type TemplateQuestion = {
+  id: string;
+  type: string;
+  label: string;
+  required: boolean;
+  sortOrder: number;
+  config: Record<string, unknown>;
+};
+
 export function CheckInForm({
   previousWeight,
+  templateId,
+  templateQuestions,
 }: {
   previousWeight: { weight: number; date: string } | null;
+  templateId?: string;
+  templateQuestions?: TemplateQuestion[];
 }) {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
@@ -35,6 +48,8 @@ export function CheckInForm({
     pendingPhotoPaths: string[];
   } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [customResponses, setCustomResponses] = useState<Record<string, string>>({});
+  const [customErrors, setCustomErrors] = useState<Record<string, string>>({});
 
   const {
     register,
@@ -44,6 +59,10 @@ export function CheckInForm({
     resolver: zodResolver(formSchema),
     defaultValues: {},
   });
+
+  const sortedQuestions = templateQuestions
+    ? [...templateQuestions].sort((a, b) => a.sortOrder - b.sortOrder)
+    : [];
 
   async function withRetry<T>(
     fn: () => Promise<T>,
@@ -93,12 +112,30 @@ export function CheckInForm({
     return photoPaths;
   }
 
+  function validateCustomQuestions(): boolean {
+    if (!sortedQuestions.length) return true;
+
+    const newErrors: Record<string, string> = {};
+    for (const q of sortedQuestions) {
+      if (q.required && !customResponses[q.id]?.trim()) {
+        newErrors[q.id] = `${q.label} is required`;
+      }
+    }
+    setCustomErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   async function submitCheckIn(
     values: FormValues,
     photoPaths: string[],
     overwriteToday?: boolean
   ) {
     setUploadState("submitting");
+
+    // Build customResponses payload — only non-empty values
+    const responsesPayload = Object.fromEntries(
+      Object.entries(customResponses).filter(([, v]) => v !== "")
+    );
 
     const result = await createCheckIn({
       weight: parseFloat(values.weight),
@@ -107,6 +144,8 @@ export function CheckInForm({
       notes: values.notes,
       photoPaths,
       overwriteToday,
+      templateId,
+      customResponses: Object.keys(responsesPayload).length > 0 ? responsesPayload : undefined,
     });
 
     if ("error" in result && result.error) {
@@ -142,11 +181,13 @@ export function CheckInForm({
 
   async function onSubmit(values: FormValues) {
     setError(null);
+
+    if (!validateCustomQuestions()) return;
+
     setUploadState("getting-urls");
 
     try {
       const photoPaths = await uploadPhotos();
-      // First attempt without overwriteToday — server will return conflict if exists
       await submitCheckIn(values, photoPaths, undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -368,6 +409,27 @@ export function CheckInForm({
           </div>
         </fieldset>
 
+        {/* Custom Template Questions */}
+        {sortedQuestions.length > 0 && (
+          <fieldset className="space-y-4 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+            <legend className="sr-only">Additional questions from your coach</legend>
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+              Additional Questions
+            </p>
+            {sortedQuestions.map((q) => (
+              <CustomQuestionField
+                key={q.id}
+                question={q}
+                value={customResponses[q.id] ?? ""}
+                onChange={(val) =>
+                  setCustomResponses((prev) => ({ ...prev, [q.id]: val }))
+                }
+                error={customErrors[q.id]}
+              />
+            ))}
+          </fieldset>
+        )}
+
         <PhotoUpload files={files} onFilesChange={setFiles} />
 
         <button
@@ -379,5 +441,128 @@ export function CheckInForm({
         </button>
       </form>
     </>
+  );
+}
+
+function CustomQuestionField({
+  question,
+  value,
+  onChange,
+  error,
+}: {
+  question: TemplateQuestion;
+  value: string;
+  onChange: (val: string) => void;
+  error?: string;
+}) {
+  const fieldId = `custom-${question.id}`;
+  const config = question.config as Record<string, unknown>;
+
+  const inputClasses =
+    "block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800";
+
+  return (
+    <div>
+      <label
+        htmlFor={fieldId}
+        className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-1.5"
+      >
+        {question.label}
+        {question.required && <span className="text-red-500"> *</span>}
+      </label>
+
+      {question.type === "shortText" && (
+        <input
+          id={fieldId}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClasses}
+        />
+      )}
+
+      {question.type === "longText" && (
+        <textarea
+          id={fieldId}
+          rows={3}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClasses}
+        />
+      )}
+
+      {question.type === "number" && (
+        <div className="flex items-center gap-2">
+          <input
+            id={fieldId}
+            type="number"
+            step="any"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+          {typeof config.unit === "string" && config.unit && (
+            <span className="shrink-0 text-sm text-zinc-400">
+              {config.unit}
+            </span>
+          )}
+        </div>
+      )}
+
+      {question.type === "boolean" && (
+        <div className="flex gap-2" role="radiogroup" aria-labelledby={fieldId}>
+          <button
+            type="button"
+            onClick={() => onChange(value === "yes" ? "" : "yes")}
+            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+              value === "yes"
+                ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                : "border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            }`}
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange(value === "no" ? "" : "no")}
+            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+              value === "no"
+                ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                : "border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            }`}
+          >
+            No
+          </button>
+        </div>
+      )}
+
+      {question.type === "scale" && (() => {
+        const min = (config.min as number) ?? 1;
+        const max = (config.max as number) ?? 10;
+        const step = (config.step as number) ?? 1;
+        return (
+          <select
+            id={fieldId}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          >
+            <option value="">Select...</option>
+            {Array.from(
+              { length: Math.floor((max - min) / step) + 1 },
+              (_, i) => min + i * step
+            ).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        );
+      })()}
+
+      {error && (
+        <p className="mt-1 text-sm text-red-500">{error}</p>
+      )}
+    </div>
   );
 }

@@ -7,6 +7,12 @@ import { db } from "@/lib/db";
 import { normalizeToMonday, getLocalDate } from "@/lib/utils/date";
 import { verifyCoachAccessToCheckIn } from "@/lib/queries/check-ins";
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@/app/generated/prisma/client";
+
+/** Serialize Zod-validated data to Prisma-compatible JSON. */
+function toJsonValue(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
 
 export async function createCheckIn(input: unknown) {
   const user = await getCurrentDbUser();
@@ -34,18 +40,41 @@ export async function createCheckIn(input: unknown) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { weight, dietCompliance, energyLevel, notes, photoPaths, overwriteToday } = parsed.data;
+  const { weight, dietCompliance, energyLevel, notes, photoPaths, overwriteToday, templateId, customResponses } = parsed.data;
 
   const now = new Date();
   const weekDate = normalizeToMonday(now);
   const tz = user.timezone || "America/Los_Angeles";
   const localDate = getLocalDate(now, tz);
 
+  // Resolve template snapshot if a templateId is provided
+  let templateSnapshot: unknown = undefined;
+  if (templateId) {
+    const template = await db.checkInTemplate.findUnique({
+      where: { id: templateId },
+      select: { questions: true, version: true, name: true },
+    });
+    if (template) {
+      templateSnapshot = {
+        version: template.version,
+        name: template.name,
+        questions: template.questions,
+      };
+    }
+  }
+
   const checkInFields = {
     weight,
     dietCompliance: typeof dietCompliance === "number" ? dietCompliance : null,
     energyLevel: typeof energyLevel === "number" ? energyLevel : null,
     notes: notes || null,
+    ...(templateId && { templateId }),
+    ...(templateSnapshot !== undefined && {
+      templateSnapshot: toJsonValue(templateSnapshot),
+    }),
+    ...(customResponses && {
+      customResponses: toJsonValue(customResponses),
+    }),
   };
 
   // Check for existing check-in today (same localDate)

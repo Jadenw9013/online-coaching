@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { UploadStep } from "./upload-step";
+import { PasteTextStep } from "./paste-text-step";
 import { DraftReview } from "./draft-review";
 
-type Step = "upload" | "processing" | "review";
+type Step = "input" | "processing" | "review";
+type InputMode = "upload" | "paste";
 
 const steps = [
-  { key: "upload" as const, label: "Upload" },
+  { key: "input" as const, label: "Input" },
   { key: "processing" as const, label: "Process" },
   { key: "review" as const, label: "Review" },
 ];
@@ -66,34 +68,103 @@ function StepIndicator({ current }: { current: Step }) {
   );
 }
 
+function InputModeToggle({
+  mode,
+  onChange,
+  disabled,
+}: {
+  mode: InputMode;
+  onChange: (mode: InputMode) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div
+      className={`mb-6 inline-flex rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800 ${
+        disabled ? "pointer-events-none opacity-60" : ""
+      }`}
+      role="radiogroup"
+      aria-label="Input method"
+    >
+      <button
+        type="button"
+        role="radio"
+        aria-checked={mode === "upload"}
+        onClick={() => onChange("upload")}
+        className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+          mode === "upload"
+            ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
+            : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+        }`}
+      >
+        Upload File
+      </button>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={mode === "paste"}
+        onClick={() => onChange("paste")}
+        className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+          mode === "paste"
+            ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
+            : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+        }`}
+      >
+        Paste Text
+      </button>
+    </div>
+  );
+}
+
 export function ImportFlow({ clientId }: { clientId: string }) {
-  const [step, setStep] = useState<Step>("upload");
+  const [step, setStep] = useState<Step>("input");
+  const [inputMode, setInputMode] = useState<InputMode>("upload");
   const [uploadId, setUploadId] = useState<string | null>(null);
 
-  // UploadStep handles both "upload" and "processing" internally
   const visualStep: Step =
-    step === "upload" ? "upload" : step === "review" ? "review" : "processing";
+    step === "input" ? "input" : step === "review" ? "review" : "processing";
+
+  const isProcessing = step === "processing";
 
   return (
     <div>
       <StepIndicator current={visualStep} />
 
-      {(step === "upload" || step === "processing") && (
-        <UploadStep
-          clientId={clientId}
-          onProcessing={() => setStep("processing")}
-          onDraftReady={(id) => {
-            setUploadId(id);
-            setStep("review");
-          }}
-        />
+      {(step === "input" || step === "processing") && (
+        <>
+          <InputModeToggle
+            mode={inputMode}
+            onChange={setInputMode}
+            disabled={isProcessing}
+          />
+
+          {inputMode === "upload" ? (
+            <UploadStep
+              clientId={clientId}
+              onProcessing={() => setStep("processing")}
+              onDraftReady={(id) => {
+                setUploadId(id);
+                setStep("review");
+              }}
+            />
+          ) : (
+            <PasteTextStep
+              clientId={clientId}
+              onProcessing={() => setStep("processing")}
+              onDraftReady={(id) => {
+                setUploadId(id);
+                setStep("review");
+              }}
+            />
+          )}
+        </>
       )}
+
       {step === "review" && uploadId && (
         <DraftReview
           uploadId={uploadId}
           clientId={clientId}
           onBack={() => {
-            setStep("upload");
+            setStep("input");
             setUploadId(null);
           }}
         />

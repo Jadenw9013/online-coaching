@@ -112,33 +112,26 @@ export default async function ClientProfilePage({
 
       {/* Quick actions */}
       <div className="flex flex-wrap items-center gap-2">
-        {latestCheckIn ? (
+        <Link
+          href={`/coach/clients/${clientId}/review/${weekDateStr}`}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Review This Week
+        </Link>
+        {latestCheckIn && (
           <Link
             href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            Review Latest
-          </Link>
-        ) : (
-          <span className="rounded-lg bg-zinc-200 px-4 py-2 text-sm font-medium text-zinc-400 dark:bg-zinc-800">
-            No check-in to review
-          </span>
-        )}
-        {latestCheckIn ? (
-          <Link
-            href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}#messages`}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
-            Message
-          </Link>
-        ) : (
-          <Link
-            href={`/coach/clients/${clientId}/review/${weekDateStr}#messages`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            Message
+            View Latest Check-in
           </Link>
         )}
+        <Link
+          href={`/coach/clients/${clientId}/review/${weekDateStr}#messages`}
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Message
+        </Link>
         <Link
           href={`/coach/clients/${clientId}/import-meal-plan`}
           className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
@@ -202,6 +195,19 @@ export default async function ClientProfilePage({
           />
         </div>
       </section>
+
+      {/* Check-in Form — managed in settings */}
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50">
+        <p className="text-xs text-zinc-500">
+          Check-in preferences managed in{" "}
+          <Link
+            href="/coach/settings"
+            className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+          >
+            Settings &rarr;
+          </Link>
+        </p>
+      </div>
 
       {/* Latest metrics */}
       {latestCheckIn && (latestCheckIn.dietCompliance || latestCheckIn.energyLevel) && (
@@ -283,21 +289,12 @@ export default async function ClientProfilePage({
               {mealPlan && (
                 <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
               )}
-              {latestCheckIn ? (
-                <Link
-                  href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
-                  className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
-                >
-                  Edit &rarr;
-                </Link>
-              ) : (
-                <Link
-                  href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-                  className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
-                >
-                  Edit &rarr;
-                </Link>
-              )}
+              <Link
+                href={`/coach/clients/${clientId}/review/${weekDateStr}`}
+                className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+              >
+                Edit &rarr;
+              </Link>
             </div>
           </div>
           {mealPlan ? (

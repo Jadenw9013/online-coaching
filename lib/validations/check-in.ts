@@ -7,6 +7,8 @@ export const createCheckInSchema = z.object({
   notes: z.string().max(5000).optional(),
   photoPaths: z.array(z.string()).max(3),
   overwriteToday: z.boolean().optional(),
+  templateId: z.string().optional(),
+  customResponses: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateCheckInInput = z.infer<typeof createCheckInSchema>;
