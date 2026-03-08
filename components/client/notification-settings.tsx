@@ -65,7 +65,7 @@ export function NotificationSettings({
   function handleSave() {
     setError(null);
 
-    let submitPhone = phoneNumber.trim();
+    const submitPhone = phoneNumber.trim();
     let submitOptIn = smsOptIn;
 
     if (!submitPhone) {
@@ -96,8 +96,8 @@ export function NotificationSettings({
           smsMissedCheckInAlertTime
         });
         showToast("Settings saved");
-      } catch (e: any) {
-        setError(e.message || "Failed to save");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to save");
       }
     });
   }
@@ -204,7 +204,7 @@ export function NotificationSettings({
                   Daily Check-in Reminder
                 </p>
                 <p className="text-xs text-zinc-500">
-                  Daily text if you haven't checked in yet.
+                  Daily text if you haven&apos;t checked in yet.
                 </p>
               </div>
               <div className="flex items-center gap-3">

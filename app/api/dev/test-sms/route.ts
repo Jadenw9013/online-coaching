@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { sendSms } from "@/lib/sms/sendSms";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 

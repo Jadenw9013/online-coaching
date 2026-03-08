@@ -45,12 +45,13 @@ export async function POST(req: Request) {
             sid: message.sid,
             status: message.status
         });
-    } catch (error: any) {
+    } catch (error) {
+        const err = error as { message?: string; code?: string; moreInfo?: string };
         return NextResponse.json({
             ok: false,
-            error: error.message || "Unknown error",
-            code: error.code,
-            moreInfo: error.moreInfo
+            error: err.message || "Unknown error",
+            code: err.code,
+            moreInfo: err.moreInfo
         }, { status: 500 });
     }
 }

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { sendSms } from "./sendSms";
 import { SMSTemplates } from "./templates";
+import type { NotificationType } from "@/app/generated/prisma/enums";
 
 /**
  * Standardized SMS send handler that enforces universal opt-in, phone number presence,
@@ -17,7 +18,7 @@ async function triggerSmsEvent({
     toggleKeys: ("smsMealPlanUpdates" | "smsDailyCheckInReminder" | "smsCoachMessages" | "smsCheckInFeedback" | "smsClientCheckIns" | "smsMissedCheckInAlerts" | "smsClientMessages" | "smsNewClientSignups")[];
     message: string;
     logType: string;
-    logMetadata?: Record<string, any>;
+    logMetadata?: Record<string, unknown>;
 }) {
     try {
         const user = await db.user.findUnique({
@@ -52,7 +53,7 @@ async function triggerSmsEvent({
         if (result.success) {
             await db.notificationLog.create({
                 data: {
-                    type: logType as any,
+                    type: logType as unknown as NotificationType,
                     clientId: userId, // Mapping to clientId for compat, though this can be coach ID too
                     ...logMetadata,
                 },

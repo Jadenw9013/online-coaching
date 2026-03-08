@@ -35,6 +35,14 @@ export function NavBar({
           {canSwitchRole && <RoleSwitcher currentRole={role} />}
           {role === "coach" && (
             <Link
+              href="/coach/templates"
+              className="hidden rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 sm:block"
+            >
+              Templates
+            </Link>
+          )}
+          {role === "coach" && (
+            <Link
               href="/coach/settings"
               className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
               aria-label="Coach settings"

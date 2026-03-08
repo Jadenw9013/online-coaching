@@ -42,8 +42,13 @@ next-env.d.ts
 
 /app/generated/prisma
 
-# Claude Code
-.claude/
+# Claude Code (local-only settings)
+.claude/settings.local.json
+
+# Ruflo runtime data (generated, not committed)
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
 
 node_modules
 .next

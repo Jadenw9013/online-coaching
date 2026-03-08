@@ -1,6 +1,7 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { getClientCheckInsLight, getLatestCoachMessage, getCheckInForLocalDate } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
+import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
 import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { getEffectiveScheduleDays } from "@/lib/scheduling/periods";
@@ -8,11 +9,9 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
 import { BecomeCoachForm } from "@/components/client/become-coach-form";
-import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { CheckInStatus } from "@/components/client/check-in-status";
 import { CheckInScheduleBanner } from "@/components/client/check-in-schedule-banner";
-import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 import { WeightProgress } from "@/components/charts/weight-progress";
 import dayjs from "dayjs";
 import utcPlugin from "dayjs/plugin/utc";
@@ -31,11 +30,12 @@ export default async function ClientDashboard() {
     },
   });
 
-  const [checkIns, mealPlan, latestCoachMessage, weightHistory] = await Promise.all([
+  const [checkIns, mealPlan, latestCoachMessage, weightHistory, trainingProgram] = await Promise.all([
     getClientCheckInsLight(user.id),
     getCurrentPublishedMealPlan(user.id),
     getLatestCoachMessage(user.id),
     getWeightHistory(user.id),
+    getPublishedTrainingProgram(user.id),
   ]);
 
   // Schedule data
@@ -185,24 +185,69 @@ export default async function ClientDashboard() {
         </Link>
       )}
 
-      {/* Meal Plan */}
-      {mealPlan && (
+      {/* Your Plans — 2-card grid */}
+      {(mealPlan || (trainingProgram && trainingProgram.days.length > 0)) && (
         <section
           className="animate-fade-in"
-          style={{ animationDelay: "320ms" }}
-          id="meal-plan"
-          aria-labelledby="meal-plan-heading"
+          style={{ animationDelay: "280ms" }}
+          aria-labelledby="plans-heading"
         >
-          <div className="mb-5 flex items-center justify-between">
-            <h2
-              id="meal-plan-heading"
-              className="text-lg font-semibold tracking-tight"
-            >
-              Your Meal Plan
-            </h2>
-            <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
+          <h2
+            id="plans-heading"
+            className="mb-3 text-lg font-semibold tracking-tight"
+          >
+            Your Plans
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {mealPlan ? (
+              <Link
+                href="/client/meal-plan"
+                className="group flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  Meal Plan
+                </p>
+                <p className="text-sm font-semibold">
+                  {mealPlan.items.length} item{mealPlan.items.length !== 1 ? "s" : ""}
+                </p>
+                <span className="mt-auto text-xs font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
+                  View &rarr;
+                </span>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-dashed border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  Meal Plan
+                </p>
+                <p className="text-sm text-zinc-400">Not yet assigned</p>
+              </div>
+            )}
+
+            {trainingProgram && trainingProgram.days.length > 0 ? (
+              <Link
+                href="/client/training"
+                className="group flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-950/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800/80 dark:bg-[#121215] dark:hover:border-zinc-700 dark:hover:shadow-zinc-950/30"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  Training
+                </p>
+                <p className="text-sm font-semibold">
+                  {trainingProgram.days.length} day
+                  {trainingProgram.days.length !== 1 ? "s" : ""} this week
+                </p>
+                <span className="mt-auto text-xs font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">
+                  View &rarr;
+                </span>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-dashed border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  Training
+                </p>
+                <p className="text-sm text-zinc-400">Not yet assigned</p>
+              </div>
+            )}
           </div>
-          <SimpleMealPlan mealPlan={mealPlan} />
         </section>
       )}
 

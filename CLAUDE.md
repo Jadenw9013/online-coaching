@@ -100,3 +100,56 @@ Photos uploaded via server-signed URLs (1hr TTL). Service-role key stays server-
 - Supabase service role key: server-side only (Server Components, Route Handlers, Server Actions).
 - All coach endpoints verify the CoachClient assignment before exposing client data.
 - Photo uploads use signed URLs — the service key never reaches the browser.
+
+## AI Orchestration (Ruflo / Claude Flow)
+
+Ruflo v3.5.14 is configured for this repo via `.claude/` and `.claude-flow/`.
+
+### Available specialist agents (use with `@` mentions)
+
+| Agent | Role |
+|-------|------|
+| `@backend-dev` | Server actions, Prisma, API routes, auth patterns |
+| `@frontend-dev` | Next.js UI, Tailwind, React Hook Form, component patterns |
+| `@security-qa` | Auth audit, secret scan, injection checks, release gate |
+| `@product-lead` | Feature scoping, user flow decisions |
+| `@product-designer` | UX critique, accessibility, mobile-first layout |
+| `@release-manager` | Build, lint, release-check, deploy readiness |
+
+### MCP server
+
+The Ruflo MCP server is wired in `.mcp.json`. Start it with:
+
+```bash
+claude-flow mcp start    # starts MCP server on port 3001
+```
+
+Claude Code will auto-connect via the project `.mcp.json` when you open this repo.
+
+### Swarm orchestration
+
+```bash
+claude-flow swarm init                    # initialize swarm
+claude-flow swarm start --topology mesh   # start mesh swarm (up to 5 agents)
+claude-flow memory init                   # initialize shared memory store
+claude-flow daemon start                  # background workers
+```
+
+### Skills
+
+8 built-in skills in `.claude/skills/`:
+`hooks-automation`, `pair-programming`, `skill-builder`, `sparc-methodology`,
+`stream-chain`, `swarm-advanced`, `swarm-orchestration`, `verification-quality`
+
+### Config files
+
+| File | Purpose |
+|------|---------|
+| `.claude/settings.json` | Hooks, permissions, model prefs, agent team config |
+| `.claude/agents/*.md` | Specialist agent definitions |
+| `.claude/commands/*.md` | Slash command definitions |
+| `.claude-flow/config.yaml` | Swarm/memory/MCP runtime config |
+| `.mcp.json` | MCP server connection (project-scoped) |
+
+> `.claude-flow/data/`, `logs/`, `sessions/` are gitignored (runtime only).
+> `.claude/settings.local.json` is gitignored (per-user overrides).

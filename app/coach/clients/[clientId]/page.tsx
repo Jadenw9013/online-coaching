@@ -1,16 +1,20 @@
 import { verifyCoachAccessToClient } from "@/lib/queries/check-ins";
 import { getClientProfile } from "@/lib/queries/client-profile";
-import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
+import { getEffectiveMealPlanForReview } from "@/lib/queries/meal-plans";
+import { getFoodLibrary } from "@/lib/queries/food-library";
+import { getMessages } from "@/lib/queries/messages";
+import { getTrainingProgramForReview } from "@/lib/queries/training-programs";
+import { getCoachTemplatesForPicker } from "@/lib/queries/training-templates";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { formatDateUTC } from "@/lib/utils/date";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SimpleMealPlan } from "@/components/client/simple-meal-plan";
 import { CoachNotesEditor } from "@/components/coach/coach-notes-editor";
 import { WeightProgress } from "@/components/charts/weight-progress";
 import { RemoveClientButton } from "@/components/coach/remove-client-button";
-import { ExportPdfButton } from "@/components/ui/export-pdf-button";
 import { ClientSchedule } from "@/components/coach/client-schedule";
+import { MessageThread } from "@/components/messages/message-thread";
+import { PlanTabs } from "@/components/coach/client-workspace/plan-tabs";
 
 const weekStatusConfig = {
   submitted: {
@@ -50,11 +54,18 @@ export default async function ClientProfilePage({
   const profile = await getClientProfile(coach.id, clientId);
   if (!profile) notFound();
 
-  const [mealPlan, weightHistory] = await Promise.all([
-    getCurrentPublishedMealPlan(clientId),
-    getWeightHistory(clientId),
-  ]);
-  const weekDateStr = formatDateUTC(profile.currentWeekOf);
+  const weekOf = profile.currentWeekOf;
+  const weekDateStr = formatDateUTC(weekOf);
+
+  const [effectivePlan, messages, foodLibrary, trainingData, templates, weightHistory] =
+    await Promise.all([
+      getEffectiveMealPlanForReview(clientId, weekOf),
+      getMessages(clientId, weekOf),
+      getFoodLibrary(coach.id),
+      getTrainingProgramForReview(clientId, weekOf),
+      getCoachTemplatesForPicker(coach.id),
+      getWeightHistory(clientId),
+    ]);
 
   const {
     client,
@@ -70,6 +81,52 @@ export default async function ClientProfilePage({
   } = profile;
 
   const statusBadge = weekStatusConfig[currentWeekStatus];
+
+  const serializedMessages = messages.map((m) => ({
+    id: m.id,
+    body: m.body,
+    createdAt: m.createdAt.toISOString(),
+    sender: m.sender,
+  }));
+
+  const foods = foodLibrary.map((f) => ({
+    id: f.id,
+    name: f.name,
+    defaultUnit: f.defaultUnit,
+  }));
+
+  const mappedTemplates = templates.map((t) => ({
+    id: t.id,
+    name: t.name,
+    days: t.days.map((d) => ({
+      dayName: d.dayName,
+      blocks: d.blocks.map((b) => ({
+        type: b.type,
+        title: b.title,
+        content: b.content,
+      })),
+    })),
+  }));
+
+  const initialProgram = trainingData.program
+    ? {
+      id: trainingData.program.id,
+      status: trainingData.program.status,
+      templateSourceId: trainingData.program.templateSourceId,
+      weeklyFrequency: trainingData.program.weeklyFrequency,
+      clientNotes: trainingData.program.clientNotes,
+      injuries: trainingData.program.injuries,
+      equipment: trainingData.program.equipment,
+      days: trainingData.program.days.map((d) => ({
+        dayName: d.dayName,
+        blocks: d.blocks.map((b) => ({
+          type: b.type,
+          title: b.title,
+          content: b.content,
+        })),
+      })),
+    }
+    : null;
 
   return (
     <div className="space-y-6">
@@ -112,12 +169,6 @@ export default async function ClientProfilePage({
 
       {/* Quick actions */}
       <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
-          Review This Week
-        </Link>
         {latestCheckIn && (
           <Link
             href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
@@ -127,106 +178,178 @@ export default async function ClientProfilePage({
           </Link>
         )}
         <Link
-          href={`/coach/clients/${clientId}/review/${weekDateStr}#messages`}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-          Message
-        </Link>
-        <Link
           href={`/coach/clients/${clientId}/import-meal-plan`}
           className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
         >
           Import Meal Plan
         </Link>
+        <Link
+          href={`/coach/clients/${clientId}/import-training`}
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Import Training
+        </Link>
       </div>
 
-      {/* Weight overview */}
-      <section aria-labelledby="weight-heading">
-        <h2 id="weight-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Weight Overview
+      {/* Client snapshot */}
+      <section aria-labelledby="snapshot-heading">
+        <h2
+          id="snapshot-heading"
+          className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500"
+        >
+          Client Snapshot
         </h2>
-        <div className="grid grid-cols-3 gap-3">
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <MetricCard
             label="Current"
             value={latestCheckIn?.weight}
             suffix="lbs"
-            subtext={latestCheckIn?.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            subtext={latestCheckIn?.submittedAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
           />
+
           <MetricCard
             label="Previous"
             value={previousCheckIn?.weight}
             suffix="lbs"
-            subtext={previousCheckIn?.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            subtext={previousCheckIn?.submittedAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
           />
+
           <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">Change</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+              Change
+            </p>
             {weightDelta != null ? (
               <div className="mt-1 flex items-baseline gap-1">
                 <span
-                  className={`text-2xl font-bold tabular-nums ${
-                    weightDelta > 0 ? "text-red-500" : weightDelta < 0 ? "text-green-600" : ""
-                  }`}
+                  className={`text-2xl font-bold tabular-nums ${weightDelta > 0
+                    ? "text-red-500"
+                    : weightDelta < 0
+                      ? "text-green-600"
+                      : ""
+                    }`}
                 >
-                  {weightDelta > 0 ? "+" : ""}{weightDelta}
+                  {weightDelta > 0 ? "+" : ""}
+                  {weightDelta}
                 </span>
                 <span className="text-xs text-zinc-400">lbs</span>
               </div>
             ) : (
-              <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+              <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">
+                &mdash;
+              </p>
             )}
           </div>
+
+          {latestCheckIn?.dietCompliance != null && (
+            <MetricCard label="Diet" value={latestCheckIn.dietCompliance} suffix="/10" />
+          )}
+
+          {latestCheckIn?.energyLevel != null && (
+            <MetricCard label="Energy" value={latestCheckIn.energyLevel} suffix="/10" />
+          )}
         </div>
+
         <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
           <WeightProgress data={weightHistory} clientId={clientId} />
         </div>
       </section>
 
-      {/* Schedule */}
+      {/* Messages */}
+      <section aria-labelledby="messages-heading" className="space-y-2">
+        <h2
+          id="messages-heading"
+          className="text-xs font-semibold uppercase tracking-wider text-zinc-500"
+        >
+          Messages
+        </h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          Send quick updates and keep communication in one place.
+        </p>
+        <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          <MessageThread
+            messages={serializedMessages}
+            clientId={clientId}
+            weekStartDate={weekDateStr}
+            currentUserId={coach.id}
+          />
+        </div>
+      </section>
+
+      {/* Check-in Schedule */}
       <section aria-labelledby="schedule-heading">
-        <h2 id="schedule-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h2
+          id="schedule-heading"
+          className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500"
+        >
           Check-in Schedule
         </h2>
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+
+        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
+
           <ClientSchedule
             clientId={clientId}
             coachDays={coachScheduleDays}
             clientOverride={clientScheduleOverride}
             effectiveDays={effectiveScheduleDays}
           />
+
+          <p className="text-xs text-zinc-500 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+            Check-in preferences managed in{" "}
+            <Link
+              href="/coach/settings"
+              className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+            >
+              Settings →
+            </Link>
+          </p>
+
         </div>
       </section>
 
-      {/* Check-in Form — managed in settings */}
-      <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50">
-        <p className="text-xs text-zinc-500">
-          Check-in preferences managed in{" "}
-          <Link
-            href="/coach/settings"
-            className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
-          >
-            Settings &rarr;
-          </Link>
-        </p>
-      </div>
+      {/* Plans — Meal Plan | Training Plan tabs */}
+      <section aria-labelledby="plans-heading">
+        <h2 id="plans-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Plans
+        </h2>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+          <PlanTabs
+            mealPlan={{
+              clientId,
+              weekStartDate: weekDateStr,
+              effectivePlan,
+              foods,
+              coachDefaultNotify: coach.defaultNotifyOnPublish ?? true,
+              publishedMealPlanId: effectivePlan.publishedId,
+            }}
+            training={{
+              clientId,
+              weekStartDate: weekDateStr,
+              templates: mappedTemplates,
+              initialProgram,
+            }}
+          />
+        </div>
+      </section>
 
-      {/* Latest metrics */}
-      {latestCheckIn && (latestCheckIn.dietCompliance || latestCheckIn.energyLevel) && (
-        <section aria-labelledby="metrics-heading">
-          <h2 id="metrics-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Latest Metrics
-          </h2>
-          <div className="flex gap-3">
-            {latestCheckIn.dietCompliance != null && (
-              <MetricCard label="Diet" value={latestCheckIn.dietCompliance} suffix="/10" />
-            )}
-            {latestCheckIn.energyLevel != null && (
-              <MetricCard label="Energy" value={latestCheckIn.energyLevel} suffix="/10" />
-            )}
-          </div>
-        </section>
-      )}
+      {/* Notes */}
+      <section>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Notes
+        </h2>
+        <CoachNotesEditor
+          clientId={clientId}
+          initial={profile.coachNotes ?? ""}
+        />
+      </section>
 
-      {/* Check-in History — inline */}
+      {/* Check-in History */}
       <section aria-labelledby="history-heading">
         <h2 id="history-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
           Check-in History
@@ -277,45 +400,6 @@ export default async function ClientProfilePage({
           </div>
         )}
       </section>
-
-      {/* Two-column: meal plan + notes */}
-      <div className="grid gap-5 lg:grid-cols-2">
-        <section aria-labelledby="meal-plan-heading">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id="meal-plan-heading" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Current Meal Plan
-            </h2>
-            <div className="flex items-center gap-3">
-              {mealPlan && (
-                <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />
-              )}
-              <Link
-                href={`/coach/clients/${clientId}/review/${weekDateStr}`}
-                className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
-              >
-                Edit &rarr;
-              </Link>
-            </div>
-          </div>
-          {mealPlan ? (
-            <SimpleMealPlan mealPlan={mealPlan} />
-          ) : (
-            <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-6 py-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
-              <p className="text-sm text-zinc-400">No published meal plan yet.</p>
-            </div>
-          )}
-        </section>
-
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Notes
-          </h2>
-          <CoachNotesEditor
-            clientId={clientId}
-            initial={profile.coachNotes ?? ""}
-          />
-        </section>
-      </div>
 
       {/* Danger Zone */}
       <section className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900/50">

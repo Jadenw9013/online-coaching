@@ -67,6 +67,9 @@ model User {
   clientUploads     MealPlanUpload[] @relation("ClientUploads")
   notificationLogs  NotificationLog[]
   checkInTemplates  CheckInTemplate[] @relation("CheckInTemplates")
+  trainingPrograms  TrainingProgram[] @relation("TrainingPrograms")
+  trainingTemplates TrainingTemplate[] @relation("TrainingTemplates")
+  workoutImports    WorkoutImport[]    @relation("WorkoutImports")
 }
 
 model CoachClient {
@@ -271,6 +274,211 @@ model MealPlanDraft {
   updatedAt     DateTime @updatedAt
 
   upload MealPlanUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+}
+
+// ── Workout Plan Import ──────────────────────────────────────────────────────
+
+enum WorkoutImportStatus {
+  UPLOADED
+  PROCESSING
+  NEEDS_REVIEW
+  IMPORTED
+  FAILED
+}
+
+model WorkoutImport {
+  id               String              @id @default(cuid())
+  coachId          String
+  clientId         String?
+  storageBucket    String              @default("meal-plan-uploads")
+  storagePath      String              @default("")
+  originalFilename String?
+  mimeType         String?
+  status           WorkoutImportStatus @default(UPLOADED)
+  errorMessage     String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  coach User               @relation("WorkoutImports", fields: [coachId], references: [id])
+  draft WorkoutImportDraft?
+
+  @@index([coachId])
+}
+
+model WorkoutImportDraft {
+  id            String   @id @default(cuid())
+  importId      String   @unique
+  extractedText String?  @db.Text
+  parsedJson    Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workoutImport WorkoutImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+}
+
+// ── Training Templates (coach-owned, reusable) ──────────────────────────────
+
+model TrainingTemplate {
+  id          String   @id @default(cuid())
+  coachId     String
+  name        String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  coach    User                   @relation("TrainingTemplates", fields: [coachId], references: [id])
+  days     TrainingTemplateDay[]
+  cardio   TrainingTemplateCardio?
+  programs TrainingProgram[]       @relation("TemplateSource")
+
+  @@index([coachId])
+}
+
+model TrainingTemplateDay {
+  id          String   @id @default(cuid())
+  templateId  String
+  dayName     String
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+
+  template  TrainingTemplate          @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exercises TrainingTemplateExercise[]
+  blocks    TrainingTemplateBlock[]
+
+  @@index([templateId])
+}
+
+model TrainingTemplateBlock {
+  id        String    @id @default(cuid())
+  dayId     String
+  type      BlockType @default(EXERCISE)
+  title     String    @default("")
+  content   String    @db.Text @default("")
+  sortOrder Int       @default(0)
+
+  day TrainingTemplateDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model TrainingTemplateExercise {
+  id            String  @id @default(cuid())
+  dayId         String
+  name          String
+  sets          Int     @default(3)
+  reps          String  @default("10")
+  intensityText String?
+  notes         String? @db.Text
+  sortOrder     Int     @default(0)
+
+  day TrainingTemplateDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model TrainingTemplateCardio {
+  id         String  @id @default(cuid())
+  templateId String  @unique
+  frequency  String?
+  duration   String?
+  modality   String?
+  intensity  String?
+  notes      String? @db.Text
+
+  template TrainingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+// ── Training Programs (client-specific, week-scoped) ────────────────────────
+
+enum TrainingProgramStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum BlockType {
+  EXERCISE
+  ACTIVATION
+  INSTRUCTION
+  SUPERSET
+  CARDIO
+  OPTIONAL
+}
+
+model TrainingProgram {
+  id               String                @id @default(cuid())
+  clientId         String
+  weekOf           DateTime
+  status           TrainingProgramStatus @default(DRAFT)
+  publishedAt      DateTime?
+  templateSourceId String?
+  weeklyFrequency  Int?
+  clientNotes      String?               @db.Text
+  injuries         String?               @db.Text
+  equipment        String?               @db.Text
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  client         User                   @relation("TrainingPrograms", fields: [clientId], references: [id])
+  templateSource TrainingTemplate?      @relation("TemplateSource", fields: [templateSourceId], references: [id])
+  days           TrainingDay[]
+  cardio         TrainingProgramCardio?
+
+  @@index([clientId, weekOf])
+  @@index([clientId, status])
+}
+
+model TrainingProgramCardio {
+  id        String  @id @default(cuid())
+  programId String  @unique
+  frequency String?
+  duration  String?
+  modality  String?
+  intensity String?
+  notes     String? @db.Text
+
+  program TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+model TrainingDay {
+  id          String   @id @default(cuid())
+  programId   String
+  dayName     String
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+
+  program   TrainingProgram    @relation(fields: [programId], references: [id], onDelete: Cascade)
+  exercises TrainingExercise[]
+  blocks    TrainingProgramBlock[]
+
+  @@index([programId])
+}
+
+model TrainingProgramBlock {
+  id        String    @id @default(cuid())
+  dayId     String
+  type      BlockType @default(EXERCISE)
+  title     String    @default("")
+  content   String    @db.Text @default("")
+  sortOrder Int       @default(0)
+
+  day TrainingDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model TrainingExercise {
+  id            String  @id @default(cuid())
+  dayId         String
+  name          String
+  sets          Int     @default(3)
+  reps          String  @default("10")
+  intensityText String?
+  notes         String? @db.Text
+  sortOrder     Int     @default(0)
+
+  day TrainingDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
 }
 
 model NotificationLog {

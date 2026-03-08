@@ -13,6 +13,9 @@ import { db } from "@/lib/db";
 import { CheckInSummary } from "@/components/coach/review/check-in-summary";
 import { MessageThread } from "@/components/messages/message-thread";
 import { MealPlanEditorV2 } from "@/components/coach/meal-plan/meal-plan-editor-v2";
+import { TrainingProgramEditor } from "@/components/coach/training/training-program-editor";
+import { getTrainingProgramForReview } from "@/lib/queries/training-programs";
+import { getCoachTemplatesForPicker } from "@/lib/queries/training-templates";
 
 /**
  * Standalone review workspace for a client + week.
@@ -43,12 +46,14 @@ export default async function ReviewWorkspacePage({
     ? checkIn.client
     : await db.user.findUniqueOrThrow({ where: { id: clientId } });
 
-  const [effectivePlan, messages, foodLibrary, previousWeight] =
+  const [effectivePlan, messages, foodLibrary, previousWeight, trainingData, templates] =
     await Promise.all([
       getEffectiveMealPlanForReview(clientId, weekOf),
       getMessages(clientId, weekOf),
       getFoodLibrary(coach.id),
       getPreviousBodyweight(clientId, weekOf),
+      getTrainingProgramForReview(clientId, weekOf),
+      getCoachTemplatesForPicker(coach.id),
     ]);
 
   const weightDelta =
@@ -128,6 +133,45 @@ export default async function ReviewWorkspacePage({
           />
         </div>
       </div>
+
+      {/* Training program — full-width panel below main grid */}
+      <TrainingProgramEditor
+        clientId={clientId}
+        weekStartDate={formatDateUTC(weekOf)}
+        templates={templates.map((t) => ({
+          id: t.id,
+          name: t.name,
+          days: t.days.map((d) => ({
+            dayName: d.dayName,
+            blocks: d.blocks.map((b) => ({
+              type: b.type,
+              title: b.title,
+              content: b.content,
+            })),
+          })),
+        }))}
+        initialProgram={
+          trainingData.program
+            ? {
+                id: trainingData.program.id,
+                status: trainingData.program.status,
+                templateSourceId: trainingData.program.templateSourceId,
+                weeklyFrequency: trainingData.program.weeklyFrequency,
+                clientNotes: trainingData.program.clientNotes,
+                injuries: trainingData.program.injuries,
+                equipment: trainingData.program.equipment,
+                days: trainingData.program.days.map((d) => ({
+                  dayName: d.dayName,
+                  blocks: d.blocks.map((b) => ({
+                    type: b.type,
+                    title: b.title,
+                    content: b.content,
+                  })),
+                })),
+              }
+            : null
+        }
+      />
     </div>
   );
 }
