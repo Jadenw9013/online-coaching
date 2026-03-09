@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chakra_Petch, Sora } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const chakraPetch = Chakra_Petch({
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-chakra",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const sora = Sora({
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sora",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -32,18 +43,27 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark">
+      <html lang="en" className="dark" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{if(localStorage.getItem('steadfast-theme')==='light'){document.documentElement.classList.remove('dark')}}catch(e){}})()`,
+            }}
+          />
+        </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#09090b] text-zinc-100`}
+          className={`${sora.variable} ${chakraPetch.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200`}
         >
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-zinc-900 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
-          >
-            Skip to content
-          </a>
-          {children}
-          <Footer />
+          <ThemeProvider>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-gray-900 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
+            >
+              Skip to content
+            </a>
+            {children}
+            <Footer />
+          </ThemeProvider>
           <Analytics />
         </body>
       </html>
