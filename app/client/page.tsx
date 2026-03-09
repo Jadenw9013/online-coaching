@@ -5,6 +5,7 @@ import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
 import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { getEffectiveScheduleDays } from "@/lib/scheduling/periods";
+import { getClientWorkflowState } from "@/lib/scheduling/workflow-state";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
@@ -56,7 +57,6 @@ export default async function ClientDashboard() {
     : [1];
 
   // Banner: show if today is a scheduled day and no check-in exists for today's localDate
-  const localDayOfWeek = dayjs(new Date()).tz(tz).day();
   const todayLocalDate = getLocalDate(new Date(), tz);
   const todayCheckIn = await getCheckInForLocalDate(user.id, todayLocalDate);
   const checkedInToday = !!todayCheckIn;
@@ -68,6 +68,14 @@ export default async function ClientDashboard() {
     : latestCheckIn.status === "REVIEWED"
       ? "reviewed"
       : "submitted";
+
+  // Compute workflow state server-side
+  const workflowState = getClientWorkflowState(
+    checkInDays,
+    tz,
+    checkedInToday,
+    (latestCheckIn?.status as "SUBMITTED" | "REVIEWED" | null) ?? null
+  );
 
   // Date label for action banner
   const todayLabel = dayjs(new Date()).tz(tz).format("MMM D, YYYY");
@@ -128,8 +136,7 @@ export default async function ClientDashboard() {
         <div className="animate-fade-in" style={{ animationDelay: "60ms" }}>
           <CheckInScheduleBanner
             checkInDays={checkInDays}
-            checkedInToday={checkedInToday}
-            todayDayOfWeek={localDayOfWeek}
+            workflowState={workflowState}
           />
         </div>
       )}

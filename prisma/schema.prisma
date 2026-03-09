@@ -562,6 +562,9 @@ model CoachingRequest {
   prospectId      String?  // Optional User ID if the prospect has an account
   prospect        User?    @relation("ProspectRequests", fields: [prospectId], references: [id], onDelete: SetNull)
 
+  inviteLastSentAt DateTime?     // Last time invite/sign-up email was sent
+  inviteSendCount  Int      @default(0) // Total invite sends (initial approval + resends)
+
   coachProfile    CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
 
   @@index([coachProfileId])

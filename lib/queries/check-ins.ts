@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { getSignedDownloadUrl } from "@/lib/supabase/storage";
 import { getCurrentWeekMonday } from "@/lib/utils/date";
+import { getEffectiveScheduleDays } from "@/lib/scheduling/periods";
 
 export async function getClientCheckIns(clientId: string) {
   return db.checkIn.findMany({
@@ -131,41 +132,57 @@ export async function getCoachClients(coachId: string) {
 export async function getCoachClientsWithWeekStatus(coachId: string) {
   const weekOf = getCurrentWeekMonday();
 
-  const assignments = await db.coachClient.findMany({
-    where: { coachId },
-    include: {
-      client: {
-        include: {
-          checkIns: {
-            where: { deletedAt: null },
-            orderBy: { submittedAt: "desc" },
-            take: 2,
-            select: {
-              id: true,
-              status: true,
-              weekOf: true,
-              weight: true,
-              dietCompliance: true,
-              energyLevel: true,
-              submittedAt: true,
+  const [assignments, coach] = await Promise.all([
+    db.coachClient.findMany({
+      where: { coachId },
+      include: {
+        client: {
+          include: {
+            checkIns: {
+              where: { deletedAt: null },
+              orderBy: { submittedAt: "desc" },
+              take: 2,
+              select: {
+                id: true,
+                status: true,
+                weekOf: true,
+                weight: true,
+                dietCompliance: true,
+                energyLevel: true,
+                submittedAt: true,
+              },
             },
-          },
-          clientMessages: {
-            where: { weekOf, senderId: { not: coachId } },
-            select: { id: true },
+            clientMessages: {
+              where: { weekOf, senderId: { not: coachId } },
+              select: { id: true },
+            },
           },
         },
       },
-    },
-  });
+    }),
+    db.user.findUnique({
+      where: { id: coachId },
+      select: { checkInDaysOfWeek: true },
+    }),
+  ]);
+
+  const coachScheduleDays = coach?.checkInDaysOfWeek ?? [1];
+  const todayDow = new Date().getDay(); // 0=Sun..6=Sat
 
   return assignments.map((a) => {
     const latestCheckIn = a.client.checkIns[0] ?? null;
     const previousCheckIn = a.client.checkIns[1] ?? null;
 
-    let weekStatus: "new" | "reviewed" | "missing";
+    // Resolve effective schedule for this client
+    const effectiveDays = getEffectiveScheduleDays(
+      coachScheduleDays,
+      a.checkInDaysOfWeekOverride
+    );
+    const isDueToday = effectiveDays.includes(todayDow);
+
+    let weekStatus: "new" | "reviewed" | "missing" | "not_due";
     if (!latestCheckIn) {
-      weekStatus = "missing";
+      weekStatus = isDueToday ? "missing" : "not_due";
     } else if (latestCheckIn.status === "REVIEWED") {
       weekStatus = "reviewed";
     } else {
@@ -184,6 +201,7 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       lastName: a.client.lastName,
       email: a.client.email,
       weekStatus,
+      isDueToday,
       hasClientMessage: a.client.clientMessages.length > 0,
       checkInId: latestCheckIn?.id ?? null,
       weekOf,

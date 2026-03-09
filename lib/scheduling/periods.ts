@@ -123,3 +123,46 @@ export function formatPeriodDateLabel(startDate: string, endDate: string): strin
   const e = new Date(endDate + "T00:00:00Z").toLocaleDateString("en-US", opts);
   return `${s} \u2013 ${e}`;
 }
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/**
+ * Check whether today (in the given timezone) is a scheduled check-in day.
+ * Uses effective schedule days (already resolved from coach default + client override).
+ */
+export function isCheckInDueToday(scheduleDays: number[], tz: string): boolean {
+  if (scheduleDays.length === 0) return false;
+  const localDay = dayjs().tz(tz).day(); // 0=Sun..6=Sat
+  return scheduleDays.includes(localDay);
+}
+
+/**
+ * Get the next upcoming due day name and days-until offset.
+ * If today IS a due day, returns today.
+ * Useful for coach/client display: "Next due: Wednesday (in 2 days)".
+ */
+export function getNextDueDay(
+  scheduleDays: number[],
+  tz: string
+): { dayName: string; dayIndex: number; daysUntil: number } | null {
+  if (scheduleDays.length === 0) return null;
+  const localDay = dayjs().tz(tz).day();
+  const sorted = [...new Set(scheduleDays)].sort((a, b) => a - b);
+
+  // Find the nearest due day >= today, wrapping around the week
+  let bestOffset = 8; // sentinel > 7
+  let bestDay = sorted[0];
+  for (const d of sorted) {
+    const offset = (d - localDay + 7) % 7;
+    if (offset < bestOffset) {
+      bestOffset = offset;
+      bestDay = d;
+    }
+  }
+
+  return {
+    dayName: DAY_NAMES[bestDay],
+    dayIndex: bestDay,
+    daysUntil: bestOffset === 0 ? 0 : bestOffset, // 0 means today
+  };
+}

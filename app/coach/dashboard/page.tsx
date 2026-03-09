@@ -36,7 +36,8 @@ export default async function CoachDashboard() {
     weekOf: c.weekOf,
   }));
 
-  const period = computeCurrentPeriod([1], new Date(), "America/Los_Angeles");
+  const scheduleDays = user.checkInDaysOfWeek.length > 0 ? user.checkInDaysOfWeek : [1];
+  const period = computeCurrentPeriod(scheduleDays, new Date(), user.timezone || "America/Los_Angeles");
   const weekLabel = period.label;
 
   const totalCount = clients.length;

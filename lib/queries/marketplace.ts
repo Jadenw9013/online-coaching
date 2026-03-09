@@ -57,5 +57,16 @@ export async function getMyCoachingRequests(coachProfileId: string) {
     return db.coachingRequest.findMany({
         where: { coachProfileId },
         orderBy: { createdAt: "desc" },
+        select: {
+            id: true,
+            prospectName: true,
+            prospectEmail: true,
+            status: true,
+            intakeAnswers: true,
+            createdAt: true,
+            prospectId: true,
+            inviteLastSentAt: true,
+            inviteSendCount: true,
+        },
     });
 }
