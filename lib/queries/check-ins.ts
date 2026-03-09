@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { getSignedDownloadUrl } from "@/lib/supabase/storage";
 import { getCurrentWeekMonday } from "@/lib/utils/date";
+import { parseCadenceConfig, getEffectiveCadence, getClientCadenceStatus, getCoachStatusLabel, cadenceFromLegacyDays, getCadencePreview } from "@/lib/scheduling/cadence";
 
 export async function getClientCheckIns(clientId: string) {
   return db.checkIn.findMany({
@@ -131,33 +132,43 @@ export async function getCoachClients(coachId: string) {
 export async function getCoachClientsWithWeekStatus(coachId: string) {
   const weekOf = getCurrentWeekMonday();
 
-  const assignments = await db.coachClient.findMany({
-    where: { coachId },
-    include: {
-      client: {
-        include: {
-          checkIns: {
-            where: { deletedAt: null },
-            orderBy: { submittedAt: "desc" },
-            take: 2,
-            select: {
-              id: true,
-              status: true,
-              weekOf: true,
-              weight: true,
-              dietCompliance: true,
-              energyLevel: true,
-              submittedAt: true,
+  const [assignments, coach] = await Promise.all([
+    db.coachClient.findMany({
+      where: { coachId },
+      include: {
+        client: {
+          include: {
+            checkIns: {
+              where: { deletedAt: null },
+              orderBy: { submittedAt: "desc" },
+              take: 2,
+              select: {
+                id: true,
+                status: true,
+                weekOf: true,
+                weight: true,
+                dietCompliance: true,
+                energyLevel: true,
+                submittedAt: true,
+              },
             },
-          },
-          clientMessages: {
-            where: { weekOf, senderId: { not: coachId } },
-            select: { id: true },
+            clientMessages: {
+              where: { weekOf, senderId: { not: coachId } },
+              select: { id: true },
+            },
           },
         },
       },
-    },
-  });
+    }),
+    db.user.findUnique({
+      where: { id: coachId },
+      select: { checkInDaysOfWeek: true, cadenceConfig: true },
+    }),
+  ]);
+
+  if (!coach) return [];
+
+  const coachCadence = parseCadenceConfig(coach.cadenceConfig);
 
   return assignments.map((a) => {
     const latestCheckIn = a.client.checkIns[0] ?? null;
@@ -178,6 +189,19 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
         ? +(latestCheckIn.weight - previousCheckIn.weight).toFixed(1)
         : null;
 
+    // Cadence-aware status derivation
+    const clientCadenceOverride = parseCadenceConfig(a.cadenceConfig);
+    const effectiveCadence = getEffectiveCadence(
+      coachCadence ?? cadenceFromLegacyDays(coach.checkInDaysOfWeek),
+      clientCadenceOverride
+    );
+    const clientTz = a.client.timezone || "America/Los_Angeles";
+    const cadenceResult = getClientCadenceStatus(
+      effectiveCadence,
+      latestCheckIn ? { submittedAt: latestCheckIn.submittedAt, status: latestCheckIn.status } : null,
+      clientTz
+    );
+
     return {
       id: a.client.id,
       firstName: a.client.firstName,
@@ -192,6 +216,9 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       dietCompliance: latestCheckIn?.dietCompliance ?? null,
       energyLevel: latestCheckIn?.energyLevel ?? null,
       submittedAt: latestCheckIn?.submittedAt ?? null,
+      cadenceStatus: cadenceResult.status,
+      cadenceLabel: getCoachStatusLabel(cadenceResult.status),
+      nextDueLabel: getCadencePreview(effectiveCadence),
     };
   });
 }
