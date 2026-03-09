@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { CadenceStatus } from "@/lib/scheduling/cadence";
 
-type WeekStatus = "new" | "reviewed" | "missing";
+type WeekStatus = "new" | "reviewed" | "missing" | "not_due";
 
 export type InboxClient = {
   id: string;
@@ -9,6 +9,7 @@ export type InboxClient = {
   lastName: string | null;
   email: string;
   weekStatus: WeekStatus;
+  isDueToday: boolean;
   hasClientMessage: boolean;
   checkInId: string | null;
   weekOf: Date;
@@ -34,7 +35,12 @@ const statusConfig = {
     pill: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
   },
   missing: {
-    label: "No check-in yet",
+    label: "Due today",
+    ring: "ring-amber-500/40",
+    pill: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+  },
+  not_due: {
+    label: "Not due yet",
     ring: "ring-zinc-300/50 dark:ring-zinc-600/40",
     pill: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
   },

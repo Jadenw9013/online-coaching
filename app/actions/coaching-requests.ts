@@ -192,9 +192,11 @@ export async function approveCoachingRequest(requestId: string) {
 
     // Send approval email to prospect
     const coachName = user.firstName || "Your coach";
+    let emailSent = false;
     try {
         const approvalEmail = requestApprovedEmail(request.prospectName, coachName);
-        await sendEmail({ to: request.prospectEmail, ...approvalEmail });
+        const result = await sendEmail({ to: request.prospectEmail, ...approvalEmail });
+        emailSent = result.success;
     } catch { /* email failure must not break approval */ }
 
     // Try to convert immediately if they already have an account
@@ -202,6 +204,8 @@ export async function approveCoachingRequest(requestId: string) {
     const existingUser = await db.user.findUnique({
         where: { email: normalizedEmail },
     });
+
+    let immediateLink = false;
 
     if (existingUser) {
         const existingConnection = await db.coachClient.findUnique({
@@ -222,11 +226,22 @@ export async function approveCoachingRequest(requestId: string) {
             where: { id: requestId },
             data: { prospectId: existingUser.id },
         });
+
+        immediateLink = true;
+    } else if (emailSent) {
+        // Track invite metadata for non-existing users only
+        await db.coachingRequest.update({
+            where: { id: requestId },
+            data: {
+                inviteLastSentAt: new Date(),
+                inviteSendCount: 1,
+            },
+        });
     }
 
     revalidatePath("/coach/marketplace/requests");
     revalidatePath("/coach/dashboard");
-    return updated;
+    return { ...updated, immediateLink };
 }
 
 export async function rejectCoachingRequest(requestId: string) {
@@ -262,4 +277,91 @@ export async function rejectCoachingRequest(requestId: string) {
 
     revalidatePath("/coach/marketplace/requests");
     return updated;
+}
+
+export async function resendInvite(requestId: string) {
+    const { getCurrentDbUser } = await import("@/lib/auth/roles");
+    const user = await getCurrentDbUser();
+    if (!user.isCoach) throw new Error("Unauthorized");
+
+    const request = await db.coachingRequest.findUnique({
+        where: { id: requestId },
+        include: { coachProfile: true },
+    });
+
+    if (!request || request.coachProfile.userId !== user.id) {
+        throw new Error("Request not found");
+    }
+
+    if (request.status !== "APPROVED") {
+        return { success: false, message: "Only approved requests can receive invites." };
+    }
+
+    // Race condition guard: re-check if prospect signed up between page load and action
+    if (request.prospectId) {
+        return { success: false, message: "This person has already signed up and is connected." };
+    }
+
+    const normalizedEmail = request.prospectEmail.toLowerCase();
+    const existingUser = await db.user.findUnique({
+        where: { email: normalizedEmail },
+    });
+
+    if (existingUser) {
+        // Prospect signed up since last page load — auto-link and inform coach
+        const existingConnection = await db.coachClient.findUnique({
+            where: { coachId_clientId: { coachId: user.id, clientId: existingUser.id } },
+        });
+        if (!existingConnection) {
+            await db.coachClient.create({
+                data: {
+                    coachId: user.id,
+                    clientId: existingUser.id,
+                    coachNotes: `Converted from marketplace request.`,
+                },
+            });
+        }
+        await db.coachingRequest.update({
+            where: { id: requestId },
+            data: { prospectId: existingUser.id },
+        });
+
+        revalidatePath("/coach/marketplace/requests");
+        return { success: true, message: "Good news — they already signed up! They've been linked to your roster." };
+    }
+
+    // Send the invite email
+    const coachName = user.firstName || "Your coach";
+    const approvalEmail = requestApprovedEmail(request.prospectName, coachName);
+    const emailResult = await sendEmail({ to: normalizedEmail, ...approvalEmail });
+
+    if (!emailResult.success) {
+        console.error(JSON.stringify({
+            event: "marketplace.invite.resend_failed",
+            requestId,
+            error: emailResult.error,
+            timestamp: new Date().toISOString(),
+        }));
+        return { success: false, message: "Unable to send the invite email right now. Please try again shortly." };
+    }
+
+    // Update invite tracking metadata
+    await db.coachingRequest.update({
+        where: { id: requestId },
+        data: {
+            inviteLastSentAt: new Date(),
+            inviteSendCount: { increment: 1 },
+        },
+    });
+
+    console.info(JSON.stringify({
+        event: "marketplace.invite.resent",
+        requestId,
+        coachProfileId: request.coachProfile.id,
+        sendCount: (request.inviteSendCount || 0) + 1,
+        timestamp: new Date().toISOString(),
+    }));
+
+    revalidatePath("/coach/marketplace/requests");
+    return { success: true, message: "Invite resent successfully." };
 }

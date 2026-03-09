@@ -174,7 +174,8 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
     const latestCheckIn = a.client.checkIns[0] ?? null;
     const previousCheckIn = a.client.checkIns[1] ?? null;
 
-    let weekStatus: "new" | "reviewed" | "missing";
+    // Legacy weekStatus for backward compatibility with inbox card
+    let weekStatus: "new" | "reviewed" | "missing" | "not_due";
     if (!latestCheckIn) {
       weekStatus = "missing";
     } else if (latestCheckIn.status === "REVIEWED") {
@@ -208,6 +209,7 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
       lastName: a.client.lastName,
       email: a.client.email,
       weekStatus,
+      isDueToday: cadenceResult.status === "due" || cadenceResult.status === "overdue",
       hasClientMessage: a.client.clientMessages.length > 0,
       checkInId: latestCheckIn?.id ?? null,
       weekOf,
