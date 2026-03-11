@@ -47,7 +47,7 @@ export function CheckInForm({
     pendingValues: FormValues;
     pendingPhotoPaths: string[];
   } | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [, setToast] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [customResponses, setCustomResponses] = useState<Record<string, string>>({});
   const [customErrors, setCustomErrors] = useState<Record<string, string>>({});

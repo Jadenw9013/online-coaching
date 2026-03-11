@@ -1,6 +1,5 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
-import type { BlockType } from "@/app/generated/prisma/enums";
 
 const styles = StyleSheet.create({
     page: {

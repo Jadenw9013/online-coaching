@@ -18,6 +18,7 @@ import { ClientSchedule } from "@/components/coach/client-schedule";
 import { MessageThread } from "@/components/messages/message-thread";
 import { PlanTabs } from "@/components/coach/client-workspace/plan-tabs";
 import { SendIntakeButton } from "@/components/coach/send-intake-button";
+import { DismissibleIntakeBanner } from "@/components/coach/dismissible-intake-banner";
 
 const weekStatusConfig = {
   submitted: {
@@ -92,9 +93,7 @@ export default async function ClientProfilePage({
 
   const statusBadge = weekStatusConfig[currentWeekStatus];
 
-  // Determine whether to show the Send Intake CTA.
-  // Show when: client has no real check-ins AND no intake has been sent yet.
-  const showSendIntakeCta = checkIns.length === 0 && !clientIntake;
+
 
   // Intake status display config
   const intakeStatusConfig = {
@@ -224,24 +223,13 @@ export default async function ClientProfilePage({
         </Link>
       </div>
 
-      {/* New client empty-state — Send Intake CTA */}
-      {showSendIntakeCta && (
-        <div className="rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8 dark:border-zinc-700 dark:bg-zinc-900">
-          <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            No starting data yet
-          </p>
-          <p className="mt-1 text-sm text-zinc-500">
-            This client hasn&rsquo;t submitted any information yet. Send them an intake
-            questionnaire to collect their baseline stats, goals, and diet details.
-          </p>
-          <div className="mt-4">
-            <SendIntakeButton clientId={clientId} />
-          </div>
-        </div>
+      {/* Send Intake CTA — always visible when no intake exists */}
+      {!clientIntake && (
+        <DismissibleIntakeBanner clientId={clientId} />
       )}
 
-      {/* Intake status badge (when intake exists but not from the CTA above) */}
-      {clientIntake && !showSendIntakeCta && (
+      {/* Intake status badge (PENDING or IN_PROGRESS) */}
+      {clientIntake && clientIntake.status !== "COMPLETED" && (
         <div className="flex items-center gap-2">
           {(() => {
             const cfg = intakeStatusConfig[clientIntake.status];
@@ -252,9 +240,7 @@ export default async function ClientProfilePage({
               </span>
             );
           })()}
-          {clientIntake.status !== "COMPLETED" && (
-            <SendIntakeButton clientId={clientId} isResend />
-          )}
+          <SendIntakeButton clientId={clientId} isResend />
         </div>
       )}
 
@@ -393,7 +379,7 @@ export default async function ClientProfilePage({
             {/* Detail rows */}
             <div className="divide-y divide-zinc-100 p-5 dark:divide-zinc-800">
               <IntakeRow label="Primary Goal" value={clientIntake.primaryGoal} />
-              <IntakeRow label="Target Timeline" value={clientIntake.targetTimeline} />
+
               <IntakeRow label="Training Experience" value={clientIntake.trainingExperience} />
               <IntakeRow label="Training Days / Week" value={clientIntake.trainingDaysPerWeek?.toString()} />
               <IntakeRow label="Equipment Access" value={clientIntake.gymAccess} />

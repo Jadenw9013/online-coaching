@@ -70,7 +70,7 @@ const QUESTIONS: IntakeQuestion[] = [
     id: "gender",
     type: "choice",
     label: "What is your gender?",
-    options: ["Male", "Female", "Non-binary", "Prefer not to say"],
+    options: ["Male", "Female", "Prefer not to say"],
   },
   {
     id: "primaryGoal",
@@ -84,17 +84,7 @@ const QUESTIONS: IntakeQuestion[] = [
       "General health",
     ],
   },
-  {
-    id: "targetTimeline",
-    type: "choice",
-    label: "What is your target timeline?",
-    options: [
-      "4\u20136 weeks",
-      "2\u20133 months",
-      "6 months",
-      "Long-term (no deadline)",
-    ],
-  },
+
   {
     id: "trainingExperience",
     type: "choice",
@@ -255,7 +245,7 @@ export function IntakeStepper() {
       ageYears: parseIntVal("ageYears"),
       gender: str("gender"),
       primaryGoal: str("primaryGoal"),
-      targetTimeline: str("targetTimeline"),
+      targetTimeline: "",
       injuries: str("injuries"),
       dietaryRestrictions: str("dietaryRestrictions"),
       dietaryPreferences: str("dietaryPreferences"),
@@ -358,7 +348,7 @@ export function IntakeStepper() {
                 placeholder={question.placeholder}
                 min={question.min}
                 max={question.max}
-                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-4 text-xl font-semibold tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-4 text-xl font-semibold tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 autoFocus
               />
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-400">

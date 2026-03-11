@@ -54,10 +54,6 @@ function foodMatchesOverride(itemFoodName: string, overrideFood: string): boolea
   return overrideWords.length > 0 && overrideWords.every((w) => normItem.includes(w));
 }
 
-function mealNameMatches(itemMeal: string, adjustmentMeal: string): boolean {
-  return itemMeal.toLowerCase().trim() === adjustmentMeal.toLowerCase().trim();
-}
-
 /**
  * Resolve the meal plan for a specific weekday by applying meal-level overrides.
  * Supports new `mealAdjustments` model and legacy flat `items` model.
@@ -459,7 +455,7 @@ export function SimpleMealPlan({ mealPlan }: { mealPlan: MealPlan }) {
       }
     }
     return map;
-  }, [extras?.dayOverrides]);
+  }, [extras]);
 
   const { resolvedItems, activeOverrides } = useMemo(() => {
     if (!extras?.dayOverrides?.length) {
@@ -469,7 +465,7 @@ export function SimpleMealPlan({ mealPlan }: { mealPlan: MealPlan }) {
       };
     }
     return resolveForDay(mealPlan.items, extras.dayOverrides, selectedDay);
-  }, [mealPlan.items, extras?.dayOverrides, selectedDay]);
+  }, [mealPlan.items, extras, selectedDay]);
 
   const meals = useMemo(() => {
     const grouped = new Map<string, ResolvedItem[]>();

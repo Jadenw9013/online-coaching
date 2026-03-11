@@ -5,7 +5,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Footer } from "@/components/footer";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";

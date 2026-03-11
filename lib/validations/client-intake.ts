@@ -16,7 +16,7 @@ export const submitClientIntakeSchema = z.object({
     .max(100, "Enter a valid age"),
   gender: z.string().min(1, "Select an option").max(50),
   primaryGoal: z.string().min(1, "Select an option").max(100),
-  targetTimeline: z.string().min(1, "Select an option").max(100),
+  targetTimeline: z.string().max(100).optional().default(""),
   injuries: z.string().max(2000),
   dietaryRestrictions: z.string().max(500),
   dietaryPreferences: z.string().max(1000),

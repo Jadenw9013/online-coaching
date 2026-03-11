@@ -1,7 +1,7 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import type { PlanExtras } from "@/types/meal-plan-extras";
-import { SUPPLEMENT_TIMING_ORDER, getOverrideColor } from "@/types/meal-plan-extras";
+import { SUPPLEMENT_TIMING_ORDER } from "@/types/meal-plan-extras";
 
 const styles = StyleSheet.create({
   page: {
@@ -373,7 +373,7 @@ function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
                   <View key={`adj-${j}`}>
                     <Text style={styles.overrideMealName}>{adj.mealName}</Text>
                     {adj.changes.map((ch, k) => {
-                      let desc = ch.type === "update" ? `${ch.food} → ${ch.newPortion}`
+                      const desc = ch.type === "update" ? `${ch.food} → ${ch.newPortion}`
                         : ch.type === "add" ? `Add: ${ch.food}${ch.newPortion ? ` (${ch.newPortion})` : ""}`
                         : ch.type === "remove" ? `Remove: ${ch.food}`
                         : `Replace ${ch.food} → ${ch.replacementFood}${ch.replacementPortion ? ` (${ch.replacementPortion})` : ""}`;

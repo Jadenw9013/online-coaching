@@ -1,8 +1,8 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
-import { getClientCheckInsLight, getLatestCoachMessage, getCheckInForLocalDate } from "@/lib/queries/check-ins";
+import { getClientCheckInsLight, getLatestCoachMessage } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
 import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
-import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
+import { formatDateUTC } from "@/lib/utils/date";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { getMyIntake } from "@/lib/queries/client-intake";
 import { parseCadenceConfig, getEffectiveCadence, getClientCadenceStatus, cadenceFromLegacyDays, getCadencePreview } from "@/lib/scheduling/cadence";
@@ -54,9 +54,6 @@ export default async function ClientDashboard() {
 
   // ── Cadence-aware status derivation ──────────────────────────────────────
   const tz = user.timezone || "America/Los_Angeles";
-  const todayLocalDate = getLocalDate(new Date(), tz);
-  const todayCheckIn = await getCheckInForLocalDate(user.id, todayLocalDate);
-  const checkedInToday = !!todayCheckIn;
 
   // Resolve effective cadence: client override → coach default → legacy fallback
   const coachCadence = coachAssignment
@@ -110,14 +107,9 @@ export default async function ClientDashboard() {
       : null;
 
   // Resolve coach banner/avatar URLs
-  let coachBannerUrl: string | null = null;
   let coachAvatarUrl: string | null = null;
   if (coachAssignment) {
-    const bannerPath = coachAssignment.coach.coachProfile?.bannerPhotoPath;
     const avatarPath = coachAssignment.coach.profilePhotoPath;
-    if (bannerPath) {
-      try { coachBannerUrl = await getProfilePhotoUrl(bannerPath); } catch { /* */ }
-    }
     if (avatarPath) {
       try { coachAvatarUrl = await getProfilePhotoUrl(avatarPath); } catch { /* */ }
     }

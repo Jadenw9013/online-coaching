@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { updateClientScheduleOverride } from "@/app/actions/notification-preferences";
 import { CadenceEditor } from "@/components/coach/cadence-editor";
-import { getCadencePreview } from "@/lib/scheduling/cadence";
 import type { CadenceConfig } from "@/lib/scheduling/cadence";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

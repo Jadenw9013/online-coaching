@@ -636,7 +636,6 @@ export function PlanExtrasEditor({
     </div>
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- this is valid, it's part of the component but after the return
 }
 
 // ── Extra state for saving specific override ────────────────────────────────

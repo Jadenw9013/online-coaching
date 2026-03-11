@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { submitOnboardingResponse } from "@/app/actions/client-onboarding";
-import { OnboardingQuestion } from "@/lib/validations/onboarding-form";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ClientOnboardingForm({ form: dbForm }: { form: any }) {

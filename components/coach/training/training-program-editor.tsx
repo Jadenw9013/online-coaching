@@ -8,7 +8,7 @@ import {
   saveTrainingProgram,
   publishTrainingProgram,
 } from "@/app/actions/training-programs";
-import type { TrainingDayGroup, TrainingBlock, BlockType } from "@/types/training";
+import type { TrainingDayGroup, BlockType } from "@/types/training";
 
 type TemplateOption = {
   id: string;
