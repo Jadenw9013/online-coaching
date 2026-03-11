@@ -421,41 +421,8 @@ export default async function ClientProfilePage({
         </section>
       )}
 
-      {/* Check-in Schedule */}
-      <section aria-labelledby="schedule-heading">
-        <h2
-          id="schedule-heading"
-          className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500"
-        >
-          Check-in Schedule
-        </h2>
-
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-
-          <ClientSchedule
-            clientId={clientId}
-            coachDays={coachScheduleDays}
-            clientOverride={clientScheduleOverride}
-            effectiveDays={effectiveScheduleDays}
-            coachCadence={coachCadence}
-            clientCadenceOverride={clientCadenceOverride}
-          />
-
-          <p className="text-xs text-zinc-500 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-            Check-in preferences managed in{" "}
-            <Link
-              href="/coach/settings"
-              className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
-            >
-              Settings →
-            </Link>
-          </p>
-
-        </div>
-      </section>
-
-      {/* Daily Adherence */}
-      {coachClientAdherence && (
+      {/* Daily Adherence — summary only, shown when adherence is enabled */}
+      {coachClientAdherence?.adherenceEnabled && (
         <AdherenceCard
           clientId={clientId}
           adherenceEnabled={coachClientAdherence.adherenceEnabled}

@@ -404,34 +404,35 @@ export default async function ClientDashboard() {
               return (
                 <div
                   key={checkIn.id}
-                  className="flex items-center gap-4 rounded-2xl border border-zinc-200/80 bg-white transition-all hover:border-zinc-300 hover:shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:hover:border-blue-500/20"
+                  className="relative rounded-2xl border border-zinc-200/80 bg-white transition-all hover:border-zinc-300 hover:shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:hover:border-blue-500/20"
                 >
+                  {/* Overflow menu — top right */}
+                  <div className="absolute right-1 top-1 z-10 sm:right-2 sm:top-2">
+                    <DeleteCheckInButton checkInId={checkIn.id} />
+                  </div>
+
                   <Link
                     href={`/client/check-ins/${checkIn.id}`}
-                    className="flex flex-1 items-center gap-4 px-5 py-4 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
+                    className="block rounded-2xl px-4 py-3.5 pr-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:px-5 sm:py-4"
                     aria-label={`View check-in from ${dateLabel}`}
                   >
-                    {/* Weight */}
-                    <div className="w-16 shrink-0">
-                      {checkIn.weight ? (
-                        <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
-                          {checkIn.weight}
-                          <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
-                        </p>
-                      ) : (
-                        <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
-                          &mdash;
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Date + delta + notes */}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold">
-                        {dateLabel}
+                    {/* Mobile: stacked | Desktop: horizontal */}
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
+                      {/* Weight + delta */}
+                      <div className="flex items-baseline gap-2">
+                        {checkIn.weight ? (
+                          <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
+                            {checkIn.weight}
+                            <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
+                          </p>
+                        ) : (
+                          <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
+                            &mdash;
+                          </p>
+                        )}
                         {delta != null && delta !== 0 && (
                           <span
-                            className={`ml-2 text-xs font-semibold ${delta < 0
+                            className={`text-xs font-semibold ${delta < 0
                               ? "text-emerald-500"
                               : "text-red-400"
                               }`}
@@ -439,32 +440,34 @@ export default async function ClientDashboard() {
                             {delta < 0 ? "\u2193" : "\u2191"} {Math.abs(delta)}
                           </span>
                         )}
-                      </p>
-                      <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-400">
-                        {checkIn._count.photos > 0 && (
-                          <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
-                        )}
-                        {checkIn.notes && (
-                          <span className="truncate max-w-[180px]">{checkIn.notes}</span>
-                        )}
                       </div>
+
+                      {/* Date + meta row */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                          {dateLabel}
+                        </p>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                          {checkIn._count.photos > 0 && (
+                            <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
+                          )}
+                          {checkIn.notes && (
+                            <span className="truncate max-w-[200px] sm:max-w-[180px]">{checkIn.notes}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Status badge */}
+                      <span
+                        className={`self-start shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold sm:self-center ${checkIn.status === "REVIEWED"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                          : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+                          }`}
+                      >
+                        {checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
+                      </span>
                     </div>
-
-                    {/* Status badge */}
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${checkIn.status === "REVIEWED"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-                        : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
-                        }`}
-                    >
-                      {checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
-                    </span>
                   </Link>
-
-                  {/* Delete button (separate from link) */}
-                  <div className="shrink-0 pr-3">
-                    <DeleteCheckInButton checkInId={checkIn.id} />
-                  </div>
                 </div>
               );
             })}

@@ -585,14 +585,14 @@ export function PlanExtrasEditor({
             {extras.allowances.map((allow, catIdx) => (
               <div key={catIdx}>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{allow.category}</span>
-                <div className="mt-1 flex flex-wrap gap-1.5">
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {allow.items.map((item, itemIdx) => (
                     <div key={itemIdx} className="group/chip flex items-center gap-0.5 rounded-md border border-zinc-200 bg-zinc-50 pr-0.5 dark:border-zinc-700 dark:bg-zinc-800">
-                      <input type="text" value={item} onChange={(e) => updateAllowanceItem(catIdx, itemIdx, e.target.value)} className="w-24 min-w-0 border-0 bg-transparent px-2 py-0.5 text-[11px] font-medium text-zinc-600 focus:outline-none dark:text-zinc-300" style={{ width: `${Math.max(3, item.length * 0.6)}em` }} />
-                      <button type="button" onClick={() => removeAllowanceItem(catIdx, itemIdx)} className="flex h-4 w-4 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover/chip:opacity-100">&times;</button>
+                      <input type="text" value={item} onChange={(e) => updateAllowanceItem(catIdx, itemIdx, e.target.value)} className="min-w-[3.5rem] max-w-[10rem] border-0 bg-transparent px-2 py-1 text-[11px] font-medium text-zinc-600 focus:outline-none dark:text-zinc-300" style={{ width: `${Math.max(3.5, item.length * 0.6)}em` }} />
+                      <button type="button" onClick={() => removeAllowanceItem(catIdx, itemIdx)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 opacity-100 transition-opacity hover:text-red-500 sm:opacity-0 sm:group-hover/chip:opacity-100" aria-label={`Remove ${item}`}>&times;</button>
                     </div>
                   ))}
-                  <button type="button" onClick={() => addAllowanceItem(catIdx)} className="rounded-md border border-dashed border-zinc-300 px-2 py-0.5 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+</button>
+                  <button type="button" onClick={() => addAllowanceItem(catIdx)} className="shrink-0 rounded-md border border-dashed border-zinc-300 px-3 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+</button>
                 </div>
                 {allow.restriction && <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{allow.restriction}</p>}
               </div>
