@@ -120,7 +120,9 @@ JSON Schema:
   }
 }
 
-IMPORTANT: Only include extended sections (metadata, dayOverrides, supplements, allowances, rules) if the text actually contains relevant information. Do not fabricate sections that aren't in the source text. Omit empty sections entirely.`;
+IMPORTANT: Only include extended sections (metadata, dayOverrides, supplements, allowances, rules) if the text actually contains relevant information. Do not fabricate sections that aren't in the source text. Omit empty sections entirely.
+
+CRITICAL: If the document contains NO meals (e.g. it is a supplement stack, a set of coaching instructions, rules, or allowances only), return an empty "meals": [] array. Do NOT fabricate or invent meals. The system accepts plans with zero meals as long as other sections are present.`;
 
 export async function parseMealPlanTextToJson(
   text: string

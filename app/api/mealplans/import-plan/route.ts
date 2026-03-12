@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         version: nextVersion,
         status: "DRAFT",
         planExtras: planExtras ? JSON.parse(JSON.stringify(planExtras)) : undefined,
-        items: { create: items },
+        ...(items.length > 0 ? { items: { create: items } } : {}),
       },
     });
 

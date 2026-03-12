@@ -52,9 +52,18 @@ describe("parsedMealPlanSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects plan with no meals", () => {
+  it("accepts plan with empty meals array", () => {
     const result = parsedMealPlanSchema.safeParse({ ...validPlan, meals: [] });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.meals).toEqual([]);
+  });
+
+  it("defaults meals to empty array when missing", () => {
+    const { meals, ...planWithoutMeals } = validPlan;
+    void meals;
+    const result = parsedMealPlanSchema.safeParse(planWithoutMeals);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.meals).toEqual([]);
   });
 
   it("rejects meal with no items", () => {
@@ -63,6 +72,42 @@ describe("parsedMealPlanSchema", () => {
       meals: [{ name: "Empty", items: [] }],
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts supplement-only plan with no meals", () => {
+    const result = parsedMealPlanSchema.safeParse({
+      title: "Supplement Stack",
+      meals: [],
+      supplements: [
+        { name: "Creatine", dosage: "5g", timing: "AM" },
+        { name: "Fish Oil", dosage: "2g", timing: "with meal" },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.meals).toEqual([]);
+      expect(result.data.supplements).toHaveLength(2);
+    }
+  });
+
+  it("accepts rules/allowances-only plan with no meals", () => {
+    const result = parsedMealPlanSchema.safeParse({
+      title: "Coaching Instructions",
+      meals: [],
+      rules: [
+        { category: "Hydration", text: "Drink 1 gallon water daily" },
+        { category: "Meal Timing", text: "Eat every 3 hours" },
+      ],
+      allowances: [
+        { category: "Drinks", items: ["Black coffee", "Green tea"] },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.meals).toEqual([]);
+      expect(result.data.rules).toHaveLength(2);
+      expect(result.data.allowances).toHaveLength(1);
+    }
   });
 
   it("defaults notes to empty string when missing", () => {

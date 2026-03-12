@@ -365,7 +365,7 @@ export function UploadStep({
 
       {/* Processing indicator */}
       {isProcessing && (
-        <ProcessingIndicator mode={status === "uploading" ? "upload" : "upload"} />
+        <ProcessingIndicator mode={status === "uploading" ? "upload" : "paste"} />
       )}
 
       {/* Actions */}

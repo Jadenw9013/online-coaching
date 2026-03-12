@@ -200,7 +200,7 @@ export function NotificationSettings({
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   Daily Check-in Reminder
@@ -287,7 +287,7 @@ export function NotificationSettings({
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                   Missed Check-in Alerts

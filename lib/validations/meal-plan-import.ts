@@ -24,7 +24,7 @@ export const parsedMealSchema = z.object({
 
 export const parsedMealPlanSchema = z.object({
   title: z.string(),
-  meals: z.array(parsedMealSchema).min(1),
+  meals: z.array(parsedMealSchema).default([]),
   notes: z.string().optional().default(""),
   // Extended sections — all optional for backward compatibility
   metadata: planMetadataSchema.optional(),

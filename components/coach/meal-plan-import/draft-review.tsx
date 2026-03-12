@@ -219,8 +219,18 @@ export function DraftReview({
     });
   }, []);
 
+  const hasExtrasContent =
+    !!plan?.metadata || (plan?.dayOverrides?.length ?? 0) > 0 || (plan?.supplements?.length ?? 0) > 0 ||
+    (plan?.allowances?.length ?? 0) > 0 || (plan?.rules?.length ?? 0) > 0;
+
   async function handleImport() {
     if (!draftId || !plan) return;
+
+    // Verify the plan has either meals or extras
+    if (plan.meals.length === 0 && !hasExtrasContent) {
+      setError("The plan has no meals, supplements, or other content to import.");
+      return;
+    }
 
     for (const meal of plan.meals) {
       for (const item of meal.items) {
@@ -287,10 +297,6 @@ export function DraftReview({
     );
   }
 
-  const hasExtras =
-    plan.metadata || plan.dayOverrides?.length || plan.supplements?.length ||
-    plan.allowances?.length || plan.rules?.length;
-
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -300,6 +306,43 @@ export function DraftReview({
           Edit meals and items below, then import into the meal plan system.
         </p>
       </div>
+
+      {/* Extraction summary */}
+      <div className="flex flex-wrap gap-2">
+        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${plan.meals.length > 0 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800'}`}>
+          {plan.meals.length} meal{plan.meals.length !== 1 ? 's' : ''}
+        </span>
+        {(plan.supplements?.length ?? 0) > 0 && (
+          <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:text-purple-400">
+            {plan.supplements!.length} supplement{plan.supplements!.length !== 1 ? 's' : ''}
+          </span>
+        )}
+        {(plan.rules?.length ?? 0) > 0 && (
+          <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+            {plan.rules!.length} rule{plan.rules!.length !== 1 ? 's' : ''}
+          </span>
+        )}
+        {(plan.allowances?.length ?? 0) > 0 && (
+          <span className="inline-flex items-center rounded-full bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-700 dark:text-teal-400">
+            {plan.allowances!.length} allowance{plan.allowances!.length !== 1 ? 's' : ''}
+          </span>
+        )}
+        {(plan.dayOverrides?.length ?? 0) > 0 && (
+          <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400">
+            {plan.dayOverrides!.length} override{plan.dayOverrides!.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      {/* No-meals info banner */}
+      {plan.meals.length === 0 && hasExtrasContent && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400">
+          <p className="font-medium">No meals detected</p>
+          <p className="mt-0.5 text-xs opacity-80">
+            This document appears to contain supplements, rules, or instructions only. You can still import it — the extras will be attached to the meal plan.
+          </p>
+        </div>
+      )}
 
       {/* Extracted text toggle */}
       <div>
@@ -619,7 +662,7 @@ export function DraftReview({
       )}
 
       {/* Extended sections summary */}
-      {hasExtras && (
+      {hasExtrasContent && plan.meals.length > 0 && (
         <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 text-xs text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400">
           Extended sections detected (overrides, supplements, allowances, rules). These will be preserved when imported.
         </div>
@@ -648,7 +691,7 @@ export function DraftReview({
         <button
           type="button"
           onClick={handleImport}
-          disabled={importing || plan.meals.length === 0}
+          disabled={importing || (plan.meals.length === 0 && !hasExtrasContent)}
           className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
         >
           {importing ? "Importing..." : "Import Meal Plan"}

@@ -386,7 +386,7 @@ export default async function ClientDashboard() {
             </div>
           </div>
         ) : (
-          <div className="stagger-children space-y-3">
+          <div className="stagger-children space-y-2 sm:space-y-3">
             {checkIns.map((checkIn, idx) => {
               const prev = checkIns[idx + 1];
               const delta =
@@ -394,7 +394,11 @@ export default async function ClientDashboard() {
                   ? +(checkIn.weight - prev.weight).toFixed(1)
                   : null;
 
-              const dateLabel = checkIn.submittedAt.toLocaleDateString("en-US", {
+              const shortDate = checkIn.submittedAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
+              const fullDate = checkIn.submittedAt.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 hour: "numeric",
@@ -404,35 +408,30 @@ export default async function ClientDashboard() {
               return (
                 <div
                   key={checkIn.id}
-                  className="relative rounded-2xl border border-zinc-200/80 bg-white transition-all hover:border-zinc-300 hover:shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:hover:border-blue-500/20"
+                  className="rounded-2xl border border-zinc-200/80 bg-white transition-all hover:border-zinc-300 hover:shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:hover:border-blue-500/20"
                 >
-                  {/* Overflow menu — top right */}
-                  <div className="absolute right-1 top-1 z-10 sm:right-2 sm:top-2">
-                    <DeleteCheckInButton checkInId={checkIn.id} />
-                  </div>
-
-                  <Link
-                    href={`/client/check-ins/${checkIn.id}`}
-                    className="block rounded-2xl px-4 py-3.5 pr-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:px-5 sm:py-4"
-                    aria-label={`View check-in from ${dateLabel}`}
-                  >
-                    {/* Mobile: stacked | Desktop: horizontal */}
-                    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
+                  <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-5 sm:py-4">
+                    {/* Main link area */}
+                    <Link
+                      href={`/client/check-ins/${checkIn.id}`}
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 sm:gap-4"
+                      aria-label={`View check-in from ${fullDate}`}
+                    >
                       {/* Weight + delta */}
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-1.5 sm:gap-2">
                         {checkIn.weight ? (
-                          <p className="text-xl font-bold tabular-nums leading-tight tracking-tight">
+                          <p className="text-lg font-bold tabular-nums leading-none tracking-tight sm:text-xl">
                             {checkIn.weight}
                             <span className="ml-0.5 text-[10px] font-normal text-zinc-400">lbs</span>
                           </p>
                         ) : (
-                          <p className="text-xl font-bold text-zinc-200 dark:text-zinc-700">
+                          <p className="text-lg font-bold text-zinc-200 dark:text-zinc-700 sm:text-xl">
                             &mdash;
                           </p>
                         )}
                         {delta != null && delta !== 0 && (
                           <span
-                            className={`text-xs font-semibold ${delta < 0
+                            className={`text-[11px] font-semibold sm:text-xs ${delta < 0
                               ? "text-emerald-500"
                               : "text-red-400"
                               }`}
@@ -442,32 +441,45 @@ export default async function ClientDashboard() {
                         )}
                       </div>
 
-                      {/* Date + meta row */}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
-                          {dateLabel}
-                        </p>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                          {checkIn._count.photos > 0 && (
-                            <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
-                          )}
-                          {checkIn.notes && (
-                            <span className="truncate max-w-[200px] sm:max-w-[180px]">{checkIn.notes}</span>
-                          )}
-                        </div>
+                      {/* Date — short on mobile, full on desktop */}
+                      <p className="min-w-0 text-xs text-zinc-500 dark:text-zinc-400 sm:text-sm sm:font-medium sm:text-zinc-600 sm:dark:text-zinc-300">
+                        <span className="sm:hidden">{shortDate}</span>
+                        <span className="hidden sm:inline">{fullDate}</span>
+                      </p>
+
+                      {/* Photo count + notes — desktop only */}
+                      <div className="hidden min-w-0 flex-1 items-center gap-2 text-xs text-zinc-400 sm:flex">
+                        {checkIn._count.photos > 0 && (
+                          <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
+                        )}
+                        {checkIn.notes && (
+                          <span className="truncate max-w-[180px]">{checkIn.notes}</span>
+                        )}
                       </div>
 
-                      {/* Status badge */}
+                      {/* Status — dot on mobile, badge on desktop */}
                       <span
-                        className={`self-start shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold sm:self-center ${checkIn.status === "REVIEWED"
+                        className={`shrink-0 sm:hidden ${checkIn.status === "REVIEWED"
+                          ? "h-2 w-2 rounded-full bg-emerald-500"
+                          : "h-2 w-2 rounded-full bg-amber-500"
+                          }`}
+                        aria-label={checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
+                      />
+                      <span
+                        className={`hidden shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold sm:inline-block ${checkIn.status === "REVIEWED"
                           ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                           : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
                           }`}
                       >
                         {checkIn.status === "REVIEWED" ? "Reviewed" : "Pending"}
                       </span>
+                    </Link>
+
+                    {/* Three-dot menu — inline, not absolute */}
+                    <div className="shrink-0">
+                      <DeleteCheckInButton checkInId={checkIn.id} />
                     </div>
-                  </Link>
+                  </div>
                 </div>
               );
             })}
