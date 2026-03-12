@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { connectToCoach } from "@/app/actions/coach-connection";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function ConnectCoachBanner() {
   const router = useRouter();
@@ -68,6 +69,33 @@ export function ConnectCoachBanner() {
           {connecting ? "Connecting..." : "Connect"}
         </button>
       </form>
+
+      <div className="mt-4 border-t border-zinc-200/60 pt-4 dark:border-zinc-800/60">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Don&apos;t have a coach code?
+        </p>
+        <Link
+          href="/coaches"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        >
+          Find Your Coach Today
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="opacity-60"
+          >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }
