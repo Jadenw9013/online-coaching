@@ -1,18 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SendIntakeButton } from "@/components/coach/send-intake-button";
 
-export function DismissibleIntakeBanner({ clientId }: { clientId: string }) {
-  const [dismissed, setDismissed] = useState(false);
+function storageKey(clientId: string) {
+  return `intake-banner-dismissed:${clientId}`;
+}
 
-  if (dismissed) return null;
+export function DismissibleIntakeBanner({ clientId }: { clientId: string }) {
+  const [dismissed, setDismissed] = useState(true); // default hidden to avoid flash
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey(clientId));
+    setDismissed(stored === "1");
+    setHydrated(true);
+  }, [clientId]);
+
+  function handleDismiss() {
+    localStorage.setItem(storageKey(clientId), "1");
+    setDismissed(true);
+  }
+
+  if (!hydrated || dismissed) return null;
 
   return (
     <div className="relative rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8 dark:border-zinc-700 dark:bg-zinc-900">
       <button
         type="button"
-        onClick={() => setDismissed(true)}
+        onClick={handleDismiss}
         className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
         aria-label="Dismiss"
       >
