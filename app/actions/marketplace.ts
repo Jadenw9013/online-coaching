@@ -20,6 +20,15 @@ const profileSchema = z.object({
     acceptingClients: z.boolean().default(true),
     isPublished: z.boolean().default(false),
     welcomeMessage: z.string().max(300, "Welcome message max 300 characters").optional().nullable(),
+    experience: z.string().max(2000).optional().nullable(),
+    certifications: z.string().max(1000).optional().nullable(),
+    coachingType: z.string().optional().nullable(),
+    location: z.string().max(100).optional().nullable(),
+    gymName: z.string().max(100).optional().nullable(),
+    yearsCoaching: z.number().int().min(0).max(50).optional().nullable(),
+    services: z.array(z.string()).max(20).default([]),
+    clientGoals: z.array(z.string()).max(20).default([]),
+    clientTypes: z.array(z.string()).max(10).default([]),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
@@ -62,6 +71,15 @@ export async function upsertCoachProfile(data: ProfileFormData) {
             acceptingClients: validated.acceptingClients,
             isPublished: validated.isPublished,
             welcomeMessage: validated.welcomeMessage,
+            experience: validated.experience,
+            certifications: validated.certifications,
+            coachingType: validated.coachingType,
+            location: validated.location,
+            gymName: validated.gymName,
+            yearsCoaching: validated.yearsCoaching,
+            services: validated.services,
+            clientGoals: validated.clientGoals,
+            clientTypes: validated.clientTypes,
         },
         update: {
             slug: validated.slug,
@@ -72,6 +90,15 @@ export async function upsertCoachProfile(data: ProfileFormData) {
             acceptingClients: validated.acceptingClients,
             isPublished: validated.isPublished,
             welcomeMessage: validated.welcomeMessage,
+            experience: validated.experience,
+            certifications: validated.certifications,
+            coachingType: validated.coachingType,
+            location: validated.location,
+            gymName: validated.gymName,
+            yearsCoaching: validated.yearsCoaching,
+            services: validated.services,
+            clientGoals: validated.clientGoals,
+            clientTypes: validated.clientTypes,
         },
     });
 

@@ -1,11 +1,15 @@
 import { getCoachProfileBySlug } from "@/lib/queries/marketplace";
 import { getPortfolioMediaUrl } from "@/lib/supabase/portfolio-storage";
 import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
+import { getTestimonialImageUrl } from "@/lib/supabase/testimonial-storage";
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { RatingSummary } from "@/components/public/rating-summary";
+import { SaveCoachButton } from "@/components/public/save-coach-button";
+import { TestimonialCard } from "@/components/public/testimonial-card";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
@@ -131,7 +135,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
                 <div className="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-gray-700/40" />
             </header>
 
-            <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8" id="main-content">
+            <main className="mx-auto max-w-4xl px-5 pb-24 pt-8 sm:px-8 lg:pb-8" id="main-content">
                 {/* ── Banner + Avatar ── */}
                 <div className="relative mb-20">
                     {/* Banner */}
@@ -179,7 +183,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                     {profile.headline}
                                 </p>
                             )}
-                            <div className="mt-2">
+                            <div className="mt-2 flex flex-wrap items-center gap-3">
                                 <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${profile.acceptingClients
                                     ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                                     : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
@@ -188,7 +192,25 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                         }`} />
                                     {profile.acceptingClients ? "Accepting New Clients" : "Currently Full"}
                                 </span>
+                                {profile.coachingType && (
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                        {profile.coachingType.charAt(0).toUpperCase() + profile.coachingType.slice(1)} Coaching
+                                    </span>
+                                )}
+                                {profile.location && (
+                                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        📍 {profile.location}
+                                    </span>
+                                )}
                             </div>
+                            {profile.ratingSummary.totalReviews > 0 && (
+                                <div className="mt-3">
+                                    <RatingSummary
+                                        averageRating={profile.ratingSummary.averageRating}
+                                        totalReviews={profile.ratingSummary.totalReviews}
+                                        />
+                                </div>
+                            )}
                         </div>
 
                         {profile.specialties.length > 0 && (
@@ -209,6 +231,89 @@ export default async function CoachProfilePage({ params }: PageProps) {
                             <div className="mt-4 whitespace-pre-wrap leading-relaxed text-zinc-600 dark:text-zinc-400">
                                 {profile.bio || "Bio coming soon."}
                             </div>
+                        </div>
+
+                        {/* ── Experience & Certifications ── */}
+                        {(profile.experience || profile.certifications) && (
+                            <div className="mt-12">
+                                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Experience & Credentials</h2>
+                                <div className="mt-4 space-y-4">
+                                    {profile.experience && (
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2">Experience</p>
+                                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{profile.experience}</p>
+                                        </div>
+                                    )}
+                                    {profile.certifications && (
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2">Certifications</p>
+                                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{profile.certifications}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Services & Goals ── */}
+                        {(profile.services.length > 0 || profile.clientGoals.length > 0) && (
+                            <div className="mt-12">
+                                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Services & Goals</h2>
+                                {profile.services.length > 0 && (
+                                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                                        {profile.services.map((service, i) => (
+                                            <div key={i} className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 shrink-0"><path d="M20 6 9 17l-5-5" /></svg>
+                                                {service}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {profile.clientGoals.length > 0 && (
+                                    <div className={`${profile.services.length > 0 ? "mt-5" : "mt-4"} flex flex-wrap gap-2`}>
+                                        {profile.clientGoals.map((goal, i) => (
+                                            <span key={i} className="inline-flex rounded-md bg-emerald-500/10 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{goal}</span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── Testimonials ── */}
+                        <div className="mt-12">
+                            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Client Testimonials</h2>
+                            {profile.testimonials.length > 0 ? (
+                                <>
+                                    <div className="mt-5 space-y-4">
+                                        {await Promise.all(profile.testimonials.map(async (testimonial) => {
+                                            // Resolve testimonial image URLs
+                                            const imageUrls: string[] = [];
+                                            for (const imgPath of testimonial.images ?? []) {
+                                                try {
+                                                    const url = await getTestimonialImageUrl(imgPath);
+                                                    imageUrls.push(url);
+                                                } catch { /* gracefully skip */ }
+                                            }
+                                            return (
+                                                <TestimonialCard
+                                                    key={testimonial.id}
+                                                    rating={testimonial.rating}
+                                                    reviewText={testimonial.reviewText}
+                                                    clientFirstName={testimonial.client.firstName}
+                                                    clientLastName={testimonial.client.lastName}
+                                                    createdAt={testimonial.createdAt}
+                                                    imageUrls={imageUrls}
+                                                />
+                                            );
+                                        }))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="mt-5 rounded-xl border border-dashed border-zinc-200 px-5 py-8 text-center dark:border-zinc-800">
+                                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                        No reviews yet. Only verified clients can leave testimonials.
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         {/* ── Posts ── */}
@@ -271,6 +376,59 @@ export default async function CoachProfilePage({ params }: PageProps) {
 
                     {/* Sidebar / CTA */}
                     <div>
+                        {/* ── Quick-Scan Facts ── */}
+                        <div className="mb-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
+                            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400">At a Glance</h3>
+                            <dl className="space-y-2.5 text-sm">
+                                {profile.coachingType && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Type</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.coachingType.charAt(0).toUpperCase() + profile.coachingType.slice(1)}</dd>
+                                    </div>
+                                )}
+                                {profile.yearsCoaching && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Experience</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.yearsCoaching}+ years</dd>
+                                    </div>
+                                )}
+                                {profile.location && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Location</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.location}</dd>
+                                    </div>
+                                )}
+                                {profile.gymName && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Gym</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.gymName}</dd>
+                                    </div>
+                                )}
+                                {profile.certifications && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Certified</dt>
+                                        <dd className="truncate max-w-[140px] font-medium text-zinc-800 dark:text-zinc-200" title={profile.certifications}>{profile.certifications}</dd>
+                                    </div>
+                                )}
+                                {(profile.services?.length ?? 0) > 0 && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Services</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.services!.length} offered</dd>
+                                    </div>
+                                )}
+                                {profile.ratingSummary.totalReviews > 0 && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Reviews</dt>
+                                        <dd className="flex items-center gap-1 font-medium text-zinc-800 dark:text-zinc-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                            {profile.ratingSummary.averageRating.toFixed(1)} ({profile.ratingSummary.totalReviews})
+                                        </dd>
+                                    </div>
+                                )}
+                            </dl>
+                        </div>
+
+                        {/* ── CTA Card ── */}
                         <div className="sticky top-32 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
                             <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                                 {profile.acceptingClients ? "Start Coaching" : "Currently Full"}
@@ -320,10 +478,43 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                     </p>
                                 </>
                             )}
+
+                            {/* Trust messaging */}
+                            {profile.ratingSummary.totalReviews > 0 && (
+                                <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><path d="M9 12 11 14 15 10" /><circle cx="12" cy="12" r="10" /></svg>
+                                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                        {profile.ratingSummary.totalReviews} verified {profile.ratingSummary.totalReviews === 1 ? "review" : "reviews"} from coached clients
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* ── Mobile Sticky CTA ── */}
+            {!isExistingClient && (
+                <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-zinc-200 bg-white/95 px-5 py-3 backdrop-blur-sm lg:hidden dark:border-zinc-800 dark:bg-[#020815]/95">
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href={`/coaches/${profile.slug}/request`}
+                            className="flex flex-1 items-center justify-center rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                        >
+                            {profile.acceptingClients ? "Request Coaching" : "Join Waitlist"}
+                        </Link>
+                        {await (async () => {
+                            try {
+                                const { getCurrentDbUser } = await import("@/lib/auth/roles");
+                                const user = await getCurrentDbUser();
+                                const { getSavedCoachIds } = await import("@/lib/queries/saved-coaches");
+                                const savedIds = await getSavedCoachIds(user.id);
+                                return <SaveCoachButton coachProfileId={profile.id} initialSaved={savedIds.has(profile.id)} size="md" />;
+                            } catch { return null; }
+                        })()}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

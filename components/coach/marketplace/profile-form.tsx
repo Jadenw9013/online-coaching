@@ -4,8 +4,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Toggle } from "@/components/ui/toggle";
 import { upsertCoachProfile } from "@/app/actions/marketplace";
+import Link from "next/link";
+
+const SERVICES_OPTIONS = [
+    "Custom workout plans", "Custom meal plans", "Weekly check-ins",
+    "Messaging support", "Form video reviews", "Contest prep",
+    "Supplement guidance", "Lifestyle coaching", "Habit coaching",
+];
+
+const GOALS_OPTIONS = [
+    "Fat loss", "Muscle gain", "Bodybuilding prep", "Lifestyle fitness",
+    "Strength training", "Powerlifting", "Athletic performance", "Body recomposition",
+];
+
+const CLIENT_TYPES_OPTIONS = [
+    "Beginner", "Intermediate", "Advanced", "Competitors",
+];
 
 const profileSchema = z.object({
     slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
@@ -16,6 +33,15 @@ const profileSchema = z.object({
     acceptingClients: z.boolean(),
     isPublished: z.boolean(),
     welcomeMessage: z.string().max(300, "Welcome message max 300 characters").optional().nullable(),
+    experience: z.string().max(2000).optional().nullable(),
+    certifications: z.string().max(1000).optional().nullable(),
+    coachingType: z.string().optional().nullable(),
+    location: z.string().max(100).optional().nullable(),
+    gymName: z.string().max(100).optional().nullable(),
+    yearsCoaching: z.number().int().min(0).max(50).optional().nullable(),
+    services: z.array(z.string()).default([]),
+    clientGoals: z.array(z.string()).default([]),
+    clientTypes: z.array(z.string()).default([]),
 });
 
 type FormValues = z.infer<typeof profileSchema>;
@@ -29,6 +55,15 @@ type InitialDataProps = {
     acceptingClients?: boolean | null;
     isPublished?: boolean | null;
     welcomeMessage?: string | null;
+    experience?: string | null;
+    certifications?: string | null;
+    coachingType?: string | null;
+    location?: string | null;
+    gymName?: string | null;
+    yearsCoaching?: number | null;
+    services?: string[] | null;
+    clientGoals?: string[] | null;
+    clientTypes?: string[] | null;
 } | null;
 
 export function ProfileForm({
@@ -43,14 +78,14 @@ export function ProfileForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [shareCopied, setShareCopied] = useState(false);
 
     // Toggle states (managed separately for instant feedback)
     const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? false);
     const [isAccepting, setIsAccepting] = useState(initialData?.acceptingClients ?? true);
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(profileSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(profileSchema) as any,
         defaultValues: {
             slug: initialData?.slug || "",
             headline: initialData?.headline || "",
@@ -60,6 +95,15 @@ export function ProfileForm({
             acceptingClients: initialData?.acceptingClients ?? true,
             isPublished: initialData?.isPublished || false,
             welcomeMessage: initialData?.welcomeMessage || "",
+            experience: initialData?.experience || "",
+            certifications: initialData?.certifications || "",
+            coachingType: initialData?.coachingType || "",
+            location: initialData?.location || "",
+            gymName: initialData?.gymName || "",
+            yearsCoaching: initialData?.yearsCoaching ?? null,
+            services: initialData?.services ?? [],
+            clientGoals: initialData?.clientGoals ?? [],
+            clientTypes: initialData?.clientTypes ?? [],
         },
     });
 
@@ -75,6 +119,7 @@ export function ProfileForm({
             await upsertCoachProfile({
                 ...data,
                 specialties: specialtiesArray,
+                yearsCoaching: data.yearsCoaching ? Number(data.yearsCoaching) : null,
             });
 
             setIsPublished(data.isPublished);
@@ -108,21 +153,6 @@ export function ProfileForm({
         }
     }, [form]);
 
-    async function handleShareProfile() {
-        const slug = form.getValues("slug");
-        if (!slug) return;
-        const fullUrl = `${window.location.origin}/coaches/${slug}`;
-        try {
-            await navigator.clipboard.writeText(fullUrl);
-            setShareCopied(true);
-            setTimeout(() => setShareCopied(false), 2000);
-        } catch {
-            /* ignore */
-        }
-    }
-
-    const specialtiesArr = (form.getValues("specialties") || "").split(",").map(s => s.trim()).filter(Boolean);
-
     return (
         <>
             {/* ── Success/Error toast ── */}
@@ -136,113 +166,23 @@ export function ProfileForm({
             )}
 
             {/* ── Action Row ── */}
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex gap-3">
                 <button
                     type="button"
                     onClick={() => setShowEditModal(true)}
-                    className="flex-1 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition-all hover:border-zinc-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-[#0a1224] dark:text-zinc-100 dark:hover:border-zinc-600"
+                    className="flex-1 rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:border-zinc-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-[#0a1224] dark:text-zinc-100 dark:hover:border-zinc-600"
                 >
                     Edit Profile
                 </button>
-                <button
-                    type="button"
-                    onClick={handleShareProfile}
-                    disabled={!isPublished || !form.getValues("slug")}
-                    className={`flex-1 rounded-xl px-5 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-40 disabled:cursor-not-allowed ${shareCopied
-                        ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-                        : "bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-                        }`}
-                >
-                    {shareCopied ? "✓ Link Copied" : "Share Profile"}
-                </button>
-            </div>
-
-            {/* ── About Your Coaching ── */}
-            <div className="mt-6 rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
-                <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">About Your Coaching</h3>
-                    <button
-                        type="button"
-                        onClick={() => setShowEditModal(true)}
-                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                {isPublished && initialData?.slug && (
+                    <Link
+                        href={`/coaches/${initialData.slug}`}
+                        target="_blank"
+                        className="flex-1 rounded-xl bg-zinc-900 px-5 py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
                     >
-                        Edit
-                    </button>
-                </div>
-                <div className="p-6 space-y-5">
-                    <DetailRow label="Professional Headline" value={initialData?.headline || "Not set"} muted={!initialData?.headline} />
-                    <DetailRow label="About / Coaching Philosophy" value={initialData?.bio || "Not set"} muted={!initialData?.bio} multiline />
-                    <div className="grid gap-5 sm:grid-cols-2">
-                        <DetailRow label="Specialties" value={specialtiesArr.length > 0 ? specialtiesArr.join(", ") : "Not set"} muted={specialtiesArr.length === 0} />
-                        <DetailRow label="Pricing" value={initialData?.pricing || "Not set"} muted={!initialData?.pricing} />
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Welcome Message ── */}
-            <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
-                <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-                    <div>
-                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Welcome Message</h3>
-                        <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Shown on your clients&apos; dashboard</p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => setShowEditModal(true)}
-                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-                    >
-                        Edit
-                    </button>
-                </div>
-                <div className="px-6 py-5">
-                    {initialData?.welcomeMessage ? (
-                        <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{initialData.welcomeMessage}</p>
-                    ) : (
-                        <p className="text-sm italic text-zinc-400 dark:text-zinc-500">No welcome message set. Add one to greet your clients.</p>
-                    )}
-                </div>
-            </div>
-
-            {/* ── Visibility & Availability ── */}
-            <div className="mt-4 space-y-px overflow-hidden rounded-2xl border border-zinc-200/80 shadow-sm dark:border-zinc-800/80">
-                {/* Public Visibility */}
-                <div className="bg-white px-6 py-5 dark:bg-[#0a1224]">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Public Visibility</h3>
-                            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                                {isPublished
-                                    ? "Your coaching page is visible in the directory."
-                                    : "Your coaching page is hidden from the public directory."}
-                            </p>
-                        </div>
-                        <Toggle
-                            checked={isPublished}
-                            onChange={(val) => handleToggle("isPublished", val)}
-                            label="Show my coaching page publicly"
-                        />
-                    </div>
-                </div>
-                {/* Divider */}
-                <div className="h-px bg-zinc-100 dark:bg-zinc-800" />
-                {/* Client Availability */}
-                <div className="bg-white px-6 py-5 dark:bg-[#0a1224]">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Accepting New Clients</h3>
-                            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                                {isAccepting
-                                    ? "People can request coaching from your page."
-                                    : "Turn this off if your coaching roster is full."}
-                            </p>
-                        </div>
-                        <Toggle
-                            checked={isAccepting}
-                            onChange={(val) => handleToggle("acceptingClients", val)}
-                            label="Accepting new clients"
-                        />
-                    </div>
-                </div>
+                        Preview Profile
+                    </Link>
+                )}
             </div>
 
             {/* ── Edit Profile Modal ── */}
@@ -275,6 +215,37 @@ export function ProfileForm({
                                         {message.text}
                                     </div>
                                 )}
+
+                                {/* ── Visibility & Availability ── */}
+                                <div className="space-y-4 rounded-xl border border-zinc-100 p-4 dark:border-zinc-800">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Public Visibility</h3>
+                                            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                                                {isPublished ? "Your coaching page is visible." : "Your page is hidden."}
+                                            </p>
+                                        </div>
+                                        <Toggle
+                                            checked={isPublished}
+                                            onChange={(val) => handleToggle("isPublished", val)}
+                                            label="Show my coaching page publicly"
+                                        />
+                                    </div>
+                                    <div className="h-px bg-zinc-100 dark:bg-zinc-800" />
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Accepting Clients</h3>
+                                            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                                                {isAccepting ? "Clients can request coaching." : "Roster is full."}
+                                            </p>
+                                        </div>
+                                        <Toggle
+                                            checked={isAccepting}
+                                            onChange={(val) => handleToggle("acceptingClients", val)}
+                                            label="Accepting new clients"
+                                        />
+                                    </div>
+                                </div>
 
                                 <div>
                                     <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -360,6 +331,134 @@ export function ProfileForm({
                                     <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Shown to your clients on their dashboard</p>
                                 </div>
 
+                                {/* ── Experience & Certs ── */}
+                                <div className="border-t border-zinc-100 pt-5 dark:border-zinc-800">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">Experience & Credentials</p>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Coaching Experience</label>
+                                            <textarea {...form.register("experience")} rows={3} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="Tell clients about your coaching background..." />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Certifications</label>
+                                            <textarea {...form.register("certifications")} rows={2} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="NASM, ISSA, CSCS, etc." />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Coaching Details ── */}
+                                <div className="border-t border-zinc-100 pt-5 dark:border-zinc-800">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">Coaching Details</p>
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Coaching Type</label>
+                                            <select {...form.register("coachingType")} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100">
+                                                <option value="">Select type</option>
+                                                <option value="online">Online</option>
+                                                <option value="in-person">In-Person</option>
+                                                <option value="hybrid">Hybrid</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Location</label>
+                                            <input {...form.register("location")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="e.g. Austin, TX" />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Gym Name</label>
+                                            <input {...form.register("gymName")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="e.g. Gold's Gym" />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Years Coaching</label>
+                                            <input {...form.register("yearsCoaching", { valueAsNumber: true })} type="number" min={0} max={50} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="e.g. 5" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Services Offered ── */}
+                                <div className="border-t border-zinc-100 pt-5 dark:border-zinc-800">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Services Offered</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {SERVICES_OPTIONS.map((service) => {
+                                            const services = form.watch("services") ?? [];
+                                            const checked = services.includes(service);
+                                            return (
+                                                <label key={service} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm cursor-pointer transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={(e) => {
+                                                            const next = e.target.checked
+                                                                ? [...services, service]
+                                                                : services.filter((s: string) => s !== service);
+                                                            form.setValue("services", next, { shouldDirty: true });
+                                                        }}
+                                                        className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600"
+                                                    />
+                                                    <span className="text-zinc-700 dark:text-zinc-300">{service}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* ── Client Goals ── */}
+                                <div className="border-t border-zinc-100 pt-5 dark:border-zinc-800">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Client Goals Supported</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {GOALS_OPTIONS.map((goal) => {
+                                            const goals = form.watch("clientGoals") ?? [];
+                                            const active = goals.includes(goal);
+                                            return (
+                                                <button
+                                                    key={goal}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const next = active
+                                                            ? goals.filter((g: string) => g !== goal)
+                                                            : [...goals, goal];
+                                                        form.setValue("clientGoals", next, { shouldDirty: true });
+                                                    }}
+                                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${active
+                                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                                                        : "border-zinc-200 text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+                                                    }`}
+                                                >
+                                                    {active ? "✓ " : ""}{goal}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* ── Client Types ── */}
+                                <div className="border-t border-zinc-100 pt-5 dark:border-zinc-800">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Client Experience Levels</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {CLIENT_TYPES_OPTIONS.map((type) => {
+                                            const types = form.watch("clientTypes") ?? [];
+                                            const active = types.includes(type);
+                                            return (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const next = active
+                                                            ? types.filter((t: string) => t !== type)
+                                                            : [...types, type];
+                                                        form.setValue("clientTypes", next, { shouldDirty: true });
+                                                    }}
+                                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${active
+                                                        ? "border-violet-500 bg-violet-500/10 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
+                                                        : "border-zinc-200 text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+                                                    }`}
+                                                >
+                                                    {active ? "✓ " : ""}{type}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                                 <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-5 dark:border-zinc-800">
                                     <button
                                         type="button"
@@ -387,30 +486,6 @@ export function ProfileForm({
 
 /* ── Helpers ── */
 
-function DetailRow({
-    label,
-    value,
-    muted = false,
-    multiline = false,
-}: {
-    label: string;
-    value: string;
-    muted?: boolean;
-    multiline?: boolean;
-}) {
-    return (
-        <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</p>
-            <p className={`mt-1.5 text-sm leading-relaxed ${muted
-                ? "text-zinc-400 italic dark:text-zinc-500"
-                : "text-zinc-800 dark:text-zinc-200"
-                } ${multiline ? "whitespace-pre-wrap" : ""}`}>
-                {value}
-            </p>
-        </div>
-    );
-}
-
 function ModalWrapper({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -420,5 +495,5 @@ function ModalWrapper({ onClose, children }: { onClose: () => void; children: Re
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, [onClose]);
 
-    return <>{children}</>;
+    return createPortal(<>{children}</>, document.body);
 }

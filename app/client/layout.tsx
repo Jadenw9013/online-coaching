@@ -41,9 +41,10 @@ export default async function ClientLayout({
       <NavBar
         role="client"
         canSwitchRole={user.isCoach && user.isClient}
+        hasCoach={!!coachClient}
       />
       <main id="main-content" className="mx-auto max-w-5xl px-5 pb-24 pt-8 sm:px-8 sm:pb-8">{children}</main>
-      <MobileBottomNav role="client" />
+      <MobileBottomNav role="client" hasCoach={!!coachClient} />
     </div>
   );
 }

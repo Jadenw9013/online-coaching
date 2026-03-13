@@ -287,6 +287,54 @@ export async function rejectCoachingRequest(requestId: string) {
         timestamp: new Date().toISOString(),
     }));
 
+    // Send rejection email to prospect (fire-and-forget)
+    const coachName = user.firstName || "this coach";
+    try {
+        const { requestDeclinedEmail } = await import("@/lib/email/templates");
+        const email = requestDeclinedEmail(request.prospectName, coachName);
+        sendEmail({ to: request.prospectEmail, ...email }).catch(console.error);
+    } catch { /* email failure must not break rejection */ }
+
+    revalidatePath("/coach/marketplace/requests");
+    revalidatePath("/client");
+    return updated;
+}
+
+export async function cancelCoachingRequest(requestId: string) {
+    const { getCurrentDbUser } = await import("@/lib/auth/roles");
+    const user = await getCurrentDbUser();
+
+    const request = await db.coachingRequest.findUnique({
+        where: { id: requestId },
+        include: { coachProfile: true },
+    });
+
+    if (!request) throw new Error("Request not found");
+
+    // Verify ownership: must be the prospect (by ID or email)
+    const isOwner =
+        (request.prospectId && request.prospectId === user.id) ||
+        request.prospectEmail.toLowerCase() === user.email.toLowerCase();
+
+    if (!isOwner) throw new Error("Unauthorized");
+
+    if (request.status !== "PENDING") {
+        throw new Error("Only pending requests can be canceled.");
+    }
+
+    const updated = await db.coachingRequest.update({
+        where: { id: requestId },
+        data: { status: "REJECTED" }, // reuse REJECTED enum (no CANCELED enum exists)
+    });
+
+    console.info(JSON.stringify({
+        event: "marketplace.request.canceled",
+        requestId: requestId,
+        coachProfileId: request.coachProfile.id,
+        timestamp: new Date().toISOString(),
+    }));
+
+    revalidatePath("/client");
     revalidatePath("/coach/marketplace/requests");
     return updated;
 }

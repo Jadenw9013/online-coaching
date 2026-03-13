@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CoachingRequestsPage() {
-    const profile = await getMyCoachProfile();
+    const { profile } = await getMyCoachProfile();
 
     if (!profile) {
         return (

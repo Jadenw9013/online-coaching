@@ -154,9 +154,9 @@ export function RequestList({
                     : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                     }`}>
                     {approvalFeedback.immediateLink ? (
-                        <p>✅ <strong>{approvalFeedback.prospectName}</strong> is now your client. They already had an account and have been linked automatically.</p>
+                        <p>✅ <strong>{approvalFeedback.prospectName}</strong> is now your client and has been linked to your account.</p>
                     ) : (
-                        <p>✅ Approved. <strong>{approvalFeedback.prospectName}</strong> will receive an email with sign-up instructions. They&apos;ll be linked to you automatically when they create their account.</p>
+                        <p>✅ <strong>{approvalFeedback.prospectName}</strong> will receive a sign-up email and be linked to you automatically.</p>
                     )}
                 </div>
             )}
@@ -243,7 +243,7 @@ export function RequestList({
                                         disabled={processingId !== null}
                                         className="rounded-lg bg-zinc-900 px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-zinc-700 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
                                     >
-                                        {processingId === req.id ? "Processing..." : "Approve & Convert"}
+                                        {processingId === req.id ? "Processing..." : "Accept"}
                                     </button>
                                 )}
                             </div>

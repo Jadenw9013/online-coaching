@@ -98,6 +98,10 @@ model User {
 
   dailyAdherences DailyAdherence[] @relation("DailyAdherences")
   exerciseResults  ExerciseResult[] @relation("ExerciseResults")
+
+  testimonialsByCoach  Testimonial[] @relation("CoachTestimonials")
+  testimonialsByClient Testimonial[] @relation("ClientTestimonials")
+  savedCoaches         SavedCoach[]  @relation("UserSavedCoaches")
 }
 
 model CoachClient {
@@ -542,12 +546,22 @@ model CoachProfile {
   isPublished      Boolean  @default(false)
   welcomeMessage   String?  @db.Text
   bannerPhotoPath  String?
+  experience       String?  @db.Text
+  certifications   String?  @db.Text
+  coachingType     String?              // "online" | "in-person" | "hybrid"
+  location         String?
+  gymName          String?
+  yearsCoaching    Int?
+  services         String[] @default([])
+  clientGoals      String[] @default([])
+  clientTypes      String[] @default([])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   user             User              @relation("MarketplaceProfile", fields: [userId], references: [id], onDelete: Cascade)
   requests         CoachingRequest[]
   portfolioItems   PortfolioItem[]
+  savedBy          SavedCoach[]
 }
 
 model PortfolioItem {
@@ -566,6 +580,38 @@ model PortfolioItem {
   coachProfile   CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
 
   @@index([coachProfileId])
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  coachId      String
+  clientId     String
+  rating       Int                         // 1–5
+  reviewText   String   @db.Text
+  images       String[] @default([])       // up to 4 Supabase storage paths
+  status       String   @default("published") // "published" | "hidden" | "flagged"
+  reportReason String?                     // reason text when coach flags a review
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  coach  User @relation("CoachTestimonials", fields: [coachId], references: [id])
+  client User @relation("ClientTestimonials", fields: [clientId], references: [id])
+
+  @@unique([coachId, clientId])
+  @@index([coachId])
+}
+
+model SavedCoach {
+  id             String       @id @default(cuid())
+  userId         String
+  coachProfileId String
+  createdAt      DateTime     @default(now())
+
+  user         User         @relation("UserSavedCoaches", fields: [userId], references: [id], onDelete: Cascade)
+  coachProfile CoachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, coachProfileId])
+  @@index([userId])
 }
 
 enum RequestStatus {

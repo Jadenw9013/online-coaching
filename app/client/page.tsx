@@ -12,6 +12,10 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
+import { MyRequestsCard } from "@/components/client/my-requests-card";
+import { getMyCoachingRequests } from "@/lib/queries/my-requests";
+import { TestimonialPrompt } from "@/components/client/testimonial-prompt";
+import { getTestimonialEligibility } from "@/lib/queries/testimonial-eligibility";
 import { BecomeCoachForm } from "@/components/client/become-coach-form";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { CheckInStatus } from "@/components/client/check-in-status";
@@ -166,7 +170,15 @@ export default async function ClientDashboard() {
 
 
       {/* Coach connection (only if no coach) */}
-      {!coachAssignment && <ConnectCoachBanner />}
+      {!coachAssignment && (
+        <>
+          {await (async () => {
+            const myRequests = await getMyCoachingRequests();
+            return myRequests.length > 0 ? <MyRequestsCard requests={myRequests} /> : null;
+          })()}
+          <ConnectCoachBanner />
+        </>
+      )}
 
       {/* Intake questionnaire banner — shown when coach has sent an intake */}
       {pendingIntake && (pendingIntake.status === "PENDING" || pendingIntake.status === "IN_PROGRESS") && (
@@ -196,6 +208,19 @@ export default async function ClientDashboard() {
           </Link>
         </div>
       )}
+
+      {/* Testimonial prompt — shown when client has a coach */}
+      {coachAssignment && await (async () => {
+        const eligibility = await getTestimonialEligibility(user.id);
+        if (!eligibility.coachId) return null;
+        return (
+          <TestimonialPrompt
+            coachId={eligibility.coachId}
+            coachName={eligibility.coachName!}
+            hasExisting={!eligibility.eligible}
+          />
+        );
+      })()}
 
       {/* Your Plans — 2-card grid */}
       {(mealPlan || (trainingProgram && trainingProgram.days.length > 0)) && (

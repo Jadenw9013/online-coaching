@@ -146,3 +146,33 @@ ${appUrl}/client${FOOTER}`;
 
     return { subject, text };
 }
+
+export function requestDeclinedEmail(prospectName: string, coachName: string) {
+    const subject = `Update on Your Coaching Request — Steadfast`;
+    const text = `Hi ${prospectName},
+
+Thanks for your interest in working with ${coachName}. Unfortunately, they're unable to take on new clients at this time.
+
+This doesn't reflect on you — coaches have limited availability and may not be the right fit for every request.
+
+Browse other available coaches:
+${appUrl}/coaches
+
+We're confident you'll find the right coach for your goals.${FOOTER}`;
+
+    return { subject, text };
+}
+
+export function newTestimonialEmail(coachName: string, clientName: string) {
+    const subject = `New Review from ${clientName}`;
+    const text = `Hi ${coachName},
+
+${clientName} just left you a verified review on your Steadfast coaching profile.
+
+View your testimonials:
+${appUrl}/coach/marketplace/profile
+
+Verified reviews help build trust with potential clients. Thank your client for sharing their experience!${FOOTER}`;
+
+    return { subject, text };
+}

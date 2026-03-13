@@ -10,9 +10,11 @@ import { ThemeToggle } from "./theme-toggle";
 export function NavBar({
   role,
   canSwitchRole,
+  hasCoach,
 }: {
   role: "coach" | "client";
   canSwitchRole?: boolean;
+  hasCoach?: boolean;
 }) {
   const pathname = usePathname();
   const maxWidth = role === "coach" ? "max-w-7xl" : "max-w-5xl";
@@ -32,7 +34,13 @@ export function NavBar({
         { href: "/coach/marketplace/profile", label: "Coaching Profile" },
         { href: "/coach/templates", label: "Workout Plans" },
       ]
-      : [{ href: "/client/profile", label: "Profile" }];
+      : [
+        ...(!hasCoach ? [
+          { href: "/coaches", label: "Find a Coach" },
+          { href: "/client/saved-coaches", label: "Saved" },
+        ] : []),
+        { href: "/client/profile", label: "Profile" },
+      ];
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md dark:bg-transparent dark:backdrop-blur-lg dark:border-b dark:border-white/[0.04]">
