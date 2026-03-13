@@ -1,4 +1,5 @@
 import { createServiceClient } from "./server";
+import { unstable_cache } from "next/cache";
 
 const BUCKET = "profile-photos";
 
@@ -39,6 +40,24 @@ export async function getProfilePhotoUrl(
 
     return data.signedUrl;
 }
+
+/**
+ * Cached version of getProfilePhotoUrl.
+ * Cache wrapper is created once at module scope — not per call.
+ * Revalidates every 30 minutes (signed URL has 1hr TTL).
+ */
+const _cachedGetUrl = unstable_cache(
+    async (storagePath: string) => getProfilePhotoUrl(storagePath),
+    ["profile-photo-url"],
+    { revalidate: 1800 }
+);
+
+export async function getCachedProfilePhotoUrl(
+    storagePath: string
+): Promise<string> {
+    return _cachedGetUrl(storagePath);
+}
+
 
 export async function deleteProfilePhoto(
     storagePath: string

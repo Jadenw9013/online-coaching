@@ -43,15 +43,15 @@ export function NavBar({
       ];
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md dark:bg-transparent dark:backdrop-blur-lg dark:border-b dark:border-white/[0.04]">
-      <div className={`mx-auto flex h-14 ${maxWidth} items-center justify-between px-5 sm:px-8`}>
+    <header className="sticky top-0 z-30 border-b border-white/[0.04] bg-[#020815]/80 backdrop-blur-xl">
+      <div className={`mx-auto flex h-14 ${maxWidth} items-center justify-between px-4 sm:px-8`}>
         {/* Logo */}
         <Link
           href={homeHref}
           className="group flex items-center gap-2.5"
           aria-label="Steadfast home"
         >
-          <div className="relative h-7 w-7 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8">
+          <div className="relative h-7 w-7 shrink-0 transition-transform duration-200 group-hover:scale-110">
             <Image
               src="/brand/Steadfast_logo_pictoral.png"
               alt=""
@@ -60,7 +60,7 @@ export function NavBar({
               className="object-contain brightness-0 dark:brightness-100"
             />
           </div>
-          <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-gray-900 dark:text-gray-100 sm:inline">
+          <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-zinc-100 sm:inline">
             Steadfast
           </span>
         </Link>
@@ -69,7 +69,7 @@ export function NavBar({
         <nav className="flex items-center gap-1 sm:gap-1.5" aria-label="Main navigation">
           {canSwitchRole && <RoleSwitcher currentRole={role} />}
 
-          {/* Desktop links */}
+          {/* Desktop nav links */}
           {navLinks.map((link) => {
             const active = isActive(link.href);
             return (
@@ -77,8 +77,8 @@ export function NavBar({
                 key={link.href}
                 href={link.href}
                 className={`hidden rounded-lg px-3 py-1.5 text-sm font-medium transition-colors sm:block ${active
-                  ? "bg-gray-900/[0.06] text-gray-900 dark:bg-white/[0.08] dark:text-white"
-                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  ? "bg-white/[0.08] text-white"
+                  : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
                   }`}
                 aria-current={active ? "page" : undefined}
               >
@@ -87,12 +87,12 @@ export function NavBar({
             );
           })}
 
-          {/* Settings icon */}
+          {/* Settings — desktop only */}
           <Link
             href={role === "coach" ? "/coach/settings" : "/client/settings"}
             className={`hidden h-8 w-8 items-center justify-center rounded-lg transition-colors sm:flex ${isActive(role === "coach" ? "/coach/settings" : "/client/settings")
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-400 hover:text-gray-700 dark:hover:text-white"
+              ? "text-white"
+              : "text-zinc-500 hover:text-zinc-200"
               }`}
             aria-label="Settings"
             aria-current={isActive(role === "coach" ? "/coach/settings" : "/client/settings") ? "page" : undefined}
@@ -103,11 +103,15 @@ export function NavBar({
             </svg>
           </Link>
 
-          {/* Client check-in CTA */}
+          {/* Client check-in CTA — desktop: full button, mobile: compact pill */}
           {role === "client" && (
             <Link
               href="/client/check-in"
-              className="rounded-lg bg-gray-900 px-3.5 py-1.5 text-sm font-semibold text-white transition-all hover:bg-gray-800 hover:shadow-sm active:scale-[0.97] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:shadow-sm active:scale-[0.97] dark:shadow-blue-500/20 dark:hover:brightness-110 ${
+                isActive("/client/check-in")
+                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+                  : "bg-blue-600/80 text-white hover:bg-blue-500"
+              }`}
             >
               <span className="hidden sm:inline">New Check-In</span>
               <span className="sm:hidden">Check-In</span>
@@ -121,9 +125,6 @@ export function NavBar({
           </SignedIn>
         </nav>
       </div>
-
-      {/* Subtle gradient separator */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-gray-700/40" />
     </header>
   );
 }

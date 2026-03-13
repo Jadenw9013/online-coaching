@@ -403,14 +403,21 @@ function RulesSection({ extras }: { extras: PlanExtras }) {
     grouped.get(key)!.push(rule.text);
   }
 
-  const categoryIcons: Record<string, string> = {
-    "Meal Timing": "🕐",
-    "Hydration": "💧",
-    "Cardio": "🏃",
-    "Check-In": "📋",
-    "Communication": "💬",
-    "Cooking": "🍳",
-    "Other": "📌",
+  const categoryIcons: Record<string, React.ReactNode> = {
+    // Clock — meal timing (blue)
+    "Meal Timing": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+    // Droplet — hydration (cyan)
+    "Hydration": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>,
+    // Zap — cardio (orange)
+    "Cardio": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
+    // Clipboard check — check-in (emerald)
+    "Check-In": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="m9 12 2 2 4-4" /></svg>,
+    // Message circle — communication (violet)
+    "Communication": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
+    // Flame — cooking (amber)
+    "Cooking": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>,
+    // Pin — other (zinc)
+    "Other": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22" /><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" /></svg>,
   };
 
   const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
@@ -432,7 +439,7 @@ function RulesSection({ extras }: { extras: PlanExtras }) {
           return (
             <div key={category} className={`rounded-xl border ${colors.border} ${colors.bg.replace("/10", "/5")} px-4 py-3`}>
               <div className="mb-2 flex items-center gap-2">
-                <span className="text-sm" aria-hidden="true">{icon}</span>
+                <span className="flex h-5 w-5 items-center justify-center" aria-hidden="true">{icon}</span>
                 <span className={`text-[11px] font-bold uppercase tracking-wider ${colors.text}`}>{category}</span>
               </div>
               <ul className="space-y-1.5 pl-1">

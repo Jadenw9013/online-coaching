@@ -73,7 +73,7 @@ export function CoachFilters() {
         <div className="space-y-6">
             {/* Sort */}
             <div>
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     Sort
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -82,10 +82,10 @@ export function CoachFilters() {
                             key={opt.value}
                             type="button"
                             onClick={() => updateFilter("sort", currentSort === opt.value ? "" : opt.value)}
-                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                 currentSort === opt.value || (!currentSort && !opt.value)
-                                    ? "bg-zinc-900 text-white shadow-sm dark:bg-zinc-100 dark:text-zinc-900"
-                                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                    ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                    : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                             }`}
                         >
                             {opt.label}
@@ -96,7 +96,7 @@ export function CoachFilters() {
 
             {/* Goal */}
             <div>
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     Goal
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -105,10 +105,10 @@ export function CoachFilters() {
                             key={goal}
                             type="button"
                             onClick={() => updateFilter("goal", currentGoal === goal ? "" : goal)}
-                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                 currentGoal === goal
-                                    ? "bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300"
-                                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                    ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                    : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                             }`}
                         >
                             {goal}
@@ -119,7 +119,7 @@ export function CoachFilters() {
 
             {/* Coaching Type */}
             <div>
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     Type
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -128,10 +128,10 @@ export function CoachFilters() {
                             key={opt.value}
                             type="button"
                             onClick={() => updateFilter("type", currentType === opt.value ? "" : opt.value)}
-                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                 currentType === opt.value
-                                    ? "bg-blue-500/15 text-blue-700 ring-1 ring-blue-500/30 dark:bg-blue-500/20 dark:text-blue-300"
-                                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                    ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                    : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                             }`}
                         >
                             {opt.label}
@@ -140,13 +140,13 @@ export function CoachFilters() {
                 </div>
             </div>
 
+
             {/* ── More Filters (collapsible) ── */}
             <div>
                 <button
                     type="button"
                     onClick={() => setShowMore(!isMoreOpen)}
-                    className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                >
+                    className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="14"
@@ -170,10 +170,10 @@ export function CoachFilters() {
                 </button>
 
                 {isMoreOpen && (
-                    <div className="mt-4 space-y-5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                    <div className="mt-4 space-y-5 border-t border-white/[0.06] pt-4">
                         {/* Service */}
                         <div>
-                            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                                 Service
                             </p>
                             <div className="flex flex-wrap gap-1.5">
@@ -182,10 +182,10 @@ export function CoachFilters() {
                                         key={svc}
                                         type="button"
                                         onClick={() => updateFilter("service", currentService === svc ? "" : svc)}
-                                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                             currentService === svc
-                                                ? "bg-violet-500/15 text-violet-700 ring-1 ring-violet-500/30 dark:bg-violet-500/20 dark:text-violet-300"
-                                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                                ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                                : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                                         }`}
                                     >
                                         {svc}
@@ -196,7 +196,7 @@ export function CoachFilters() {
 
                         {/* Client Level */}
                         <div>
-                            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                                 Client Level
                             </p>
                             <div className="flex flex-wrap gap-1.5">
@@ -205,10 +205,10 @@ export function CoachFilters() {
                                         key={ct}
                                         type="button"
                                         onClick={() => updateFilter("clientType", currentClientType === ct ? "" : ct)}
-                                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                             currentClientType === ct
-                                                ? "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300"
-                                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                                ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                                : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                                         }`}
                                     >
                                         {ct}
@@ -219,7 +219,7 @@ export function CoachFilters() {
 
                         {/* Min Rating */}
                         <div>
-                            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                                 Min Rating
                             </p>
                             <div className="flex flex-wrap gap-1.5">
@@ -228,10 +228,10 @@ export function CoachFilters() {
                                         key={r}
                                         type="button"
                                         onClick={() => updateFilter("minRating", currentMinRating === String(r) ? "" : String(r))}
-                                        className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                                        className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                             currentMinRating === String(r)
-                                                ? "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300"
-                                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                                ? "bg-blue-500/15 text-blue-300 ring-1 ring-blue-500/30"
+                                                : "border border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-zinc-200"
                                         }`}
                                     >
                                         {r}+
@@ -247,9 +247,9 @@ export function CoachFilters() {
                                 type="checkbox"
                                 checked={acceptingOnly}
                                 onChange={(e) => updateFilter("accepting", e.target.checked ? "1" : "")}
-                                className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600"
+                                className="rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30"
                             />
-                            <span className="text-xs text-zinc-600 dark:text-zinc-400">Accepting new clients</span>
+                            <span className="text-xs text-zinc-400">Accepting new clients</span>
                         </label>
                     </div>
                 )}
@@ -260,7 +260,7 @@ export function CoachFilters() {
                 <button
                     type="button"
                     onClick={clearAll}
-                    className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
                 >
                     Clear all filters
                 </button>
@@ -280,7 +280,7 @@ export function CoachFilters() {
                 <button
                     type="button"
                     onClick={() => setShowMobileFilters(!showMobileFilters)}
-                    className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:bg-[#0a1224] dark:text-zinc-300"
+                    className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-white/20"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="4" y1="21" y2="14" /><line x1="4" x2="4" y1="10" y2="3" /><line x1="12" x2="12" y1="21" y2="12" /><line x1="12" x2="12" y1="8" y2="3" /><line x1="20" x2="20" y1="21" y2="16" /><line x1="20" x2="20" y1="12" y2="3" /><line x1="2" x2="6" y1="14" y2="14" /><line x1="10" x2="14" y1="8" y2="8" /><line x1="18" x2="22" y1="16" y2="16" /></svg>
                     Filters
@@ -294,12 +294,12 @@ export function CoachFilters() {
 
             {/* Mobile Filter Drawer */}
             {showMobileFilters && (
-                <div className="lg:hidden mb-6 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0a1224]">
+                <div className="lg:hidden mb-6 rounded-2xl border border-white/[0.07] bg-[#0d1428] p-5">
                     {filterContent}
                     <button
                         type="button"
                         onClick={() => setShowMobileFilters(false)}
-                        className="mt-5 w-full rounded-full bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900"
+                        className="mt-5 w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-500"
                     >
                         Done
                     </button>

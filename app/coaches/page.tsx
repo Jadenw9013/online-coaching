@@ -1,5 +1,5 @@
 import { getPublishedCoaches } from "@/lib/queries/marketplace";
-import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
+import { getCachedProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,37 @@ export const metadata: Metadata = {
 
 interface PageProps {
     searchParams: Promise<{ [key: string]: string | undefined }>;
+}
+
+// Color palettes cycled per card index for visual distinction
+const TAG_PALETTES = [
+    "bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20",
+    "bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20",
+    "bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20",
+    "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20",
+    "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20",
+    "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20",
+];
+
+const BANNER_GRADIENTS = [
+    "from-[#0f2042] via-[#1a3a7a] to-[#0d1829]",
+    "from-[#1a0a3d] via-[#2d1466] to-[#0d0d1f]",
+    "from-[#052e2e] via-[#0a4a5a] to-[#061420]",
+    "from-[#1f0d08] via-[#3d1a10] to-[#0d0a06]",
+    "from-[#0d2200] via-[#1a3d00] to-[#081408]",
+];
+
+function VerifiedBadge() {
+    return (
+        <span
+            title="Verified Coach"
+            className="ml-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500 ring-1 ring-blue-400/30"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+            </svg>
+        </span>
+    );
 }
 
 export default async function CoachesDirectoryPage({ searchParams }: PageProps) {
@@ -37,7 +68,7 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
         coaches.map(async (profile) => {
             let avatarUrl: string | null = null;
             if (profile.user.profilePhotoPath) {
-                try { avatarUrl = await getProfilePhotoUrl(profile.user.profilePhotoPath); } catch { /* */ }
+                try { avatarUrl = await getCachedProfilePhotoUrl(profile.user.profilePhotoPath); } catch { /* */ }
             }
             return { ...profile, avatarUrl };
         })
@@ -63,81 +94,103 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
 
     const hasFilters = activeFilters.length > 0;
 
+    // Platform-level trust stats
+    const totalCoaches = coachesWithPhotos.length;
+    const acceptingCount = coachesWithPhotos.filter(c => c.acceptingClients).length;
+    const allRatings = coachesWithPhotos.filter(c => c.ratingSummary.averageRating > 0);
+    const platformAvg = allRatings.length > 0
+        ? (allRatings.reduce((s, c) => s + c.ratingSummary.averageRating, 0) / allRatings.length).toFixed(1)
+        : null;
+
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#020815]">
+        <div className="min-h-screen bg-[#080d1a] text-zinc-100">
             {/* ── Nav ── */}
-            <header className="sticky top-0 z-30 bg-zinc-50 dark:bg-[#020815]">
+            <header className="sticky top-0 z-30 border-b border-white/[0.05] bg-[#080d1a]/95 backdrop-blur-sm">
                 <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:px-8">
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-2.5"
-                        aria-label="Steadfast home"
-                    >
+                    <Link href="/" className="group flex items-center gap-2.5" aria-label="Steadfast home">
                         <div className="relative h-7 w-7 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8">
-                            <Image
-                                src="/brand/Steadfast_logo_pictoral.png"
-                                alt=""
-                                fill
-                                priority
-                                className="object-contain brightness-0 dark:brightness-100"
-                            />
+                            <Image src="/brand/Steadfast_logo_pictoral.png" alt="" fill priority className="object-contain" />
                         </div>
-                        <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-gray-900 dark:text-gray-100 sm:inline">Steadfast</span>
+                        <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-zinc-100 sm:inline">Steadfast</span>
                     </Link>
                     <nav className="flex items-center gap-3">
                         <ThemeToggle />
-                        <Link
-                            href="/sign-in"
-                            className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                        >
-                            Sign In
-                        </Link>
+                        <Link href="/sign-in" className="text-sm font-medium text-zinc-400 transition-colors hover:text-white">Sign In</Link>
                         <Link
                             href="/sign-up"
-                            className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-gray-800 hover:shadow-sm active:scale-[0.97] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                            className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:brightness-110 active:scale-[0.97]"
                         >
                             Get Started
                         </Link>
                     </nav>
                 </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-gray-700/40" />
             </header>
 
-            <main className="mx-auto max-w-5xl px-5 py-16 sm:px-8" id="main-content">
-                <div className="mb-12">
+            <main className="mx-auto max-w-5xl px-5 py-12 sm:px-8" id="main-content">
+                {/* ── Hero ── */}
+                <div className="mb-8">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl text-zinc-900 dark:text-zinc-100">
+                        <h1 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
                             Find your coach
                         </h1>
-                        <span className="rounded-full border border-zinc-300 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+                        <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-400">
                             Beta
                         </span>
                     </div>
-                    <p className="mt-3 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
+                    <p className="mt-3 max-w-2xl text-base text-zinc-400">
                         Browse verified coaches and find the right fit for your goals.
                     </p>
 
-                    {/* ── Search Input ── */}
+                    {/* Search */}
                     <form action="/coaches" method="GET" className="mt-6 max-w-md">
-                        {/* Preserve existing filters when searching */}
                         {Object.entries(params).filter(([k, v]) => k !== "q" && v).map(([k, v]) => (
                             <input key={k} type="hidden" name={k} value={v} />
                         ))}
                         <div className="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
+                                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+                            </svg>
                             <input
                                 type="text"
                                 name="q"
                                 defaultValue={params.q || ""}
                                 placeholder="Search by name, specialty, or keyword..."
-                                className="w-full rounded-xl border border-zinc-300 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition-all focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-[#0a1224] dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-zinc-500"
+                                className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-zinc-100 placeholder-zinc-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             />
                         </div>
                     </form>
                 </div>
 
+                {/* ── Trust Stats Bar ── */}
+                <div className="mb-10 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-5 py-3.5">
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="font-display text-xl font-bold text-white">{totalCoaches}</span>
+                        <span className="text-xs text-zinc-500 uppercase tracking-wider">coaches available</span>
+                    </div>
+                    <div className="h-3 w-px bg-white/10 hidden sm:block" />
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="font-display text-xl font-bold text-white">100%</span>
+                        <span className="text-xs text-zinc-500 uppercase tracking-wider">verified</span>
+                    </div>
+                    {platformAvg && (
+                        <>
+                            <div className="h-3 w-px bg-white/10 hidden sm:block" />
+                            <div className="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                <span className="font-display text-xl font-bold text-white">{platformAvg}</span>
+                                <span className="text-xs text-zinc-500 uppercase tracking-wider">avg rating</span>
+                            </div>
+                        </>
+                    )}
+                    <div className="h-3 w-px bg-white/10 hidden sm:block" />
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="font-display text-xl font-bold text-emerald-400">{acceptingCount}</span>
+                        <span className="text-xs text-zinc-500 uppercase tracking-wider">accepting now</span>
+                    </div>
+                </div>
+
                 {/* ── Mobile Filters ── */}
-                <div className="lg:hidden">
+                <div className="lg:hidden mb-4">
                     <Suspense>
                         <CoachFilters />
                     </Suspense>
@@ -146,8 +199,8 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                 <div className="flex gap-8">
                     {/* ── Desktop Filter Sidebar ── */}
                     <div className="hidden lg:block w-64 shrink-0">
-                        <div className="sticky top-24 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
-                            <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-zinc-400">Filters</h3>
+                        <div className="sticky top-24 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5">
+                            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Filters</h3>
                             <Suspense>
                                 <CoachFilters />
                             </Suspense>
@@ -155,10 +208,10 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                     </div>
 
                     {/* ── Coach Grid ── */}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                         {/* Result count + active chips */}
                         <div className="mb-5">
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            <p className="text-sm text-zinc-500">
                                 {coachesWithPhotos.length} {coachesWithPhotos.length === 1 ? "coach" : "coaches"}{hasFilters ? " matching filters" : " available"}
                             </p>
                             {activeFilters.length > 0 && (
@@ -169,16 +222,13 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                                             href={`/coaches?${new URLSearchParams(
                                                 Object.entries(params).filter(([k, v]) => k !== f.paramKey && v !== undefined) as [string, string][]
                                             ).toString()}`}
-                                            className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-600"
+                                            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-zinc-300 transition-colors hover:border-white/20 hover:bg-white/10"
                                         >
                                             {f.label}
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                                         </Link>
                                     ))}
-                                    <Link
-                                        href="/coaches"
-                                        className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
-                                    >
+                                    <Link href="/coaches" className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300">
                                         Clear all
                                     </Link>
                                 </div>
@@ -186,137 +236,164 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                         </div>
 
                         {coaches.length === 0 ? (
-                            <div className="rounded-2xl border border-zinc-200 border-dashed bg-white p-12 text-center dark:border-zinc-800 dark:bg-[#0a1224]">
-                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center">
+                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                                 </div>
-                                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                <p className="text-sm font-medium text-zinc-300">
                                     {hasFilters ? "No coaches match your filters" : "No coaches are listed yet"}
                                 </p>
-                                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                                    {hasFilters
-                                        ? "Try adjusting your filters to see more results."
-                                        : "Our first coaches are setting up their profiles. Check back soon or create an account to be ready when they launch."}
+                                <p className="mt-2 text-sm text-zinc-500">
+                                    {hasFilters ? "Try adjusting your filters to see more results." : "Our first coaches are setting up their profiles. Check back soon."}
                                 </p>
-                                {hasFilters ? (
-                                    <Link
-                                        href="/coaches"
-                                        className="mt-6 inline-block rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-                                    >
+                                {hasFilters && (
+                                    <Link href="/coaches" className="mt-6 inline-block rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-500">
                                         Clear Filters
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href="/sign-up"
-                                        className="mt-6 inline-block rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-                                    >
-                                        Create Free Account
                                     </Link>
                                 )}
                             </div>
                         ) : (
-                            <div className="stagger-children grid gap-5 sm:grid-cols-2">
-                                {coachesWithPhotos.map((profile) => (
-                                    <Link
-                                        key={profile.id}
-                                        href={`/coaches/${profile.slug}`}
-                                        className="group relative flex flex-col rounded-2xl border border-zinc-200/60 bg-white p-5 transition-all duration-200 hover:border-zinc-300/80 hover:shadow-md hover:-translate-y-0.5 dark:border-zinc-800/60 dark:bg-[#0a1224] dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/30"
-                                    >
-                                        {/* Save button */}
-                                        {savedIds !== null && (
-                                            <div className="absolute top-4 right-4 z-10">
-                                                <SaveCoachButton coachProfileId={profile.id} initialSaved={savedIds.has(profile.id)} />
-                                            </div>
-                                        )}
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                {coachesWithPhotos.map((profile, idx) => {
+                                    const tagPalette = TAG_PALETTES[idx % TAG_PALETTES.length];
+                                    const bannerGradient = BANNER_GRADIENTS[idx % BANNER_GRADIENTS.length];
+                                    const hasRating = profile.ratingSummary.totalReviews > 0;
 
-                                        {/* Avatar + Name + Headline */}
-                                        <div className="flex items-start gap-4">
-                                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-zinc-100 ring-2 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700/80">
-                                                {profile.avatarUrl ? (
-                                                    <Image
-                                                        src={profile.avatarUrl}
-                                                        alt={`${profile.user.firstName} ${profile.user.lastName}`}
-                                                        width={64}
-                                                        height={64}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-zinc-500 dark:text-zinc-400">
-                                                        {profile.user.firstName?.[0]}{profile.user.lastName?.[0]}
+                                    return (
+                                        <Link
+                                            key={profile.id}
+                                            href={`/coaches/${profile.slug}`}
+                                            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1428] transition-all duration-200 ease-out hover:-translate-y-[3px] hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10"
+                                            style={{ "--tw-shadow-color": "rgba(59,124,244,0.15)" } as React.CSSProperties}
+                                        >
+                                            {/* Top accent line — appears on hover */}
+                                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+                                            {/* Save button */}
+                                            {savedIds !== null && (
+                                                <div className="absolute top-3 right-3 z-10">
+                                                    <SaveCoachButton coachProfileId={profile.id} initialSaved={savedIds.has(profile.id)} />
+                                                </div>
+                                            )}
+
+                                            {/* ── Banner + Avatar overlap ── */}
+                                            <div className="relative">
+                                                {/* Banner strip */}
+                                                <div className={`h-20 bg-gradient-to-br ${bannerGradient}`} />
+                                                {/* Avatar overlapping banner by 50% */}
+                                                <div className="absolute -bottom-8 left-5">
+                                                    <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#0d1428] bg-[#1a2540] ring-2 ring-white/10 shadow-lg shadow-black/40">
+                                                        {profile.avatarUrl ? (
+                                                            <Image
+                                                                src={profile.avatarUrl}
+                                                                alt={`${profile.user.firstName} ${profile.user.lastName}`}
+                                                                width={64}
+                                                                height={64}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center text-xl font-bold text-zinc-400">
+                                                                {profile.user.firstName?.[0]}{profile.user.lastName?.[0]}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
-                                            <div className="min-w-0 pt-1">
-                                                <h2 className="text-base font-bold text-zinc-900 transition-colors group-hover:text-zinc-600 dark:text-zinc-100 dark:group-hover:text-zinc-300 truncate">
-                                                    {profile.user.firstName} {profile.user.lastName}
-                                                </h2>
-                                                {profile.headline && (
-                                                    <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                                                        {profile.headline}
-                                                    </p>
-                                                )}
-                                                {/* Inline meta */}
-                                                <div className="mt-1.5 flex items-center gap-3 text-xs text-zinc-400 dark:text-zinc-500">
-                                                    {profile.ratingSummary.totalReviews > 0 && (
-                                                        <span className="inline-flex items-center gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                                                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">{profile.ratingSummary.averageRating.toFixed(1)}</span>
-                                                            <span>({profile.ratingSummary.totalReviews})</span>
-                                                        </span>
-                                                    )}
+
+                                            {/* ── Card body ── */}
+                                            <div className="flex flex-1 flex-col px-5 pb-5 pt-11">
+                                                {/* Name + verified + availability */}
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center">
+                                                            <h2 className="truncate text-base font-bold text-white">
+                                                                {profile.user.firstName} {profile.user.lastName}
+                                                            </h2>
+                                                            <VerifiedBadge />
+                                                        </div>
+                                                        {profile.headline && (
+                                                            <p className="mt-0.5 truncate text-[13px] text-zinc-400">{profile.headline}</p>
+                                                        )}
+                                                    </div>
+                                                    {/* Availability pill */}
                                                     {profile.acceptingClients ? (
-                                                        <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                                                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                        <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 ring-1 ring-emerald-500/20">
+                                                            <span className="relative flex h-1.5 w-1.5">
+                                                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                                                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                                            </span>
                                                             Available
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                                                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                                        <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-400 ring-1 ring-amber-500/20">
                                                             Full
                                                         </span>
                                                     )}
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Bio excerpt */}
-                                        {profile.bio && (
-                                            <p className="mt-4 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                                                {profile.bio}
-                                            </p>
-                                        )}
+                                                {/* ── Stats row ── */}
+                                                <div className="mt-4 grid grid-cols-3 divide-x divide-white/[0.06] rounded-xl border border-white/[0.06] bg-white/[0.03]">
+                                                    <div className="flex flex-col items-center py-2.5 px-1">
+                                                        <span className="font-display text-lg font-bold leading-none text-white">
+                                                            {hasRating ? profile.ratingSummary.averageRating.toFixed(1) : "—"}
+                                                        </span>
+                                                        <span className="mt-1 text-[9px] font-semibold uppercase tracking-widest text-zinc-500">Rating</span>
+                                                    </div>
+                                                    <div className="flex flex-col items-center py-2.5 px-1">
+                                                        <span className="font-display text-lg font-bold leading-none text-white">
+                                                            {profile.clientCount > 0 ? profile.clientCount : "—"}
+                                                        </span>
+                                                        <span className="mt-1 text-[9px] font-semibold uppercase tracking-widest text-zinc-500">Clients</span>
+                                                    </div>
+                                                    <div className="flex flex-col items-center py-2.5 px-1">
+                                                        <span className="font-display text-lg font-bold leading-none text-white">
+                                                            {profile.ratingSummary.totalReviews > 0 ? profile.ratingSummary.totalReviews : "—"}
+                                                        </span>
+                                                        <span className="mt-1 text-[9px] font-semibold uppercase tracking-widest text-zinc-500">Reviews</span>
+                                                    </div>
+                                                </div>
 
-                                        {/* Tags */}
-                                        {profile.clientGoals.length > 0 && (
-                                            <div className="mt-3 flex flex-wrap gap-1.5">
-                                                {profile.clientGoals.slice(0, 3).map((goal, i) => (
-                                                    <span key={i} className="inline-flex rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                                                        {goal}
-                                                    </span>
-                                                ))}
-                                                {profile.clientGoals.length > 3 && (
-                                                    <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
-                                                        +{profile.clientGoals.length - 3}
-                                                    </span>
+                                                {/* Bio excerpt */}
+                                                {profile.bio && (
+                                                    <p className="mt-4 text-[13px] leading-relaxed text-zinc-400 line-clamp-2">
+                                                        {profile.bio}
+                                                    </p>
                                                 )}
-                                            </div>
-                                        )}
 
-                                        {/* Footer — Pricing + View */}
-                                        <div className="mt-auto pt-4 flex items-center justify-between">
-                                            {profile.pricing ? (
-                                                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                                                    {profile.pricing}
-                                                </span>
-                                            ) : (
-                                                <span />
-                                            )}
-                                            <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors">
-                                                View Profile &rarr;
-                                            </span>
-                                        </div>
-                                    </Link>
-                                ))}
+                                                {/* Specialty tags */}
+                                                {profile.clientGoals.length > 0 && (
+                                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                                        {profile.clientGoals.slice(0, 3).map((goal, i) => (
+                                                            <span key={i} className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-medium ${tagPalette}`}>
+                                                                {goal}
+                                                            </span>
+                                                        ))}
+                                                        {profile.clientGoals.length > 3 && (
+                                                            <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] text-zinc-500">
+                                                                +{profile.clientGoals.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Footer — Pricing + View */}
+                                                <div className="mt-auto flex items-center justify-between pt-4">
+                                                    {profile.pricing ? (
+                                                        <span className="text-sm font-semibold text-white">
+                                                            {profile.pricing}
+                                                        </span>
+                                                    ) : (
+                                                        <span />
+                                                    )}
+                                                    <span className="inline-flex items-center gap-1 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-400 transition-all duration-200 group-hover:border-blue-500/40 group-hover:bg-blue-500/20 group-hover:text-blue-300">
+                                                        View Profile
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

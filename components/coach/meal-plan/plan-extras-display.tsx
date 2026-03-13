@@ -30,6 +30,13 @@ export function PlanExtrasEditor({
 }) {
   // ── Toast state ───────────────────────────────────────────────────────────
   const [toast, setToast] = useState<string | null>(null);
+  // ── Collapse state for sub-sections (all collapsed by default) ────────────
+  const [planDetailsOpen, setPlanDetailsOpen] = useState(false);
+  const [overridesOpen, setOverridesOpen] = useState(false);
+  const [supplementsOpen, setSupplementsOpen] = useState(false);
+  const [allowancesOpen, setAllowancesOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+
   useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(null), 2000);
@@ -386,15 +393,41 @@ export function PlanExtrasEditor({
         />
       )}
 
-      {/* Section divider */}
-      <div className="flex items-center gap-2">
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700/50" />
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">Plan Details</span>
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700/50" />
-      </div>
+      {/* Plan Details — prominent collapsible section header */}
+      <button
+        type="button"
+        onClick={() => setPlanDetailsOpen((v) => !v)}
+        className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition-all hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        aria-expanded={planDetailsOpen}
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-sm">📋</span>
+          <div>
+            <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Plan Details</span>
+            <span className="ml-2 text-xs text-zinc-400 dark:text-zinc-500">
+              {planDetailsOpen ? "Click to collapse" : "Overrides, supplements, rules & more"}
+            </span>
+          </div>
+        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 ${planDetailsOpen ? "rotate-180" : ""}`}
+          aria-hidden
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
 
       {/* ── Metadata ── */}
-      {extras.metadata && (
+      {planDetailsOpen && extras.metadata && (
         <ExtrasCard>
           <ExtrasCardHeader label="Overview" />
           <div className="grid gap-2 sm:grid-cols-3">
@@ -428,124 +461,143 @@ export function PlanExtrasEditor({
         </ExtrasCard>
       )}
 
-      {/* ── Day Overrides ── */}
-      <ExtrasCard>
-        <div className="flex items-center justify-between mb-2.5">
-          <ExtrasCardHeader label="Day Overrides" count={extras.dayOverrides?.length} />
-          <SectionMenu
-            actions={[
-              { label: "Paste Override", onClick: handlePasteOverride },
-              { label: "Apply Template…", onClick: () => handleApplyTemplate("override", (payload) => {
-                const data = payload as DayOverride;
-                onChange({ ...extras, dayOverrides: [...(extras.dayOverrides ?? []), { ...data, label: `${data.label}` }] });
-                showToast("Template applied");
-              })},
-            ]}
-          />
-        </div>
-
-        {(extras.dayOverrides ?? []).length === 0 && (
-          <p className="text-xs text-zinc-400 mb-2">No overrides yet. Add one to customize meals for specific days.</p>
-        )}
-
-        <div className="space-y-3">
-          {(extras.dayOverrides ?? []).map((override, oi) => {
-            const color = getOverrideColor(override.color);
-            const adjustments = override.mealAdjustments ?? [];
-
-            return (
-              <div key={oi} className={`rounded-xl border p-3 ${color.border} bg-white dark:bg-zinc-900/50`}>
-                {/* Header */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
-                  <input
-                    type="text"
-                    value={override.label}
-                    onChange={(e) => updateOverride(oi, { label: e.target.value })}
-                    className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-bold text-zinc-800 focus:outline-none dark:text-zinc-100"
-                    placeholder="Override name"
-                  />
-                  <div className="flex items-center gap-0.5 order-last w-full sm:order-none sm:w-auto">
-                    {OVERRIDE_COLORS.map((c) => (
-                      <button key={c.id} type="button" onClick={() => updateOverride(oi, { color: c.id })} className={`h-4 w-4 rounded-full transition-all ${c.dot} ${override.color === c.id ? "ring-2 ring-offset-1 ring-zinc-400 dark:ring-offset-zinc-900" : "opacity-40 hover:opacity-70"}`} aria-label={`Color: ${c.label}`} />
-                    ))}
-                  </div>
-                  <SectionMenu
-                    actions={[
-                      { label: "Duplicate", onClick: () => duplicateOverride(oi) },
-                      { label: "Copy", onClick: () => handleCopyOverride(oi) },
-                      { label: "Save as Template…", onClick: () => {
-                        setTemplateModal({
-                          type: "override",
-                          mode: "save",
-                          applyCallback: () => {},
-                        });
-                        // We need to pass the specific override data to the modal.
-                        // Store it temporarily:
-                        setSaveOverrideData(override);
-                      }},
-                      { label: "Delete", onClick: () => removeOverride(oi), danger: true },
-                    ]}
-                  />
-                </div>
-
-                {/* Weekday selector */}
-                <div className="mt-2.5 flex flex-wrap gap-1">
-                  {WEEKDAYS.map((day) => {
-                    const active = override.weekdays?.includes(day);
-                    return (
-                      <button key={day} type="button" onClick={() => toggleOverrideDay(oi, day)} className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all ${active ? `${color.bg} ${color.text}` : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-700"}`}>
-                        {day.slice(0, 3)}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Meal Adjustments */}
-                <div className="mt-3 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Meal Modifications</span>
-                  {adjustments.length === 0 && <p className="text-[11px] text-zinc-400">No meal modifications yet</p>}
-                  {adjustments.map((adj, ai) => (
-                    <div key={ai} className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-2.5 dark:border-zinc-700/50 dark:bg-zinc-800/30">
-                      <div className="flex items-center gap-2">
-                        {mealNames && mealNames.length > 0 ? (
-                          <select value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-                            {mealNames.map((m) => (<option key={m} value={m}>{m}</option>))}
-                          </select>
-                        ) : (
-                          <input type="text" value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200" placeholder="Meal name" />
-                        )}
-                        <input type="text" value={adj.notes ?? ""} onChange={(e) => updateMealAdjustment(oi, ai, { notes: e.target.value })} className="flex-1 border-0 bg-transparent p-0 text-[11px] text-zinc-400 focus:outline-none dark:text-zinc-500" placeholder="Meal notes" />
-                        <button type="button" onClick={() => removeMealAdjustment(oi, ai)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950">&times;</button>
-                      </div>
-                      <div className="mt-2 space-y-1">
-                        {adj.changes.map((change, ci) => (
-                          <MealChangeRow key={ci} change={change} onUpdate={(patch) => updateChange(oi, ai, ci, patch)} onRemove={() => removeChange(oi, ai, ci)} />
-                        ))}
-                      </div>
-                      <button type="button" onClick={() => addChange(oi, ai)} className="mt-1.5 rounded-md border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+ Add Change</button>
-                    </div>
-                  ))}
-                </div>
-
-                <button type="button" onClick={() => addMealAdjustment(oi)} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Meal Modification</button>
-
-                <div className="mt-2">
-                  <input type="text" value={override.notes ?? ""} onChange={(e) => updateOverride(oi, { notes: e.target.value })} className="w-full border-0 bg-transparent p-0 text-[11px] text-zinc-500 focus:outline-none dark:text-zinc-400" placeholder="Override notes (optional)" />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <button type="button" onClick={addOverride} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Day Override</button>
-      </ExtrasCard>
-
-      {/* ── Supplements ── */}
-      {extras.supplements && extras.supplements.length > 0 && (
+      {planDetailsOpen && (
         <ExtrasCard>
           <div className="flex items-center justify-between mb-2.5">
-            <ExtrasCardHeader label="Supplements" count={extras.supplements.length} />
+            <button
+              type="button"
+              onClick={() => setOverridesOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-left"
+              aria-expanded={overridesOpen}
+            >
+              <ExtrasCardHeader label="Day Overrides" count={extras.dayOverrides?.length} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${overridesOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <SectionMenu
+              actions={[
+                { label: "Paste Override", onClick: handlePasteOverride },
+                { label: "Apply Template…", onClick: () => handleApplyTemplate("override", (payload) => {
+                  const data = payload as DayOverride;
+                  onChange({ ...extras, dayOverrides: [...(extras.dayOverrides ?? []), { ...data, label: `${data.label}` }] });
+                  showToast("Template applied");
+                })},
+              ]}
+            />
+          </div>
+
+          {overridesOpen && (
+            <>
+              {(extras.dayOverrides ?? []).length === 0 && (
+                <p className="text-xs text-zinc-400 mb-2">No overrides yet. Add one to customize meals for specific days.</p>
+              )}
+
+              <div className="space-y-3">
+                {(extras.dayOverrides ?? []).map((override, oi) => {
+                  const color = getOverrideColor(override.color);
+                  const adjustments = override.mealAdjustments ?? [];
+
+                  return (
+                    <div key={oi} className={`rounded-xl border p-3 ${color.border} bg-white dark:bg-zinc-900/50`}>
+                      {/* Header */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
+                        <input
+                          type="text"
+                          value={override.label}
+                          onChange={(e) => updateOverride(oi, { label: e.target.value })}
+                          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-bold text-zinc-800 focus:outline-none dark:text-zinc-100"
+                          placeholder="Override name"
+                        />
+                        <div className="flex items-center gap-0.5 order-last w-full sm:order-none sm:w-auto">
+                          {OVERRIDE_COLORS.map((c) => (
+                            <button key={c.id} type="button" onClick={() => updateOverride(oi, { color: c.id })} className={`h-4 w-4 rounded-full transition-all ${c.dot} ${override.color === c.id ? "ring-2 ring-offset-1 ring-zinc-400 dark:ring-offset-zinc-900" : "opacity-40 hover:opacity-70"}`} aria-label={`Color: ${c.label}`} />
+                          ))}
+                        </div>
+                        <SectionMenu
+                          actions={[
+                            { label: "Duplicate", onClick: () => duplicateOverride(oi) },
+                            { label: "Copy", onClick: () => handleCopyOverride(oi) },
+                            { label: "Save as Template…", onClick: () => {
+                              setTemplateModal({
+                                type: "override",
+                                mode: "save",
+                                applyCallback: () => {},
+                              });
+                              setSaveOverrideData(override);
+                            }},
+                            { label: "Delete", onClick: () => removeOverride(oi), danger: true },
+                          ]}
+                        />
+                      </div>
+
+                      {/* Weekday selector */}
+                      <div className="mt-2.5 flex flex-wrap gap-1">
+                        {WEEKDAYS.map((day) => {
+                          const active = override.weekdays?.includes(day);
+                          return (
+                            <button key={day} type="button" onClick={() => toggleOverrideDay(oi, day)} className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all ${active ? `${color.bg} ${color.text}` : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-700"}`}>
+                              {day.slice(0, 3)}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Meal Adjustments */}
+                      <div className="mt-3 space-y-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Meal Modifications</span>
+                        {adjustments.length === 0 && <p className="text-[11px] text-zinc-400">No meal modifications yet</p>}
+                        {adjustments.map((adj, ai) => (
+                          <div key={ai} className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-2.5 dark:border-zinc-700/50 dark:bg-zinc-800/30">
+                            <div className="flex items-center gap-2">
+                              {mealNames && mealNames.length > 0 ? (
+                                <select value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                                  {mealNames.map((m) => (<option key={m} value={m}>{m}</option>))}
+                                </select>
+                              ) : (
+                                <input type="text" value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200" placeholder="Meal name" />
+                              )}
+                              <input type="text" value={adj.notes ?? ""} onChange={(e) => updateMealAdjustment(oi, ai, { notes: e.target.value })} className="flex-1 border-0 bg-transparent p-0 text-[11px] text-zinc-400 focus:outline-none dark:text-zinc-500" placeholder="Meal notes" />
+                              <button type="button" onClick={() => removeMealAdjustment(oi, ai)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950">&times;</button>
+                            </div>
+                            <div className="mt-2 space-y-1">
+                              {adj.changes.map((change, ci) => (
+                                <MealChangeRow key={ci} change={change} onUpdate={(patch) => updateChange(oi, ai, ci, patch)} onRemove={() => removeChange(oi, ai, ci)} />
+                              ))}
+                            </div>
+                            <button type="button" onClick={() => addChange(oi, ai)} className="mt-1.5 rounded-md border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+ Add Change</button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button type="button" onClick={() => addMealAdjustment(oi)} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Meal Modification</button>
+
+                      <div className="mt-2">
+                        <input type="text" value={override.notes ?? ""} onChange={(e) => updateOverride(oi, { notes: e.target.value })} className="w-full border-0 bg-transparent p-0 text-[11px] text-zinc-500 focus:outline-none dark:text-zinc-400" placeholder="Override notes (optional)" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button type="button" onClick={addOverride} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Day Override</button>
+            </>
+          )}
+        </ExtrasCard>
+      )}
+
+      {/* ── Supplements ── */}
+      {planDetailsOpen && extras.supplements && extras.supplements.length > 0 && (
+        <ExtrasCard>
+          <div className="flex items-center justify-between mb-2.5">
+            <button
+              type="button"
+              onClick={() => setSupplementsOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-left"
+              aria-expanded={supplementsOpen}
+            >
+              <ExtrasCardHeader label="Supplements" count={extras.supplements.length} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${supplementsOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+            </button>
             <SectionMenu
               actions={[
                 { label: "Copy Stack", onClick: handleCopySupplements },
@@ -559,16 +611,28 @@ export function PlanExtrasEditor({
               ]}
             />
           </div>
-          <SupplementEditor supplements={extras.supplements} onUpdate={updateSupplement} onRemove={removeSupplement} />
-          <button type="button" onClick={addSupplement} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Supplement</button>
+          {supplementsOpen && (
+            <>
+              <SupplementEditor supplements={extras.supplements} onUpdate={updateSupplement} onRemove={removeSupplement} />
+              <button type="button" onClick={addSupplement} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Supplement</button>
+            </>
+          )}
         </ExtrasCard>
       )}
 
       {/* ── Allowances ── */}
-      {extras.allowances && extras.allowances.length > 0 && (
+      {planDetailsOpen && extras.allowances && extras.allowances.length > 0 && (
         <ExtrasCard>
           <div className="flex items-center justify-between mb-2.5">
-            <ExtrasCardHeader label="Approved Extras" count={extras.allowances.length} />
+            <button
+              type="button"
+              onClick={() => setAllowancesOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-left"
+              aria-expanded={allowancesOpen}
+            >
+              <ExtrasCardHeader label="Approved Extras" count={extras.allowances.length} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${allowancesOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+            </button>
             <SectionMenu
               actions={[
                 { label: "Copy Allowances", onClick: handleCopyAllowances },
@@ -581,32 +645,44 @@ export function PlanExtrasEditor({
               ]}
             />
           </div>
-          <div className="space-y-3">
-            {extras.allowances.map((allow, catIdx) => (
-              <div key={catIdx}>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{allow.category}</span>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {allow.items.map((item, itemIdx) => (
-                    <div key={itemIdx} className="group/chip flex items-center gap-0.5 rounded-md border border-zinc-200 bg-zinc-50 pr-0.5 dark:border-zinc-700 dark:bg-zinc-800">
-                      <input type="text" value={item} onChange={(e) => updateAllowanceItem(catIdx, itemIdx, e.target.value)} className="min-w-[3.5rem] max-w-[10rem] border-0 bg-transparent px-2 py-1 text-[11px] font-medium text-zinc-600 focus:outline-none dark:text-zinc-300" style={{ width: `${Math.max(3.5, item.length * 0.6)}em` }} />
-                      <button type="button" onClick={() => removeAllowanceItem(catIdx, itemIdx)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 opacity-100 transition-opacity hover:text-red-500 sm:opacity-0 sm:group-hover/chip:opacity-100" aria-label={`Remove ${item}`}>&times;</button>
+          {allowancesOpen && (
+            <>
+              <div className="space-y-3">
+                {extras.allowances.map((allow, catIdx) => (
+                  <div key={catIdx}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{allow.category}</span>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {allow.items.map((item, itemIdx) => (
+                        <div key={itemIdx} className="group/chip flex items-center gap-0.5 rounded-md border border-zinc-200 bg-zinc-50 pr-0.5 dark:border-zinc-700 dark:bg-zinc-800">
+                          <input type="text" value={item} onChange={(e) => updateAllowanceItem(catIdx, itemIdx, e.target.value)} className="min-w-[3.5rem] max-w-[10rem] border-0 bg-transparent px-2 py-1 text-[11px] font-medium text-zinc-600 focus:outline-none dark:text-zinc-300" style={{ width: `${Math.max(3.5, item.length * 0.6)}em` }} />
+                          <button type="button" onClick={() => removeAllowanceItem(catIdx, itemIdx)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 opacity-100 transition-opacity hover:text-red-500 sm:opacity-0 sm:group-hover/chip:opacity-100" aria-label={`Remove ${item}`}>&times;</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => addAllowanceItem(catIdx)} className="shrink-0 rounded-md border border-dashed border-zinc-300 px-3 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+</button>
                     </div>
-                  ))}
-                  <button type="button" onClick={() => addAllowanceItem(catIdx)} className="shrink-0 rounded-md border border-dashed border-zinc-300 px-3 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+</button>
-                </div>
-                {allow.restriction && <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{allow.restriction}</p>}
+                    {allow.restriction && <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{allow.restriction}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <button type="button" onClick={addAllowanceCategory} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Category</button>
+              <button type="button" onClick={addAllowanceCategory} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Category</button>
+            </>
+          )}
         </ExtrasCard>
       )}
 
       {/* ── Rules ── */}
-      {extras.rules && extras.rules.length > 0 && (
+      {planDetailsOpen && extras.rules && extras.rules.length > 0 && (
         <ExtrasCard>
           <div className="flex items-center justify-between mb-2.5">
-            <ExtrasCardHeader label="Rules & Guidelines" count={extras.rules.length} />
+            <button
+              type="button"
+              onClick={() => setRulesOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-left"
+              aria-expanded={rulesOpen}
+            >
+              <ExtrasCardHeader label="Rules & Guidelines" count={extras.rules.length} />
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${rulesOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+            </button>
             <SectionMenu
               actions={[
                 { label: "Copy Rules", onClick: handleCopyRules },
@@ -619,18 +695,22 @@ export function PlanExtrasEditor({
               ]}
             />
           </div>
-          <div className="space-y-1.5">
-            {extras.rules.map((rule, idx) => (
-              <div key={idx} className="group flex items-start gap-2">
-                <select value={rule.category} onChange={(e) => updateRule(idx, "category", e.target.value)} className="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-1 text-[10px] font-bold uppercase text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                  {["Meal Timing", "Hydration", "Cardio", "Check-In", "Communication", "Cooking", "Other"].map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
-                </select>
-                <input type="text" value={rule.text} onChange={(e) => updateRule(idx, "text", e.target.value)} className="flex-1 border-0 bg-transparent p-0 text-xs leading-relaxed text-zinc-600 focus:outline-none dark:text-zinc-300" placeholder="Rule text" />
-                <button type="button" onClick={() => removeRule(idx)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
+          {rulesOpen && (
+            <>
+              <div className="space-y-1.5">
+                {extras.rules.map((rule, idx) => (
+                  <div key={idx} className="group flex items-start gap-2">
+                    <select value={rule.category} onChange={(e) => updateRule(idx, "category", e.target.value)} className="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-1 text-[10px] font-bold uppercase text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                      {["Meal Timing", "Hydration", "Cardio", "Check-In", "Communication", "Cooking", "Other"].map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                    </select>
+                    <input type="text" value={rule.text} onChange={(e) => updateRule(idx, "text", e.target.value)} className="flex-1 border-0 bg-transparent p-0 text-xs leading-relaxed text-zinc-600 focus:outline-none dark:text-zinc-300" placeholder="Rule text" />
+                    <button type="button" onClick={() => removeRule(idx)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <button type="button" onClick={addRule} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Rule</button>
+              <button type="button" onClick={addRule} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Rule</button>
+            </>
+          )}
         </ExtrasCard>
       )}
     </div>

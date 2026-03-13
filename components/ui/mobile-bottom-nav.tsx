@@ -7,6 +7,7 @@ type NavItem = {
     href: string;
     label: string;
     icon: React.ReactNode;
+    isCheckIn?: boolean;
 };
 
 const coachItems: NavItem[] = [
@@ -56,13 +57,6 @@ const clientItems: NavItem[] = [
         ),
     },
     {
-        href: "/coaches",
-        label: "Coaches",
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-        ),
-    },
-    {
         href: "/client/profile",
         label: "Profile",
         icon: (
@@ -72,8 +66,9 @@ const clientItems: NavItem[] = [
     {
         href: "/client/check-in",
         label: "Check-In",
+        isCheckIn: true,
         icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
         ),
     },
     {
@@ -88,9 +83,15 @@ const clientItems: NavItem[] = [
 export function MobileBottomNav({ role, hasCoach }: { role: "coach" | "client"; hasCoach?: boolean }) {
     const pathname = usePathname();
     const allItems = role === "coach" ? coachItems : clientItems;
-    // Hide "Coaches" tab when client already has a coach
-    const items = (role === "client" && hasCoach)
-        ? allItems.filter((item) => item.href !== "/coaches")
+    // Hide "Coaches" tab when client has a coach — already removed from clientItems based on hasCoach requirement
+    const items = (role === "client" && !hasCoach)
+        ? [
+            clientItems[0], // Home
+            { href: "/coaches", label: "Coaches", icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>) },
+            clientItems[1], // Profile
+            clientItems[2], // Check-In
+            clientItems[3], // Settings
+        ]
         : allItems;
 
     function isActive(href: string) {
@@ -102,34 +103,60 @@ export function MobileBottomNav({ role, hasCoach }: { role: "coach" | "client"; 
 
     return (
         <nav
-            className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md dark:bg-transparent dark:backdrop-blur-lg sm:hidden"
+            className="fixed bottom-0 left-0 right-0 z-30 sm:hidden"
             aria-label="Mobile navigation"
             style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-            {/* Subtle gradient separator */}
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent dark:via-gray-700/40" />
-            <div className="flex items-stretch justify-around">
-                {items.map((item) => {
-                    const active = isActive(item.href);
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${active
-                                ? "text-blue-400 dark:text-blue-400"
-                                : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            {/* Glass bar */}
+            <div className="relative border-t border-white/[0.06] bg-[#020815]/80 backdrop-blur-xl">
+                <div className="flex items-stretch justify-around">
+                    {items.map((item) => {
+                        const active = isActive(item.href);
+                        const isCheckIn = (item as NavItem).isCheckIn;
+
+                        if (isCheckIn) {
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    aria-label="Check-In"
+                                    aria-current={active ? "page" : undefined}
+                                    className="relative flex flex-1 flex-col items-center justify-center py-2"
+                                >
+                                    {/* Floating pill button */}
+                                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-200 ${
+                                        active
+                                            ? "bg-blue-500 shadow-lg shadow-blue-500/40"
+                                            : "bg-blue-600/80 shadow-md shadow-blue-600/20 hover:bg-blue-500"
+                                    }`}>
+                                        <span className="text-white">{item.icon}</span>
+                                    </div>
+                                    <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${active ? "text-blue-400" : "text-blue-400/60"}`}>
+                                        {item.label}
+                                    </span>
+                                </Link>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 pb-1 pt-2 text-[10px] font-medium transition-colors ${
+                                    active ? "text-white" : "text-zinc-600 hover:text-zinc-400"
                                 }`}
-                            aria-current={active ? "page" : undefined}
-                        >
-                            {/* Active indicator dot */}
-                            {active && (
-                                <span className="absolute top-1.5 h-1 w-1 rounded-full bg-blue-500 dark:bg-blue-400" />
-                            )}
-                            <span className={active ? "text-gray-900 dark:text-gray-100" : ""}>{item.icon}</span>
-                            {item.label}
-                        </Link>
-                    );
-                })}
+                                aria-current={active ? "page" : undefined}
+                            >
+                                {/* Active top indicator line */}
+                                {active && (
+                                    <span className="absolute top-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-blue-500" />
+                                )}
+                                <span className={active ? "text-white" : "text-zinc-600"}>{item.icon}</span>
+                                <span className={active ? "text-zinc-300" : ""}>{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
             </div>
         </nav>
     );

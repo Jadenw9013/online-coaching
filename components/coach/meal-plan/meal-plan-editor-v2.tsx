@@ -29,6 +29,7 @@ export function MealPlanEditorV2({
   foods,
   coachDefaultNotify,
   publishedMealPlanId,
+  cardioPrescription,
 }: {
   clientId: string;
   weekStartDate: string;
@@ -36,6 +37,13 @@ export function MealPlanEditorV2({
   foods: FoodLibraryEntry[];
   coachDefaultNotify?: boolean;
   publishedMealPlanId?: string | null;
+  cardioPrescription?: {
+    modality: string;
+    frequency: string;
+    duration: string;
+    intensity: string;
+    notes: string;
+  } | null;
 }) {
   const router = useRouter();
   const [draftId, setDraftId] = useState<string | null>(effectivePlan.draftId);
@@ -294,6 +302,48 @@ export function MealPlanEditorV2({
           </button>
         </div>
       </div>
+
+      {/* ── Cardio Prescription Banner (above meals) ── */}
+      {cardioPrescription && (cardioPrescription.modality || cardioPrescription.frequency || cardioPrescription.duration || cardioPrescription.intensity) && (
+        <div className="rounded-xl border border-green-500/20 bg-green-500/[0.06] p-4 dark:bg-green-950/30">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-500/15 text-base">🏃</span>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-green-500/80">Cardio Prescription</p>
+              <p className="text-sm font-bold text-green-100 dark:text-green-200">Weekly Cardio Protocol</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {cardioPrescription.modality && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
+                <span className="text-green-500/60 font-normal">Type</span>
+                {cardioPrescription.modality}
+              </span>
+            )}
+            {cardioPrescription.frequency && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
+                <span className="text-green-500/60 font-normal">Freq</span>
+                {cardioPrescription.frequency}
+              </span>
+            )}
+            {cardioPrescription.duration && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
+                <span className="text-green-500/60 font-normal">Duration</span>
+                {cardioPrescription.duration}
+              </span>
+            )}
+            {cardioPrescription.intensity && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
+                <span className="text-green-500/60 font-normal">Intensity</span>
+                {cardioPrescription.intensity}
+              </span>
+            )}
+          </div>
+          {cardioPrescription.notes && (
+            <p className="mt-2 text-xs leading-relaxed text-green-200/60">{cardioPrescription.notes}</p>
+          )}
+        </div>
+      )}
 
       {/* Meal cards */}
       <div className="space-y-2">

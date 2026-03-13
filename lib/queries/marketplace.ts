@@ -51,23 +51,34 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
         },
     });
 
-    // Fetch testimonial aggregates for all coach profiles
+    // Fetch testimonial aggregates and client counts in parallel
     const coachIds = profiles.map((p) => p.user.id);
-    const ratingData = await db.testimonial.groupBy({
-        by: ["coachId"],
-        where: { coachId: { in: coachIds }, status: "published" },
-        _avg: { rating: true },
-        _count: { rating: true },
-    });
+    const [ratingData, clientCounts] = await Promise.all([
+        db.testimonial.groupBy({
+            by: ["coachId"],
+            where: { coachId: { in: coachIds }, status: "published" },
+            _avg: { rating: true },
+            _count: { rating: true },
+        }),
+        db.coachClient.groupBy({
+            by: ["coachId"],
+            where: { coachId: { in: coachIds } },
+            _count: true,
+        }),
+    ]);
 
     const ratingMap = new Map(
         ratingData.map((r) => [r.coachId, { avg: r._avg.rating ?? 0, count: r._count.rating }])
+    );
+    const clientCountMap = new Map(
+        clientCounts.map((c) => [c.coachId, c._count])
     );
 
     // Compute ranking score and sort
     const ranked = profiles
         .map((profile) => {
             const rating = ratingMap.get(profile.user.id) ?? { avg: 0, count: 0 };
+            const clientCount = clientCountMap.get(profile.user.id) ?? 0;
 
             // ── Profile completeness (0–1) ──
             // Each signal checks a field that improves conversion/trust.
@@ -86,10 +97,6 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
             const completeness = completenessChecks.filter(Boolean).length / completenessChecks.length;
 
             // ── Trust score ──
-            // rating_avg (0–1 normalized) × 0.50  – quality of reviews
-            // review_count (0–1, capped at 10) × 0.20 – volume of reviews
-            // completeness (0–1) × 0.20              – profile readiness
-            // availability × 0.10                     – currently accepting
             const normalizedRating = rating.avg / 5;
             const normalizedCount = Math.min(rating.count / 10, 1);
             const availabilityBoost = profile.acceptingClients ? 0.1 : 0;
@@ -103,6 +110,7 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
             return {
                 ...profile,
                 ratingSummary: { averageRating: rating.avg, totalReviews: rating.count },
+                clientCount,
                 rankScore: trustScore,
             };
         })
