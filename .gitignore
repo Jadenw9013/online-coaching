@@ -67,3 +67,13 @@ apps/mobile/android
 apps/mobile/ios
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Additional logs and outputs to ignore
+*.log
+*-out*.txt
+*error*.txt
+lint-out*.txt
+ts_errors*.txt
+typescript-errors.txt
+errors.txt
+tatus
