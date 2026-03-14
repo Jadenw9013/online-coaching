@@ -8,7 +8,6 @@ import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { BannerPhotoUpload } from "@/components/profile/banner-photo-upload";
 import { getMarketplaceStats } from "@/lib/queries/marketplace-stats";
 import { Metadata } from "next";
-import Image from "next/image";
 
 export const metadata: Metadata = {
     title: "Coaching Profile | Steadfast",
