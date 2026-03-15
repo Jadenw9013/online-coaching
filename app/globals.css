@@ -716,6 +716,33 @@ html {
   background: #6b7280;
 }
 
+/* ─── Mobile Utilities ─── */
+
+/* Hide scrollbar but keep scrolling (used in horizontally scrollable filter bars) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove tap highlight on interactive elements (Android Chrome) */
+button,
+a,
+[role="tab"],
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure smooth overscroll on iOS for scroll containers */
+.overflow-x-auto,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* ─── Landing Page ─── */
 
 .landing-dark-bg {

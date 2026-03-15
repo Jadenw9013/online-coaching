@@ -42,6 +42,7 @@ const profileSchema = z.object({
     serviceTier: z.enum(["training-only", "nutrition-only", "full-coaching"]).optional().nullable(),
     gymName: z.string().max(100).optional().nullable(),
     yearsCoaching: z.number().int().min(0).max(50).optional().nullable(),
+    phoneNumber: z.string().max(30).optional().nullable(),
     services: z.array(z.string()).default([]),
     clientGoals: z.array(z.string()).default([]),
     clientTypes: z.array(z.string()).default([]),
@@ -67,6 +68,7 @@ type InitialDataProps = {
     serviceTier?: string | null;
     gymName?: string | null;
     yearsCoaching?: number | null;
+    phoneNumber?: string | null;
     services?: string[] | null;
     clientGoals?: string[] | null;
     clientTypes?: string[] | null;
@@ -110,6 +112,7 @@ export function ProfileForm({
             serviceTier: (initialData?.serviceTier as "training-only" | "nutrition-only" | "full-coaching" | null) ?? null,
             gymName: initialData?.gymName || "",
             yearsCoaching: initialData?.yearsCoaching ?? null,
+            phoneNumber: initialData?.phoneNumber || "",
             services: initialData?.services ?? [],
             clientGoals: initialData?.clientGoals ?? [],
             clientTypes: initialData?.clientTypes ?? [],
@@ -397,6 +400,13 @@ export function ProfileForm({
                                         <div>
                                             <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Years Coaching</label>
                                             <input {...form.register("yearsCoaching", { valueAsNumber: true })} type="number" min={0} max={50} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="e.g. 5" />
+                                        </div>
+                                        <div>
+                                             <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                                 Contact Phone <span className="font-normal text-zinc-400">(shown on your public profile)</span>
+                                             </label>
+                                             <input {...form.register("phoneNumber")} type="tel" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100" placeholder="e.g. +1 (512) 555-0100" />
+                                             <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Optional — helps prospective clients reach you directly</p>
                                         </div>
                                     </div>
                                 </div>

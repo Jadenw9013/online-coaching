@@ -137,6 +137,7 @@ export async function getCoachClientsWithWeekStatus(coachId: string) {
   const [assignments, coach] = await Promise.all([
     db.coachClient.findMany({
       where: { coachId },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       include: {
         client: {
           include: {

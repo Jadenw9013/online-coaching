@@ -58,3 +58,41 @@ export async function leaveCoach(input: unknown) {
   revalidatePath("/client", "layout");
   return { success: true };
 }
+
+const reorderClientsSchema = z.object({
+  orderedClientIds: z.array(z.string().min(1)).min(1),
+});
+
+export async function reorderClients(input: unknown) {
+  const parsed = reorderClientsSchema.safeParse(input);
+  if (!parsed.success) throw new Error("Invalid input");
+
+  const user = await getCurrentDbUser();
+  if (user.activeRole !== "COACH") throw new Error("Not a coach");
+
+  const { orderedClientIds } = parsed.data;
+
+  // Verify all provided clientIds belong to this coach before updating
+  const assignments = await db.coachClient.findMany({
+    where: { coachId: user.id, clientId: { in: orderedClientIds } },
+    select: { id: true, clientId: true },
+  });
+
+  if (assignments.length !== orderedClientIds.length) {
+    throw new Error("One or more clients not found in your roster");
+  }
+
+  const assignmentMap = new Map(assignments.map((a) => [a.clientId, a.id]));
+
+  await db.$transaction(
+    orderedClientIds.map((clientId, index) =>
+      db.coachClient.update({
+        where: { id: assignmentMap.get(clientId)! },
+        data: { sortOrder: index },
+      })
+    )
+  );
+
+  revalidatePath("/coach/dashboard");
+  return { success: true };
+}

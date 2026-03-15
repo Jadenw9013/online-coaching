@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 const GOAL_OPTIONS = [
     "Fat loss", "Muscle gain", "Bodybuilding prep", "Lifestyle fitness",
@@ -49,8 +49,24 @@ export function CoachFilters() {
     const currentClientType = searchParams.get("clientType") ?? "";
     const currentMinRating = searchParams.get("minRating") ?? "";
     const currentSort = searchParams.get("sort") ?? "";
-    const currentCity = searchParams.get("city") ?? "";
+    const currentZip = searchParams.get("zip") ?? "";
     const acceptingOnly = searchParams.get("accepting") === "1";
+
+    // Local zip input state — only commits to URL on Enter or blur
+    const [zipInput, setZipInput] = useState(currentZip);
+    useEffect(() => { setZipInput(currentZip); }, [currentZip]);
+
+    const commitZip = useCallback(() => {
+        const clean = zipInput.replace(/\D/g, "").slice(0, 5);
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("city"); // clear legacy city param
+        if (clean.length === 5) {
+            params.set("zip", clean);
+        } else {
+            params.delete("zip");
+        }
+        router.push(`/coaches?${params.toString()}`);
+    }, [zipInput, router, searchParams]);
 
     const updateFilter = useCallback(
         (key: string, value: string) => {
@@ -72,8 +88,8 @@ export function CoachFilters() {
     // Show location input only when in-person or hybrid mode is selected
     const showLocationInput = currentType === "in-person" || currentType === "hybrid";
 
-    const hasFilters = currentGoal || currentType || currentServiceTier || currentService || currentClientType || currentMinRating || currentSort || acceptingOnly || currentCity;
-    const activeFilterCount = [currentGoal, currentType, currentServiceTier, currentService, currentClientType, currentMinRating, acceptingOnly ? "1" : "", currentCity].filter(Boolean).length;
+    const hasFilters = currentGoal || currentType || currentServiceTier || currentService || currentClientType || currentMinRating || currentSort || acceptingOnly || currentZip;
+    const activeFilterCount = [currentGoal, currentType, currentServiceTier, currentService, currentClientType, currentMinRating, acceptingOnly ? "1" : "", currentZip].filter(Boolean).length;
 
     const hasSecondaryFilter = currentService || currentClientType || currentMinRating;
     const isMoreOpen = showMore || !!hasSecondaryFilter;
@@ -136,21 +152,43 @@ export function CoachFilters() {
                     ))}
                 </div>
 
-                {/* Location input — only shown for in-person / hybrid */}
+                {/* Zip code input — only shown for in-person / hybrid */}
                 {showLocationInput && (
                     <div className="mt-3">
-                        <label htmlFor="city-filter" className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                            City
+                        <label htmlFor="zip-filter" className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                            Near zip code
                         </label>
-                        <input
-                            id="city-filter"
-                            type="text"
-                            value={currentCity}
-                            onChange={(e) => updateFilter("city", e.target.value)}
-                            placeholder="e.g. Vancouver"
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 transition-colors focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
-                        />
-                        <p className="mt-1 text-[10px] text-zinc-600">Filter by coach city for in-person sessions</p>
+                        <div className="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500">
+                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            <input
+                                id="zip-filter"
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={5}
+                                value={zipInput}
+                                onChange={(e) => setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                                onBlur={commitZip}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitZip(); } }}
+                                placeholder="e.g. 98004"
+                                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-600 transition-colors focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                            />
+                            {currentZip && (
+                                <button
+                                    type="button"
+                                    onClick={() => { setZipInput(""); updateFilter("zip", ""); }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                                    aria-label="Clear zip"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                            )}
+                        </div>
+                        <p className="mt-1 text-[10px] text-zinc-600">
+                            {currentZip ? "Showing coaches near this zip code" : "Enter zip to find coaches near you"}
+                        </p>
                     </div>
                 )}
             </div>

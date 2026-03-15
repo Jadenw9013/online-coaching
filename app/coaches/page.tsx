@@ -1,5 +1,6 @@
 import { getPublishedCoaches } from "@/lib/queries/marketplace";
 import { getCachedProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
+import { resolveZipCode } from "@/lib/utils/zip-lookup";
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -122,6 +123,14 @@ function EmptyState({ params, hasFilters }: { params: { [key: string]: string | 
 
 export default async function CoachesDirectoryPage({ searchParams }: PageProps) {
     const params = await searchParams;
+
+    // Resolve zip code → city/state (server-side, cached 24h)
+    let resolvedZip: { city: string; state: string; zip: string } | null = null;
+    if (params.zip) {
+        const looked = await resolveZipCode(params.zip);
+        if (looked) resolvedZip = looked;
+    }
+
     const coaches = await getPublishedCoaches({
         goal: params.goal,
         type: params.type,
@@ -132,7 +141,9 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
         minRating: params.minRating ? Number(params.minRating) : undefined,
         sort: params.sort,
         q: params.q,
-        city: params.city,
+        // If zip resolved, use its city; fall back to legacy city param
+        city: resolvedZip?.city ?? params.city,
+        state: resolvedZip?.state ?? params.state,
     });
 
     // Resolve profile photos
@@ -159,7 +170,14 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
     if (params.goal) activeFilters.push({ key: "goal", label: params.goal, paramKey: "goal" });
     if (params.type) activeFilters.push({ key: "type", label: params.type === "in-person" ? "In-Person" : params.type.charAt(0).toUpperCase() + params.type.slice(1), paramKey: "type" });
     if (params.serviceTier) activeFilters.push({ key: "serviceTier", label: params.serviceTier === "training-only" ? "Training only" : params.serviceTier === "nutrition-only" ? "Nutrition only" : "Full coaching", paramKey: "serviceTier" });
-    if (params.city) activeFilters.push({ key: "city", label: `Near ${params.city}`, paramKey: "city" });
+    if (params.zip) {
+        const zipLabel = resolvedZip
+            ? `Near ${resolvedZip.zip} · ${resolvedZip.city}, ${resolvedZip.state}`
+            : `Zip ${params.zip} (not found)`;
+        activeFilters.push({ key: "zip", label: zipLabel, paramKey: "zip" });
+    } else if (params.city) {
+        activeFilters.push({ key: "city", label: `Near ${params.city}`, paramKey: "city" });
+    }
     if (params.service) activeFilters.push({ key: "service", label: params.service, paramKey: "service" });
     if (params.clientType) activeFilters.push({ key: "clientType", label: params.clientType, paramKey: "clientType" });
     if (params.minRating) activeFilters.push({ key: "minRating", label: `${params.minRating}+ stars`, paramKey: "minRating" });
@@ -192,7 +210,7 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                         <Link href="/sign-in" className="text-sm font-medium text-zinc-400 transition-colors hover:text-white">Sign In</Link>
                         <Link
                             href="/sign-up"
-                            className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:brightness-110 active:scale-[0.97]"
+                            className="rounded-lg bg-white px-4 py-1.5 text-sm font-semibold text-zinc-900 shadow-lg shadow-black/20 transition-all hover:bg-zinc-100 active:scale-[0.97]"
                         >
                             Get Started
                         </Link>
@@ -216,7 +234,7 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                     </p>
 
                     {/* Search */}
-                    <form action="/coaches" method="GET" className="mt-6 max-w-md">
+                    <form action="/coaches" method="GET" className="mt-6 w-full sm:max-w-md">
                         {Object.entries(params).filter(([k, v]) => k !== "q" && v).map(([k, v]) => (
                             <input key={k} type="hidden" name={k} value={v} />
                         ))}

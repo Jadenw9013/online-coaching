@@ -405,6 +405,19 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                         <dd className="font-medium text-zinc-800 dark:text-zinc-200">{profile.gymName}</dd>
                                     </div>
                                 )}
+                                {profile.phoneNumber && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-zinc-500 dark:text-zinc-400">Phone</dt>
+                                        <dd className="font-medium text-zinc-800 dark:text-zinc-200">
+                                            <a
+                                                href={`tel:${profile.phoneNumber.replace(/\s/g, "")}`}
+                                                className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                                            >
+                                                {profile.phoneNumber}
+                                            </a>
+                                        </dd>
+                                    </div>
+                                )}
                                 {profile.certifications && (
                                     <div className="flex items-center justify-between">
                                         <dt className="text-zinc-500 dark:text-zinc-400">Certified</dt>

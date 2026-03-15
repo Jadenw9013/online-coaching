@@ -109,8 +109,8 @@ export function NavBar({
               href="/client/check-in"
               className={`hidden rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:shadow-sm active:scale-[0.97] sm:block dark:shadow-blue-500/20 dark:hover:brightness-110 ${
                 isActive("/client/check-in")
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                  : "bg-blue-600/80 text-white hover:bg-blue-500"
+                  ? "bg-zinc-100 text-zinc-900 shadow-lg"
+                  : "bg-white text-zinc-900 hover:bg-zinc-100"
               }`}
             >
               New Check-In

@@ -210,25 +210,35 @@ export default async function ClientProfilePage({
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-1 gap-2 xs:flex xs:flex-wrap sm:flex sm:flex-wrap">
         {latestCheckIn && (
           <Link
             href={`/coach/clients/${clientId}/check-ins/${latestCheckIn.id}`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-md transition-all hover:shadow-lg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:justify-start ${
+              currentWeekStatus === "submitted"
+                ? "bg-amber-400 text-zinc-900 shadow-amber-400/30 hover:bg-amber-300 focus-visible:ring-amber-400"
+                : "bg-white text-zinc-900 shadow-black/10 hover:bg-zinc-100 focus-visible:ring-zinc-400"
+            }`}
           >
-            View Latest Check-in
+            {currentWeekStatus === "submitted" && (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-900 opacity-40" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-zinc-900 opacity-60" />
+              </span>
+            )}
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            {currentWeekStatus === "submitted" ? "Review Check-in" : "View Latest Check-in"}
           </Link>
         )}
         <Link
           href={`/coach/clients/${clientId}/import-meal-plan`}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:justify-start"
         >
           Import Meal Plan
         </Link>
         <Link
           href={`/coach/clients/${clientId}/import-training`}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:justify-start"
         >
           Import Training
         </Link>

@@ -128,7 +128,7 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
             </p>
             {client.weightChange != null && client.weightChange !== 0 && (
               <p className="mt-0.5 text-xs font-medium tabular-nums">
-                <span className={client.weightChange < 0 ? "text-emerald-500" : "text-red-400"}>
+                <span className={client.weightChange < 0 ? "text-emerald-500" : "text-amber-400"}>
                   {client.weightChange < 0 ? "\u2193" : "\u2191"} {Math.abs(client.weightChange)} lbs
                 </span>
               </p>
@@ -147,8 +147,9 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:right-5">
           <Link
             href={reviewHref}
-            className="rounded-xl bg-zinc-900 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-zinc-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-500"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d1a2e] px-3.5 py-2 text-xs font-semibold text-zinc-100 shadow-lg shadow-black/20 backdrop-blur-sm transition-all hover:border-blue-500/40 hover:bg-[#111f36] hover:shadow-blue-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             Review
           </Link>
         </div>

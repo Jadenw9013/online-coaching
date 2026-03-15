@@ -36,9 +36,9 @@ function computeMatchReasons(
         const modeLabel = filters.type === "in-person" ? "In-Person" : filters.type.charAt(0).toUpperCase() + filters.type.slice(1);
         const loc = [profile.city, profile.state].filter(Boolean).join(", ");
         reasons.push(loc ? `${modeLabel} · ${loc}` : modeLabel);
-    } else if (filters.type === "in-person" && profile.coachingType === "hybrid") {
-        const loc = [profile.city, profile.state].filter(Boolean).join(", ");
-        reasons.push(loc ? `Hybrid · ${loc}` : "Hybrid (in-person available)");
+    } else if (profile.coachingType === "hybrid" && (filters.type === "in-person" || filters.type === "online")) {
+        const loc = filters.type === "in-person" ? [profile.city, profile.state].filter(Boolean).join(", ") : "";
+        reasons.push(loc ? `Hybrid · ${loc}` : filters.type === "in-person" ? "Hybrid (in-person available)" : "Hybrid (online available)");
     }
     if (filters.city && profile.city?.toLowerCase().includes(filters.city.toLowerCase())) {
         // Already captured in mode reason above if mode was also filtered
@@ -66,12 +66,12 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { isPublished: true };
 
-    // Coaching mode — for in-person requests, include hybrid coaches (ranked lower)
+    // Coaching mode — hybrid coaches cover both online and in-person
     if (filters?.type) {
-        if (filters.type === "in-person") {
-            where.coachingType = { in: ["in-person", "hybrid"] };
+        if (filters.type === "in-person" || filters.type === "online") {
+            where.coachingType = { in: [filters.type, "hybrid"] };
         } else {
-            where.coachingType = filters.type;
+            where.coachingType = filters.type; // "hybrid" exact match
         }
     }
     if (filters?.accepting) {
@@ -221,11 +221,11 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
                 if (filters?.goal && profile.clientGoals.includes(filters.goal)) {
                     score += W.goalMatch;
                 }
-                // Coaching mode match
+                // Coaching mode match — hybrid covers both online and in-person
                 if (filters?.type) {
                     if (profile.coachingType === filters.type) {
                         score += W.modeExactMatch;
-                    } else if (filters.type === "in-person" && profile.coachingType === "hybrid") {
+                    } else if (profile.coachingType === "hybrid" && (filters.type === "in-person" || filters.type === "online")) {
                         score += W.modePartialMatch;
                     }
                 }

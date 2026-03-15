@@ -115,6 +115,7 @@ model CoachClient {
   checkInDaysOfWeekOverride Int[]  @default([])  // empty = use coach default
   cadenceConfig             Json?  // CadenceConfig override (null = inherit coach default)
   adherenceEnabled          Boolean @default(false)
+  sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
 
   coach  User @relation("Coach", fields: [coachId], references: [id])
@@ -558,6 +559,7 @@ model CoachProfile {
   serviceTier      String?              // "training-only" | "nutrition-only" | "full-coaching"
   gymName          String?
   yearsCoaching    Int?
+  phoneNumber      String?              // optional contact phone shown on public profile
   services         String[] @default([])
   clientGoals      String[] @default([])
   clientTypes      String[] @default([])
