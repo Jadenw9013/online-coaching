@@ -1,13 +1,10 @@
 "use client";
 
-import { createContext, useContext, useCallback, useRef, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect } from "react";
 
-type Theme = "dark" | "light";
-
-const ThemeContext = createContext<{
-  theme: Theme;
-  toggleTheme: () => void;
-}>({
+// Theme is permanently locked to dark mode. toggleTheme is a no-op kept for
+// interface compatibility with any remaining imports of useTheme.
+const ThemeContext = createContext<{ theme: "dark"; toggleTheme: () => void }>({
   theme: "dark",
   toggleTheme: () => {},
 });
@@ -16,39 +13,15 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-function getSnapshot(): Theme {
-  return localStorage.getItem("steadfast-theme") === "light" ? "light" : "dark";
-}
-
-function getServerSnapshot(): Theme {
-  return "dark";
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const listenerRef = useRef<(() => void) | null>(null);
-
-  const subscribe = useCallback((callback: () => void) => {
-    listenerRef.current = callback;
-    return () => {
-      listenerRef.current = null;
-    };
+  useEffect(() => {
+    // Clear any stored light preference and ensure dark class is always applied
+    localStorage.removeItem("steadfast-theme");
+    document.documentElement.classList.add("dark");
   }, []);
 
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  const toggleTheme = useCallback(() => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    localStorage.setItem("steadfast-theme", next);
-    if (next === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    listenerRef.current?.();
-  }, [theme]);
-
   return (
-    <ThemeContext value={{ theme, toggleTheme }}>
+    <ThemeContext value={{ theme: "dark", toggleTheme: () => {} }}>
       {children}
     </ThemeContext>
   );

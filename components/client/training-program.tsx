@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef, useCallback } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import type { BlockType } from "@/app/generated/prisma/enums";
 import { toggleExerciseCheckoff } from "@/app/actions/adherence";
 import { saveExerciseResult } from "@/app/actions/exercise-results";
@@ -107,6 +107,19 @@ function parseExerciseContent(content: string) {
   }
 
   return { equipment, details, notes };
+}
+
+/** Parse the number of sets from a plan detail string like "3 sets × 5–8 reps" or "2 working sets × 6–8 reps" */
+function parseSetCount(details: string[]): number {
+  for (const detail of details) {
+    // Matches "3 sets", "2 working sets", "4 warmup sets", etc.
+    const m = detail.match(/(\d+)\s*(?:\w+\s+)?sets?/i);
+    if (m?.[1]) {
+      const n = parseInt(m[1], 10);
+      if (n >= 1 && n <= 10) return n;
+    }
+  }
+  return 1;
 }
 
 /** Build a unique key for an exercise checkoff: dayName + exerciseOrder */
@@ -247,7 +260,7 @@ export function TrainingProgram({
         return (
           <div className="rounded-2xl border border-green-200/60 bg-white shadow-sm dark:border-green-900/40 dark:bg-[#0a1224] dark:shadow-none">
             <div className="flex items-center gap-2 border-b border-green-100 px-5 py-3 dark:border-green-900/30">
-              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
                 Cardio
               </span>
               {modality && (
@@ -307,7 +320,7 @@ export function TrainingProgram({
             >
               <div className="flex-1 min-w-0">
                 <p
-                  className={`text-[11px] font-medium uppercase tracking-wider ${
+                  className={`text-xs font-medium uppercase tracking-wider ${
                     allDone
                       ? "text-emerald-600 dark:text-emerald-500"
                       : "text-gray-400 dark:text-zinc-500"
@@ -350,7 +363,7 @@ export function TrainingProgram({
                   </svg>
                 )}
                 {dayProgress && (
-                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-zinc-800 dark:text-zinc-400">
                     {dayProgress.done}/{dayProgress.total}
                   </span>
                 )}
@@ -371,10 +384,10 @@ export function TrainingProgram({
             {isExpanded && adherence && dayProgress && dayProgress.total > 0 && (
               <div className="border-t border-gray-100 px-5 py-2.5 dark:border-zinc-800">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-medium text-gray-400 dark:text-zinc-500">
+                  <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">
                     Progress
                   </span>
-                  <span className="text-[11px] font-semibold tabular-nums text-gray-500 dark:text-zinc-400">
+                  <span className="text-xs font-semibold tabular-nums text-gray-500 dark:text-zinc-400">
                     {dayProgress.done} / {dayProgress.total}
                   </span>
                 </div>
@@ -424,6 +437,7 @@ export function TrainingProgram({
                         const parsed = isExercise
                           ? parseExerciseContent(block.content || "")
                           : null;
+                        const setCount = parsed ? parseSetCount(parsed.details) : 1;
 
                         const isChecked = isExercise && adherence
                           ? completedExercises.has(exerciseKey(day.dayName, currentExerciseIndex))
@@ -447,7 +461,7 @@ export function TrainingProgram({
                                   />
                                 </label>
                               ) : isExercise ? (
-                                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[11px] font-semibold text-gray-500 dark:bg-zinc-800 dark:text-zinc-400">
+                                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500 dark:bg-zinc-800 dark:text-zinc-400">
                                   {currentExerciseIndex + 1}
                                 </span>
                               ) : null}
@@ -462,7 +476,7 @@ export function TrainingProgram({
                                   )}
                                   {badgeLabel && (
                                     <span
-                                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}
+                                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClass}`}
                                     >
                                       {badgeLabel}
                                     </span>
@@ -471,7 +485,7 @@ export function TrainingProgram({
                                   {parsed?.equipment.map((eq, eqI) => (
                                     <span
                                       key={eqI}
-                                      className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-zinc-800 dark:text-zinc-400"
+                                      className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-zinc-800 dark:text-zinc-400"
                                     >
                                       {eq}
                                     </span>
@@ -506,8 +520,9 @@ export function TrainingProgram({
                               <ExerciseProgressInput
                                 exerciseName={block.title}
                                 programDay={day.dayName}
-                                current={progress.currentWeek[`${day.dayName}::${block.title}`]}
-                                previous={progress.previousWeek[`${day.dayName}::${block.title}`]}
+                                setCount={setCount}
+                                currentAll={progress.currentWeek}
+                                previousAll={progress.previousWeek}
                               />
                             )}
                           </div>
@@ -540,133 +555,166 @@ export function TrainingProgram({
 type ExerciseProgressInputProps = {
   exerciseName: string;
   programDay: string;
-  current?: ExerciseResultData;
-  previous?: ExerciseResultData;
+  setCount: number;
+  currentAll: Record<string, ExerciseResultData>;
+  previousAll: Record<string, ExerciseResultData>;
 };
 
 function ExerciseProgressInput({
   exerciseName,
   programDay,
-  current,
-  previous,
+  setCount,
+  currentAll,
+  previousAll,
 }: ExerciseProgressInputProps) {
-  const [weight, setWeight] = useState(current?.weight?.toString() ?? "");
-  const [reps, setReps] = useState(current?.reps?.toString() ?? "");
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // DB key for set i — single-set exercises keep no suffix for backwards compat
+  function exNameForSet(i: number) {
+    return setCount === 1 ? exerciseName : `${exerciseName} [Set ${i + 1}]`;
+  }
+  function lookupKey(i: number) {
+    return `${programDay}::${exNameForSet(i)}`;
+  }
+  // Legacy key (old single-set entries without a set suffix)
+  const legacyKey = `${programDay}::${exerciseName}`;
+
+  const [sets, setSets] = useState<{ weight: string; reps: string }[]>(() =>
+    Array.from({ length: setCount }, (_, i) => {
+      const cur = currentAll[lookupKey(i)] ?? (i === 0 ? currentAll[legacyKey] : undefined);
+      return { weight: cur?.weight?.toString() ?? "", reps: cur?.reps?.toString() ?? "" };
+    })
+  );
+  const [saveStates, setSaveStates] = useState<("idle" | "saving" | "saved" | "error")[]>(() =>
+    Array(setCount).fill("idle")
+  );
+  const timerRefs = useRef<(ReturnType<typeof setTimeout> | null)[]>(Array(setCount).fill(null));
   const [, startTransition] = useTransition();
 
-  const save = useCallback(
-    (w: string, r: string) => {
-      const weightNum = parseFloat(w);
-      const repsNum = parseInt(r, 10);
-      if (!w || !r || isNaN(weightNum) || isNaN(repsNum) || weightNum <= 0 || repsNum <= 0) return;
+  // Keep state arrays in sync if setCount changes between renders
+  useEffect(() => {
+    setSets((prev) => {
+      if (prev.length === setCount) return prev;
+      if (prev.length > setCount) return prev.slice(0, setCount);
+      return [...prev, ...Array.from({ length: setCount - prev.length }, () => ({ weight: "", reps: "" }))];
+    });
+    setSaveStates((prev) => {
+      if (prev.length === setCount) return prev;
+      if (prev.length > setCount) return prev.slice(0, setCount);
+      return [...prev, ...Array<"idle">(setCount - prev.length).fill("idle")];
+    });
+  }, [setCount]);
 
-      // Don't save if values haven't changed from what's already persisted
-      if (current && current.weight === weightNum && current.reps === repsNum) return;
+  function updateSet(i: number, field: "weight" | "reps", value: string) {
+    setSets((prev) => { const next = [...prev]; next[i] = { ...next[i], [field]: value }; return next; });
+  }
 
-      setSaveState("saving");
-      if (timerRef.current) clearTimeout(timerRef.current);
+  function saveSet(i: number) {
+    const { weight: w, reps: r } = sets[i];
+    const weightNum = parseFloat(w);
+    const repsNum = parseInt(r, 10);
+    if (!w || !r || isNaN(weightNum) || isNaN(repsNum) || weightNum <= 0 || repsNum <= 0) return;
+    const cur = currentAll[lookupKey(i)] ?? (i === 0 ? currentAll[legacyKey] : undefined);
+    if (cur && cur.weight === weightNum && cur.reps === repsNum) return;
 
-      startTransition(async () => {
-        const result = await saveExerciseResult({
-          exerciseName,
-          programDay,
-          weight: weightNum,
-          reps: repsNum,
-        });
-        if (result?.error) {
-          setSaveState("error");
-        } else {
-          setSaveState("saved");
-          timerRef.current = setTimeout(() => setSaveState("idle"), 2000);
-        }
+    setSaveStates((prev) => { const next = [...prev]; next[i] = "saving"; return next; });
+    if (timerRefs.current[i]) clearTimeout(timerRefs.current[i]!);
+
+    startTransition(async () => {
+      const result = await saveExerciseResult({
+        exerciseName: exNameForSet(i),
+        programDay,
+        weight: weightNum,
+        reps: repsNum,
       });
-    },
-    [exerciseName, programDay, current, startTransition]
-  );
-
-  function handleBlur() {
-    save(weight, reps);
+      setSaveStates((prev) => {
+        const next = [...prev];
+        if (result?.error) {
+          next[i] = "error";
+        } else {
+          next[i] = "saved";
+          timerRefs.current[i] = setTimeout(() => {
+            setSaveStates((p) => { const n = [...p]; n[i] = "idle"; return n; });
+          }, 2000);
+        }
+        return next;
+      });
+    });
   }
 
   return (
-    <div className="ml-9 mt-2 rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/40">
-      {/* Last week result */}
-      <div className="mb-2 text-[11px] text-gray-400 dark:text-zinc-500">
-        {previous ? (
-          <>
-            Last week:{" "}
-            <span className="font-semibold text-gray-600 dark:text-zinc-300">
-              {previous.weight} × {previous.reps}
-            </span>
-          </>
-        ) : (
-          "No previous result"
-        )}
-      </div>
+    <div className="ml-9 mt-2 rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/40 space-y-2.5">
+      {Array.from({ length: setCount }, (_, i) => {
+        const prev = previousAll[lookupKey(i)] ?? (i === 0 ? previousAll[legacyKey] : undefined);
+        const { weight, reps } = sets[i] ?? { weight: "", reps: "" };
+        const saveState = saveStates[i];
+        return (
+          <div key={i}>
+            {/* Set label + previous result */}
+            <div className="mb-1.5 flex items-center justify-between">
+              {setCount > 1 ? (
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-zinc-500">
+                  Set {i + 1}
+                </span>
+              ) : (
+                <span className="text-xs text-gray-400 dark:text-zinc-500">
+                  {prev ? "Last week" : "No previous result"}
+                </span>
+              )}
+              {prev && (
+                <span className="text-xs text-gray-400 dark:text-zinc-500">
+                  {setCount > 1 ? "Last: " : ""}
+                  <span className="font-semibold text-gray-500 dark:text-zinc-400">
+                    {prev.weight} × {prev.reps}
+                  </span>
+                </span>
+              )}
+            </div>
 
-      {/* This week inputs */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          <label
-            htmlFor={`w-${programDay}-${exerciseName}`}
-            className="text-[11px] font-medium text-gray-500 dark:text-zinc-400"
-          >
-            Weight
-          </label>
-          <input
-            id={`w-${programDay}-${exerciseName}`}
-            type="number"
-            inputMode="decimal"
-            step="any"
-            min="0"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            onBlur={handleBlur}
-            placeholder="lbs"
-            className="w-16 rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm tabular-nums text-gray-800 placeholder:text-gray-300 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            aria-label={`Weight for ${exerciseName}`}
-          />
-        </div>
-        <span className="text-gray-300 dark:text-zinc-600">×</span>
-        <div className="flex items-center gap-1.5">
-          <label
-            htmlFor={`r-${programDay}-${exerciseName}`}
-            className="text-[11px] font-medium text-gray-500 dark:text-zinc-400"
-          >
-            Reps
-          </label>
-          <input
-            id={`r-${programDay}-${exerciseName}`}
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={reps}
-            onChange={(e) => setReps(e.target.value)}
-            onBlur={handleBlur}
-            placeholder="0"
-            className="w-14 rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm tabular-nums text-gray-800 placeholder:text-gray-300 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            aria-label={`Reps for ${exerciseName}`}
-          />
-        </div>
+            {/* Weight × Reps inputs */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <label htmlFor={`w-${programDay}-${exerciseName}-${i}`} className="text-xs font-medium text-gray-500 dark:text-zinc-400">Weight</label>
+                <input
+                  id={`w-${programDay}-${exerciseName}-${i}`}
+                  type="number" inputMode="decimal" step="any" min="0"
+                  value={weight}
+                  onChange={(e) => updateSet(i, "weight", e.target.value)}
+                  onBlur={() => saveSet(i)}
+                  placeholder="lbs"
+                  className="w-16 rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm tabular-nums text-gray-800 placeholder:text-gray-300 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  aria-label={`Weight for ${exerciseName} set ${i + 1}`}
+                />
+              </div>
+              <span className="text-gray-300 dark:text-zinc-600">×</span>
+              <div className="flex items-center gap-1.5">
+                <label htmlFor={`r-${programDay}-${exerciseName}-${i}`} className="text-xs font-medium text-gray-500 dark:text-zinc-400">Reps</label>
+                <input
+                  id={`r-${programDay}-${exerciseName}-${i}`}
+                  type="number" inputMode="numeric" min="0"
+                  value={reps}
+                  onChange={(e) => updateSet(i, "reps", e.target.value)}
+                  onBlur={() => saveSet(i)}
+                  placeholder="0"
+                  className="w-14 rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm tabular-nums text-gray-800 placeholder:text-gray-300 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  aria-label={`Reps for ${exerciseName} set ${i + 1}`}
+                />
+              </div>
+              {saveState === "saving" && <span className="text-xs text-gray-400 dark:text-zinc-500">Saving…</span>}
+              {saveState === "saved" && (
+                <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  Saved
+                </span>
+              )}
+              {saveState === "error" && <span className="text-xs font-medium text-red-500">Failed</span>}
+            </div>
 
-        {/* Save state indicator */}
-        {saveState === "saving" && (
-          <span className="text-[11px] text-gray-400 dark:text-zinc-500">Saving…</span>
-        )}
-        {saveState === "saved" && (
-          <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            Saved
-          </span>
-        )}
-        {saveState === "error" && (
-          <span className="text-[11px] font-medium text-red-500">Failed</span>
-        )}
-      </div>
+            {/* Divider between sets */}
+            {setCount > 1 && i < setCount - 1 && (
+              <div className="mt-2.5 border-t border-gray-100 dark:border-zinc-800/60" />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

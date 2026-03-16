@@ -1063,3 +1063,21 @@ a,
     transform: none;
   }
 }
+
+/* ─── Mobile Readability ─── */
+
+/* Ensure inputs never trigger iOS auto-zoom (requires ≥16px) */
+input,
+select,
+textarea {
+  font-size: max(1rem, 16px);
+}
+
+/* On small screens bump the base rem scale so all Tailwind text-* sizes
+   proportionally increase — text-sm becomes ~15.75px instead of 14px,
+   text-xs becomes ~13.5px instead of 12px, etc. */
+@media (max-width: 640px) {
+  html {
+    font-size: 112.5%; /* 18px base, up from 16px browser default */
+  }
+}

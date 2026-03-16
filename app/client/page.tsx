@@ -34,7 +34,9 @@ export default async function ClientDashboard() {
 
   const coachAssignment = await db.coachClient.findFirst({
     where: { clientId: user.id },
-    include: {
+    select: {
+      id: true,
+      cadenceConfig: true,
       coach: {
         select: {
           firstName: true,

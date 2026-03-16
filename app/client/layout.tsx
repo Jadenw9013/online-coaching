@@ -16,18 +16,23 @@ export default async function ClientLayout({
   }
 
   // Enforce Onboarding Questionnaire completion before allowing dashboard access
+  // NOTE: explicit select avoids selecting Int[]/Json columns that can trip up
+  // the @prisma/adapter-pg driver in certain Next.js dev configurations.
   const coachClient = await db.coachClient.findFirst({
     where: { clientId: user.id },
+    select: { id: true, coachId: true },
   });
 
   if (coachClient) {
     const activeForm = await db.onboardingForm.findFirst({
       where: { coachId: coachClient.coachId, isActive: true },
+      select: { id: true },
     });
 
     if (activeForm) {
       const response = await db.onboardingResponse.findUnique({
         where: { clientId: user.id },
+        select: { id: true },
       });
 
       if (!response) {

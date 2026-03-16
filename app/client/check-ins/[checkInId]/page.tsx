@@ -1,6 +1,5 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { getCheckInById } from "@/lib/queries/check-ins";
-import { getMessages } from "@/lib/queries/messages";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,9 +18,6 @@ export default async function ClientCheckInDetailPage({
   // Authorization: client can only view their own check-ins
   if (checkIn.clientId !== user.id) notFound();
 
-  const messages = await getMessages(checkIn.clientId, checkIn.weekOf);
-
-  const coachMessages = messages.filter((m) => m.senderId !== user.id);
 
   const submittedLabel = checkIn.submittedAt.toLocaleDateString("en-US", {
     month: "long",
@@ -160,27 +156,7 @@ export default async function ClientCheckInDetailPage({
         >
           Coach Feedback
         </h2>
-        {coachMessages.length > 0 ? (
-          <div className="space-y-3">
-            {coachMessages.map((msg) => (
-              <div key={msg.id} className="space-y-1">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  {msg.body}
-                </p>
-                <p className="text-xs text-zinc-400">
-                  {msg.createdAt.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-400">
-            No feedback yet. Your coach hasn&apos;t reviewed this check-in.
-          </p>
-        )}
+        <p className="text-sm text-zinc-400">No feedback</p>
       </section>
     </div>
   );

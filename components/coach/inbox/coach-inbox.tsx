@@ -190,7 +190,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
             >
               {f.label}
               <span
-                className={`ml-1.5 inline-block min-w-[1.25rem] rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${
+                className={`ml-1.5 inline-block min-w-[1.25rem] rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
                   f.key === "new"
                     ? "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
                     : f.key === "reviewed"
@@ -231,45 +231,19 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
                   onDragStart={isDragEnabled ? (e) => handleDragStart(e, client.id, index) : undefined}
                   onDragOver={isDragEnabled ? (e) => handleDragOver(e, index) : undefined}
                   onDragEnd={isDragEnabled ? handleDragEnd : undefined}
-                  style={{ transition: "opacity 150ms ease, transform 150ms ease" }}
                   className={[
-                    "group flex items-center gap-2",
-                    isDragEnabled ? "cursor-default" : "",
-                    isDragging ? "opacity-40 scale-[0.98]" : "opacity-100 scale-100",
-                    isDropTarget ? "translate-y-0" : "",
+                    "group relative transition-all duration-200 ease-out",
+                    isDragEnabled ? "cursor-grab active:cursor-grabbing" : "",
+                    isDragging ? "opacity-25 scale-[0.97]" : "opacity-100 scale-100",
                   ].join(" ")}
                 >
-                  {/* Grip handle */}
-                  {isDragEnabled && (
-                    <div
-                      className="flex h-8 w-5 flex-shrink-0 cursor-grab items-center justify-center rounded active:cursor-grabbing"
-                      aria-hidden="true"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="16"
-                        viewBox="0 0 12 20"
-                        fill="currentColor"
-                        className="text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400"
-                      >
-                        <circle cx="4" cy="3" r="1.5" />
-                        <circle cx="8" cy="3" r="1.5" />
-                        <circle cx="4" cy="10" r="1.5" />
-                        <circle cx="8" cy="10" r="1.5" />
-                        <circle cx="4" cy="17" r="1.5" />
-                        <circle cx="8" cy="17" r="1.5" />
-                      </svg>
+                  {/* Glowing drop indicator line above this card */}
+                  {isDropTarget && (
+                    <div className="absolute -top-1 left-4 right-4 z-10 flex items-center">
+                      <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_8px_2px_rgba(96,165,250,0.35)]" />
                     </div>
                   )}
-
-                  {/* Drop indicator line above this card */}
-                  <div className="min-w-0 flex-1">
-                    {isDropTarget && (
-                      <div className="mb-1.5 h-0.5 w-full rounded-full bg-blue-500/60" />
-                    )}
-                    <InboxClientCard client={client} />
-                  </div>
+                  <InboxClientCard client={client} />
                 </div>
               );
             })}

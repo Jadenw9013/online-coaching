@@ -5,7 +5,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Footer } from "@/components/footer";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CoachFilters } from "@/components/public/coach-filters";
 import { SaveCoachButton } from "@/components/public/save-coach-button";
 import { getSavedCoachIds } from "@/lib/queries/saved-coaches";
@@ -206,7 +205,6 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                         <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-zinc-100 sm:inline">Steadfast</span>
                     </Link>
                     <nav className="flex items-center gap-3">
-                        <ThemeToggle />
                         <Link href="/sign-in" className="text-sm font-medium text-zinc-400 transition-colors hover:text-white">Sign In</Link>
                         <Link
                             href="/sign-up"

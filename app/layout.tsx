@@ -44,13 +44,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <head>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{if(localStorage.getItem('steadfast-theme')==='light'){document.documentElement.classList.remove('dark')}}catch(e){}})()`,
-            }}
-          />
-        </head>
+      
         <body
           className={`${sora.variable} ${chakraPetch.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200`}
         >

@@ -6,7 +6,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { RatingSummary } from "@/components/public/rating-summary";
 import { SaveCoachButton } from "@/components/public/save-coach-button";
 import { TestimonialCard } from "@/components/public/testimonial-card";
@@ -113,7 +112,6 @@ export default async function CoachProfilePage({ params }: PageProps) {
                         ← Directory
                     </Link>
                     <div className="flex items-center gap-3">
-                        <ThemeToggle />
                         <Link
                             href="/"
                             className="group flex items-center gap-2.5"

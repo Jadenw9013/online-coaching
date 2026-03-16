@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RoleSwitcher } from "./role-switcher";
-import { ThemeToggle } from "./theme-toggle";
 
 export function NavBar({
   role,
@@ -116,8 +115,6 @@ export function NavBar({
               New Check-In
             </Link>
           )}
-
-          <ThemeToggle />
 
           <SignedIn>
             <UserButton />
