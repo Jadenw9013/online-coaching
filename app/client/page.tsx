@@ -25,6 +25,7 @@ import { TodayAdherence } from "@/components/client/today-adherence";
 import dayjs from "dayjs";
 import utcPlugin from "dayjs/plugin/utc";
 import timezonePlugin from "dayjs/plugin/timezone";
+import { ClientTeamBanner } from "@/components/client/ClientTeamBanner";
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
@@ -169,7 +170,8 @@ export default async function ClientDashboard() {
         </p>
       </section>
 
-
+      {/* Team banner — silently renders nothing if coach has no team */}
+      <ClientTeamBanner clientId={user.id} />
 
       {/* Coach connection (only if no coach) */}
       {!coachAssignment && (

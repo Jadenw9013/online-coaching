@@ -8,6 +8,8 @@ import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { BannerPhotoUpload } from "@/components/profile/banner-photo-upload";
 import { ShareProfileButton } from "@/components/coach/marketplace/share-profile-button";
 import { getMarketplaceStats } from "@/lib/queries/marketplace-stats";
+import { TeamBadge } from "@/components/ui/TeamBadge";
+import { getCoachTeamInfo } from "@/lib/queries/teams";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -21,6 +23,8 @@ export default async function CoachMarketplaceProfilePage() {
     ]);
 
     const { profile, testimonialCount } = marketplaceData;
+
+    const teamInfo = user.teamId ? await getCoachTeamInfo(user.id) : null;
 
     const initials = `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?";
     const displayName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Coach";
@@ -161,6 +165,31 @@ export default async function CoachMarketplaceProfilePage() {
                 )}
             </div>
 
+            {/* ── Team Affiliation (read-only) ── */}
+            <div className="animate-fade-in mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5" style={{ animationDelay: "180ms" }}>
+                <div className="flex items-center justify-between gap-4">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Team</p>
+                    <a href="/coach/settings#team" className="text-xs text-zinc-500 transition hover:text-zinc-300">Manage in Settings →</a>
+                </div>
+                <div className="mt-3">
+                    {teamInfo ? (
+                        <TeamBadge
+                            teamName={teamInfo.team?.name ?? "My Team"}
+                            logoPath={teamInfo.team?.logoPath ?? null}
+                            role={teamInfo.teamRole ?? null}
+                            showRole={true}
+                            size="md"
+                        />
+                    ) : (
+                        <p className="text-sm text-zinc-500">
+                            Not part of a team yet.{" "}
+                            <a href="/coach/settings" className="text-zinc-400 underline underline-offset-2 transition hover:text-zinc-200">
+                                Create one in Settings
+                            </a>
+                        </p>
+                    )}
+                </div>
+            </div>
 
             {/* ═══════════════════════════════════════════════
                 SECTION 2 — ABOUT

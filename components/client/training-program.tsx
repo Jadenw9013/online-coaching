@@ -591,17 +591,19 @@ function ExerciseProgressInput({
 
   // Keep state arrays in sync if setCount changes between renders
   useEffect(() => {
-    setSets((prev) => {
-      if (prev.length === setCount) return prev;
-      if (prev.length > setCount) return prev.slice(0, setCount);
-      return [...prev, ...Array.from({ length: setCount - prev.length }, () => ({ weight: "", reps: "" }))];
+    startTransition(() => {
+      setSets((prev) => {
+        if (prev.length === setCount) return prev;
+        if (prev.length > setCount) return prev.slice(0, setCount);
+        return [...prev, ...Array.from({ length: setCount - prev.length }, () => ({ weight: "", reps: "" }))];
+      });
+      setSaveStates((prev) => {
+        if (prev.length === setCount) return prev;
+        if (prev.length > setCount) return prev.slice(0, setCount);
+        return [...prev, ...Array<"idle">(setCount - prev.length).fill("idle")];
+      });
     });
-    setSaveStates((prev) => {
-      if (prev.length === setCount) return prev;
-      if (prev.length > setCount) return prev.slice(0, setCount);
-      return [...prev, ...Array<"idle">(setCount - prev.length).fill("idle")];
-    });
-  }, [setCount]);
+  }, [setCount, startTransition]);
 
   function updateSet(i: number, field: "weight" | "reps", value: string) {
     setSets((prev) => { const next = [...prev]; next[i] = { ...next[i], [field]: value }; return next; });

@@ -3,6 +3,7 @@ import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
 import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { ClientProfileForm } from "@/components/client/client-profile-form";
 import { Metadata } from "next";
+import { ClientTeamBanner } from "@/components/client/ClientTeamBanner";
 
 export const metadata: Metadata = {
     title: "My Profile | Steadfast",
@@ -50,6 +51,9 @@ export default async function ClientProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Coach team banner — silent if no team */}
+            <ClientTeamBanner clientId={user.id} />
 
             {/* ── Profile Details + Edit ── */}
             <ClientProfileForm

@@ -140,7 +140,17 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
         where,
         include: {
             user: {
-                select: { id: true, firstName: true, lastName: true, profilePhotoPath: true },
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    profilePhotoPath: true,
+                    teamId: true,
+                    teamRole: true,
+                    team: {
+                        select: { id: true, name: true, slug: true, logoPath: true },
+                    },
+                },
             },
         },
     });
@@ -283,7 +293,17 @@ export async function getCoachProfileBySlug(slug: string) {
         where: { slug, isPublished: true },
         include: {
             user: {
-                select: { id: true, firstName: true, lastName: true, profilePhotoPath: true },
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    profilePhotoPath: true,
+                    teamId: true,
+                    teamRole: true,
+                    team: {
+                        select: { id: true, name: true, slug: true, logoPath: true },
+                    },
+                },
             },
             portfolioItems: {
                 orderBy: { sortOrder: "asc" },

@@ -5,8 +5,16 @@ import { ResetTemplateButton } from "@/components/coach/reset-template-button";
 import { CadenceEditor } from "@/components/coach/cadence-editor";
 import { CoachEmailSettings } from "@/components/coach/coach-email-settings";
 import { parseCadenceConfig, cadenceFromLegacyDays } from "@/lib/scheduling/cadence";
+import { TeamSection } from "@/components/coach/TeamSection";
+import { getTeamWithMembers, getActiveTeamInvite } from "@/lib/queries/teams";
 
-export default async function CoachSettingsPage() {
+export default async function CoachSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ joined?: string }>;
+}) {
+  const { joined } = await searchParams;
+  const justJoined = joined === "true";
   const user = await getCurrentDbUser();
   const template = await getDefaultTemplate(user.id);
 
@@ -14,6 +22,12 @@ export default async function CoachSettingsPage() {
   const cadenceConfig =
     parseCadenceConfig(user.cadenceConfig) ??
     cadenceFromLegacyDays(user.checkInDaysOfWeek);
+
+  // Fetch team data + active invite if the coach is on a team
+  const [teamData, activeInvite] = await Promise.all([
+    user.teamId ? getTeamWithMembers(user.teamId) : Promise.resolve(null),
+    user.teamId ? getActiveTeamInvite(user.teamId) : Promise.resolve(null),
+  ]);
 
   const questionCount = template
     ? (template.questions as unknown[]).length
@@ -109,6 +123,22 @@ export default async function CoachSettingsPage() {
             initialEmailCoachingRequests={user.emailCoachingRequests}
           />
         </div>
+      </section>
+
+      {/* Team */}
+      <section aria-labelledby="team-heading" className="animate-fade-in" style={{ animationDelay: "240ms" }}>
+        <h2
+          id="team-heading"
+          className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400"
+        >
+          Team
+        </h2>
+        <TeamSection
+          user={{ id: user.id, teamId: user.teamId, teamRole: user.teamRole }}
+          teamData={teamData}
+          activeInvite={activeInvite}
+          justJoined={justJoined}
+        />
       </section>
     </div>
   );

@@ -11,6 +11,7 @@ import { SaveCoachButton } from "@/components/public/save-coach-button";
 import { TestimonialCard } from "@/components/public/testimonial-card";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { TeamBadge } from "@/components/ui/TeamBadge";
 
 interface PageProps {
     params: Promise<{
@@ -230,6 +231,22 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                 {profile.bio || "Bio coming soon."}
                             </div>
                         </div>
+
+                        {/* ── Team Section ── */}
+                        {profile.user.team && (
+                            <div className="mt-10">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Team</p>
+                                <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4">
+                                    <TeamBadge
+                                        teamName={profile.user.team.name}
+                                        logoPath={profile.user.team.logoPath}
+                                        role={profile.user.teamRole}
+                                        showRole={true}
+                                        size="md"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* ── Experience & Certifications ── */}
                         {(profile.experience || profile.certifications) && (

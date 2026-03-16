@@ -9,6 +9,7 @@ import { CoachFilters } from "@/components/public/coach-filters";
 import { SaveCoachButton } from "@/components/public/save-coach-button";
 import { getSavedCoachIds } from "@/lib/queries/saved-coaches";
 import { Suspense } from "react";
+import { TeamBadge } from "@/components/ui/TeamBadge";
 
 export const metadata: Metadata = {
     title: "Find a Coach | Steadfast",
@@ -386,6 +387,18 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
                                                         </div>
                                                         {profile.headline && (
                                                             <p className="mt-0.5 truncate text-[13px] text-zinc-400">{profile.headline}</p>
+                                                        )}
+                                                        {/* Team badge — shown below name when coach is on a team */}
+                                                        {profile.user.team && (
+                                                            <div className="mt-1.5">
+                                                                <TeamBadge
+                                                                    teamName={profile.user.team.name}
+                                                                    logoPath={profile.user.team.logoPath}
+                                                                    role={profile.user.teamRole}
+                                                                    showRole={true}
+                                                                    size="sm"
+                                                                />
+                                                            </div>
                                                         )}
                                                     </div>
                                                     {/* Availability pill */}

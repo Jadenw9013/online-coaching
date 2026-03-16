@@ -105,6 +105,10 @@ model User {
   clientInvitesSent    ClientInvite[]       @relation("CoachInvites")
   consultationMeetings ConsultationMeeting[] @relation("CoachMeetings")
   coachSettings        CoachSettings?        @relation("CoachSettings")
+
+  teamId   String? @map("team_id")
+  teamRole String? @map("team_role")
+  team     Team?   @relation(fields: [teamId], references: [id])
 }
 
 model CoachClient {
@@ -124,6 +128,34 @@ model CoachClient {
   @@unique([coachId, clientId])
   @@index([coachId])
   @@index([clientId])
+}
+
+// ── Teams ────────────────────────────────────────────────────────────────────
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logoPath    String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  members User[]
+  invites TeamInvite[]
+}
+
+model TeamInvite {
+  id          String       @id @default(cuid())
+  teamId      String
+  inviteToken String       @unique @default(cuid())
+  status      InviteStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  expiresAt   DateTime
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([inviteToken])
 }
 
 model CheckInTemplate {
