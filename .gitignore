@@ -76,4 +76,7 @@ lint-out*.txt
 ts_errors*.txt
 typescript-errors.txt
 errors.txt
+
+# Accidental shell artifacts
 tatus
+"({,+"
