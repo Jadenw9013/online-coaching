@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { markContacted, scheduleConsultation, acceptClient, declineRequest } from "@/app/actions/coaching-requests";
+import { markContacted, scheduleConsultation, acceptClient, declineRequest, resendInvite } from "@/app/actions/coaching-requests";
 import { useRouter } from "next/navigation";
 
 type LeadActionsProps = {
     requestId: string;
     status: string;
+    prospectId: string | null;
     existingMeeting?: { meetingLink: string | null; scheduledTime: Date | null; notes: string | null } | null;
 };
 
-export function LeadActions({ requestId, status, existingMeeting }: LeadActionsProps) {
+export function LeadActions({ requestId, status, prospectId, existingMeeting }: LeadActionsProps) {
     const [pending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [showSchedule, setShowSchedule] = useState(false);
     const [meetingLink, setMeetingLink] = useState(existingMeeting?.meetingLink ?? "");
     const [scheduledTime, setScheduledTime] = useState(
@@ -35,7 +37,9 @@ export function LeadActions({ requestId, status, existingMeeting }: LeadActionsP
         });
     }
 
-    const isTerminal = status === "ACCEPTED" || status === "APPROVED" || status === "DECLINED" || status === "REJECTED";
+    const isAccepted = status === "ACCEPTED" || status === "APPROVED";
+    const isTerminal = isAccepted || status === "DECLINED" || status === "REJECTED";
+    const isAwaitingSignup = isAccepted && !prospectId;
 
     return (
         <div className="space-y-3">
@@ -142,10 +146,44 @@ export function LeadActions({ requestId, status, existingMeeting }: LeadActionsP
                 </form>
             )}
 
-            {isTerminal && (
+            {isTerminal && !isAwaitingSignup && (
                 <p className="text-sm text-zinc-600">
-                    This lead is {status === "ACCEPTED" || status === "APPROVED" ? "accepted — client is on your roster" : "closed"}.
+                    This lead is {isAccepted ? "accepted — client is on your roster" : "closed"}.
                 </p>
+            )}
+
+            {isAwaitingSignup && (
+                <div className="space-y-3">
+                    <p className="text-sm text-amber-400">
+                        ⏳ Accepted — waiting for client to sign up.
+                    </p>
+                    {successMsg && (
+                        <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-400">{successMsg}</p>
+                    )}
+                    <button
+                        disabled={pending}
+                        onClick={() => {
+                            setError(null);
+                            setSuccessMsg(null);
+                            startTransition(async () => {
+                                try {
+                                    const result = await resendInvite(requestId);
+                                    if (result.success) {
+                                        setSuccessMsg(result.message);
+                                    } else {
+                                        setError(result.message);
+                                    }
+                                    router.refresh();
+                                } catch (e) {
+                                    setError(e instanceof Error ? e.message : "Something went wrong");
+                                }
+                            });
+                        }}
+                        className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-300 transition-all hover:bg-blue-500/20 disabled:opacity-50"
+                    >
+                        Send Invite
+                    </button>
+                </div>
             )}
         </div>
     );

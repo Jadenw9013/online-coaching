@@ -66,6 +66,17 @@ export async function submitCoachingRequest(data: CoachingRequestData) {
         throw new Error("You already have a pending request with this coach. Please wait for them to respond.");
     }
 
+    // If the submitter is authenticated, link their account immediately
+    let prospectId: string | undefined;
+    try {
+        const { auth } = await import("@clerk/nextjs/server");
+        const { userId: clerkId } = await auth();
+        if (clerkId) {
+            const existingUser = await db.user.findUnique({ where: { clerkId } });
+            if (existingUser) prospectId = existingUser.id;
+        }
+    } catch { /* unauthenticated — continue without linking */ }
+
     // Create Request
     const request = await db.coachingRequest.create({
         data: {
@@ -74,6 +85,7 @@ export async function submitCoachingRequest(data: CoachingRequestData) {
             prospectEmail: normalizedPhone,
             intakeAnswers: validated.intakeAnswers,
             status: "PENDING",
+            prospectId,
         },
     });
 
@@ -197,10 +209,18 @@ export async function approveCoachingRequest(requestId: string) {
     } catch { /* email failure must not break approval */ }
 
     // Try to convert immediately if they already have an account
-    const normalizedEmail = request.prospectEmail.toLowerCase();
-    const existingUser = await db.user.findUnique({
-        where: { email: normalizedEmail },
+    const normalizedContact = request.prospectEmail.toLowerCase().trim();
+    let existingUser = await db.user.findUnique({
+        where: { email: normalizedContact },
     });
+    if (!existingUser) {
+        const digits = normalizedContact.replace(/\D/g, "");
+        if (digits.length >= 7) {
+            existingUser = await db.user.findFirst({
+                where: { phoneNumber: { contains: digits.slice(-10) } },
+            });
+        }
+    }
 
     let immediateLink = false;
 
@@ -356,10 +376,18 @@ export async function resendInvite(requestId: string) {
         return { success: false, message: "This person has already signed up and is connected." };
     }
 
-    const normalizedEmail = request.prospectEmail.toLowerCase();
-    const existingUser = await db.user.findUnique({
-        where: { email: normalizedEmail },
+    const normalizedContact = request.prospectEmail.toLowerCase().trim();
+    let existingUser = await db.user.findUnique({
+        where: { email: normalizedContact },
     });
+    if (!existingUser) {
+        const digits = normalizedContact.replace(/\D/g, "");
+        if (digits.length >= 7) {
+            existingUser = await db.user.findFirst({
+                where: { phoneNumber: { contains: digits.slice(-10) } },
+            });
+        }
+    }
 
     if (existingUser) {
         // Prospect signed up since last page load — auto-link and inform coach
@@ -387,7 +415,7 @@ export async function resendInvite(requestId: string) {
     // Send the invite email
     const coachName = user.firstName || "Your coach";
     const approvalEmail = requestApprovedEmail(request.prospectName, coachName);
-    const emailResult = await sendEmail({ to: normalizedEmail, ...approvalEmail });
+    const emailResult = await sendEmail({ to: normalizedContact, ...approvalEmail });
 
     if (!emailResult.success) {
         console.error(JSON.stringify({
@@ -506,9 +534,18 @@ export async function acceptClient(requestId: string) {
     }
 
     // Create CoachClient if prospect has an account
-    const existingUser = await db.user.findUnique({
-        where: { email: request.prospectEmail.toLowerCase() },
+    const normalizedContact = request.prospectEmail.toLowerCase().trim();
+    let existingUser = await db.user.findUnique({
+        where: { email: normalizedContact },
     });
+    if (!existingUser) {
+        const digits = normalizedContact.replace(/\D/g, "");
+        if (digits.length >= 7) {
+            existingUser = await db.user.findFirst({
+                where: { phoneNumber: { contains: digits.slice(-10) } },
+            });
+        }
+    }
 
     if (existingUser) {
         const existingConn = await db.coachClient.findUnique({

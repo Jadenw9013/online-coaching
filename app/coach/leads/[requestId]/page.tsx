@@ -124,6 +124,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                 <LeadActions
                     requestId={lead.id}
                     status={lead.status}
+                    prospectId={lead.prospectId}
                     existingMeeting={lead.consultationMeeting ? {
                         meetingLink: lead.consultationMeeting.meetingLink,
                         scheduledTime: lead.consultationMeeting.scheduledTime,

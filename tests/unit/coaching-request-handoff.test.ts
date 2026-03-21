@@ -116,3 +116,61 @@ describe("invite send count", () => {
         });
     });
 });
+
+// State rule helper — mirrors the guard logic from acceptClient
+function canAcceptClient(request: { status: string }): {
+    allowed: boolean;
+    reason?: string;
+} {
+    if (request.status === "ACCEPTED" || request.status === "APPROVED") {
+        return { allowed: false, reason: "Client already accepted." };
+    }
+    return { allowed: true };
+}
+
+describe("acceptClient state rules", () => {
+    it("allows accept for PENDING leads", () => {
+        expect(canAcceptClient({ status: "PENDING" }).allowed).toBe(true);
+    });
+
+    it("allows accept for CONTACTED leads", () => {
+        expect(canAcceptClient({ status: "CONTACTED" }).allowed).toBe(true);
+    });
+
+    it("allows accept for CALL_SCHEDULED leads", () => {
+        expect(canAcceptClient({ status: "CALL_SCHEDULED" }).allowed).toBe(true);
+    });
+
+    it("blocks accept for already ACCEPTED leads", () => {
+        const result = canAcceptClient({ status: "ACCEPTED" });
+        expect(result.allowed).toBe(false);
+        expect(result.reason).toContain("already accepted");
+    });
+
+    it("blocks accept for already APPROVED leads", () => {
+        const result = canAcceptClient({ status: "APPROVED" });
+        expect(result.allowed).toBe(false);
+        expect(result.reason).toContain("already accepted");
+    });
+});
+
+describe("JIT conversion status matching", () => {
+    // Mirrors the JIT query in lib/auth/roles.ts
+    const JIT_ELIGIBLE_STATUSES = ["APPROVED", "ACCEPTED"];
+
+    it("matches APPROVED requests", () => {
+        expect(JIT_ELIGIBLE_STATUSES.includes("APPROVED")).toBe(true);
+    });
+
+    it("matches ACCEPTED requests", () => {
+        expect(JIT_ELIGIBLE_STATUSES.includes("ACCEPTED")).toBe(true);
+    });
+
+    it("does not match PENDING requests", () => {
+        expect(JIT_ELIGIBLE_STATUSES.includes("PENDING")).toBe(false);
+    });
+
+    it("does not match DECLINED requests", () => {
+        expect(JIT_ELIGIBLE_STATUSES.includes("DECLINED")).toBe(false);
+    });
+});

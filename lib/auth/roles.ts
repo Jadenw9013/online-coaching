@@ -72,7 +72,7 @@ export async function getCurrentDbUser() {
     const unhandledRequests = await db.coachingRequest.findMany({
       where: {
         prospectEmail: email.toLowerCase(),
-        status: "APPROVED",
+        status: { in: ["APPROVED", "ACCEPTED"] },
         prospectId: null,
       },
       include: {

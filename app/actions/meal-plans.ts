@@ -189,8 +189,8 @@ export async function publishMealPlan(input: unknown) {
       await notifyMealPlanUpdated(plan.clientId, user.firstName);
 
       // Background email to client
-      const client = await db.user.findUnique({ where: { id: plan.clientId }, select: { email: true, firstName: true } });
-      if (client?.email) {
+      const client = await db.user.findUnique({ where: { id: plan.clientId }, select: { email: true, firstName: true, emailMealPlanUpdates: true } });
+      if (client?.email && client.emailMealPlanUpdates) {
         const { sendEmail } = await import("@/lib/email/sendEmail");
         const { mealPlanUpdatedEmail } = await import("@/lib/email/templates");
         const email = mealPlanUpdatedEmail(client.firstName || "there", user.firstName || "your coach");
