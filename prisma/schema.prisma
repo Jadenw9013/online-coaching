@@ -33,6 +33,27 @@ enum ReminderStage {
   OVERDUE
 }
 
+enum SubscriptionTier {
+  BETA
+  STARTER
+  PRO
+}
+
+enum SubscriptionStatus {
+  NONE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum BillingState {
+  BETA
+  GRACE_PERIOD
+  REQUIRES_PAYMENT
+  ACTIVE
+}
+
 model User {
   id         String   @id @default(cuid())
   clerkId    String   @unique
@@ -67,6 +88,12 @@ model User {
   checkInDaysOfWeek     Int[]   @default([1])   // 0=Sun..6=Sat. Default: Monday
   cadenceConfig         Json?   // CadenceConfig object (null = legacy checkInDaysOfWeek)
   timezone              String  @default("America/New_York")
+  subscriptionTier     SubscriptionTier?
+  subscriptionStatus   SubscriptionStatus?
+  billingState         BillingState?
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  betaAccessEndsAt     DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

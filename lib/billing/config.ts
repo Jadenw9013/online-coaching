@@ -1,0 +1,3 @@
+export const BILLING_GRACE_PERIOD_DAYS = 14;
+export const MIN_BETA_ACCESS_DAYS = 14;
+export const BETA_EMERGENCY_CLIENT_CAP = 100;
