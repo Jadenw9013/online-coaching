@@ -106,13 +106,13 @@ export function NavBar({
           {role === "client" && (
             <Link
               href="/client/check-in"
-              className={`hidden rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:shadow-sm active:scale-[0.97] sm:block dark:shadow-blue-500/20 dark:hover:brightness-110 ${
+              className={`hidden rounded-lg px-3 py-1.5 text-sm font-semibold transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020815] sm:block ${
                 isActive("/client/check-in")
-                  ? "bg-zinc-100 text-zinc-900 shadow-lg"
+                  ? "bg-white text-zinc-900 shadow-[0_0_12px_rgba(255,255,255,0.15)]"
                   : "bg-white text-zinc-900 hover:bg-zinc-100"
               }`}
             >
-              New Check-In
+              Check-In
             </Link>
           )}
 

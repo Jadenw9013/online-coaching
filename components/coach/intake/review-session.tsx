@@ -559,7 +559,10 @@ export function ReviewSession({
                                                     <p className="text-sm text-emerald-400">
                                                         ✓ Signed copy uploaded {doc.uploadedSignedAt ? new Date(doc.uploadedSignedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
                                                     </p>
-                                                    <p className="text-sm text-zinc-300">📄 {doc.uploadedSignedFileName}</p>
+                                                    <p className="flex items-center gap-1.5 text-sm text-zinc-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                                                        {doc.uploadedSignedFileName}
+                                                    </p>
                                                     {doc.signedFileUrl && (
                                                         <a
                                                             href={doc.signedFileUrl}

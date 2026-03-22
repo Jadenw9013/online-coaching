@@ -143,14 +143,15 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
           placeholder="Search clients…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-zinc-500"
+          className="w-full rounded-xl border border-zinc-700/60 bg-zinc-800/30 py-2.5 pl-9 pr-4 text-zinc-100 placeholder-zinc-600 transition-colors focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          style={{ fontSize: "max(1rem, 16px)" }}
           aria-label="Search clients by name"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition-colors"
             aria-label="Clear search"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -160,7 +161,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
 
       {/* Filter bar — horizontally scrollable on mobile */}
       <div
-        className="flex gap-1 overflow-x-auto rounded-xl bg-zinc-100 p-1 scrollbar-none dark:bg-zinc-800/60"
+        className="flex gap-1 overflow-x-auto rounded-xl bg-zinc-800/60 p-1 scrollbar-none"
         role="tablist"
         aria-label="Filter clients"
       >
@@ -184,20 +185,20 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
               onKeyDown={(e) => handleKeyDown(e, i)}
               className={`min-h-[44px] shrink-0 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
                 activeFilter === f.key
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                  ? "bg-zinc-900 text-zinc-100 shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
               {f.label}
               <span
                 className={`ml-1.5 inline-block min-w-[1.25rem] rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
                   f.key === "new"
-                    ? "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
+                    ? "bg-blue-500/20 text-blue-400"
                     : f.key === "reviewed"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                    ? "bg-emerald-500/20 text-emerald-400"
                     : f.key === "missing"
-                    ? "bg-zinc-200/60 text-zinc-500 dark:bg-zinc-700/60 dark:text-zinc-400"
-                    : "bg-zinc-200/60 dark:bg-zinc-700/60"
+                    ? "bg-zinc-700/60 text-zinc-400"
+                    : "bg-zinc-700/60 text-zinc-400"
                 }`}
               >
                 {count}
@@ -210,7 +211,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
       {/* Client cards */}
       <div role="tabpanel">
         {filtered.length === 0 ? (
-          <div className="animate-fade-in flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-300 py-16 dark:border-zinc-700">
+          <div className="animate-fade-in flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-700/50 py-16">
             <p className="text-sm font-medium text-zinc-400">
               {query ? `No clients match "${query}"` : "No clients match this filter"}
             </p>

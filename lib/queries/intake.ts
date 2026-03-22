@@ -87,6 +87,32 @@ export async function getIntakePacketForReview(requestId: string, coachUserId: s
     return packet;
 }
 
+/**
+ * Fetch the submitted IntakePacket for a client by matching
+ * CoachingRequest.prospectId = clientId in the coach's profile.
+ */
+export async function getIntakePacketForClient(coachUserId: string, clientId: string) {
+    const request = await db.coachingRequest.findFirst({
+        where: {
+            prospectId: clientId,
+            coachProfile: { userId: coachUserId },
+            intakePacket: { submittedAt: { not: null } },
+        },
+        select: {
+            id: true,
+            intakePacket: {
+                select: {
+                    id: true,
+                    formAnswers: true,
+                    submittedAt: true,
+                    coachNotes: true,
+                },
+            },
+        },
+    });
+    return request?.intakePacket ?? null;
+}
+
 export async function getSignedUploadUrl(filePath: string): Promise<string> {
     const { getDocumentUrl } = await import("@/lib/supabase/document-storage");
     return getDocumentUrl(filePath);

@@ -6,25 +6,12 @@ import { computeCurrentPeriod } from "@/lib/scheduling/periods";
 import { parseCadenceConfig, getCadencePreview, cadenceFromLegacyDays } from "@/lib/scheduling/cadence";
 import Link from "next/link";
 
-function KpiCard({
-  value,
-  label,
-  accent,
-}: {
-  value: number;
-  label: string;
-  accent: string;
-}) {
-  return (
-    <div
-      className={`overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 dark:border-white/[0.06] dark:bg-[#0a1224] ${accent}`}
-    >
-      <p className="text-3xl font-bold tabular-nums tracking-tight">{value}</p>
-      <p className="mt-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-        {label}
-      </p>
-    </div>
-  );
+function getGreeting(): string {
+  // Approximate US local time from UTC (rough EST/CST center)
+  const localHour = (new Date().getUTCHours() + 19) % 24; // UTC-5
+  if (localHour < 12) return "Good morning";
+  if (localHour < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 export default async function CoachDashboard() {
@@ -40,73 +27,125 @@ export default async function CoachDashboard() {
   const coachCadence = parseCadenceConfig(user.cadenceConfig);
   const effectiveCadence = coachCadence ?? cadenceFromLegacyDays(user.checkInDaysOfWeek);
   const cadencePreview = getCadencePreview(effectiveCadence);
-
-  // Fall back to legacy period label if cadence is weekly
   const period = computeCurrentPeriod([1], new Date(), "America/Los_Angeles");
   const weekLabel = `${period.label} \u00b7 ${cadencePreview}`;
 
   const totalCount = clients.length;
-  const newCount = clients.filter((c) => c.weekStatus === "new").length;
+  const overdueCount = clients.filter(
+    (c) => c.cadenceStatus === "overdue" || c.cadenceStatus === "due"
+  ).length;
   const reviewedCount = clients.filter((c) => c.weekStatus === "reviewed").length;
-  const overdueCount = clients.filter((c) => c.cadenceStatus === "overdue" || c.cadenceStatus === "due").length;
+
+  const greeting = getGreeting();
+  const coachFirstName = user.firstName ?? "Coach";
 
   return (
-    <div className="space-y-10">
-      {/* Header */}
+    <div className="space-y-8">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <section className="animate-fade-in">
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1.5 text-sm text-zinc-500">
-          {weekLabel}
-        </p>
+        {/* Greeting row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+              {greeting}, {coachFirstName}
+            </h1>
+            <p className="mt-1 text-sm text-zinc-500">{weekLabel}</p>
+          </div>
+
+          {/* Stats pills */}
+          {clients.length > 0 && (
+            <div
+              className="flex flex-wrap gap-2 sm:shrink-0 sm:items-start"
+              role="status"
+              aria-label="Client summary"
+            >
+              <span
+                className="inline-flex items-center rounded-full bg-zinc-800/60 px-3 py-1 text-xs font-semibold text-zinc-400"
+                aria-label={`${totalCount} total clients`}
+              >
+                {totalCount} client{totalCount !== 1 ? "s" : ""}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  overdueCount > 0
+                    ? "bg-red-500/10 text-red-400"
+                    : "bg-zinc-800/60 text-zinc-500"
+                }`}
+                aria-label={`${overdueCount} clients overdue`}
+              >
+                {overdueCount > 0 && (
+                  <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 motion-safe:animate-pulse" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-400" />
+                  </span>
+                )}
+                {overdueCount} overdue
+              </span>
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-zinc-800/60 px-3 py-1 text-xs font-semibold text-zinc-400"
+                aria-label={`${reviewedCount} clients reviewed this week`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                {reviewedCount} reviewed
+              </span>
+            </div>
+          )}
+        </div>
       </section>
 
-      {/* KPI Cards */}
-      {clients.length > 0 && (
-        <div
-          className="stagger-children grid grid-cols-2 gap-4 sm:grid-cols-4"
-          role="status"
-          aria-label="Client check-in summary"
-        >
-          <KpiCard
-            value={newCount}
-            label="Awaiting Review"
-            accent="border-l-2 border-l-blue-500"
-          />
-          <KpiCard
-            value={overdueCount}
-            label="Due / Overdue"
-            accent="border-l-2 border-l-amber-500"
-          />
-          <KpiCard
-            value={reviewedCount}
-            label="Reviewed"
-            accent="border-l-2 border-l-emerald-500"
-          />
-          <KpiCard
-            value={totalCount}
-            label="Total Clients"
-            accent=""
-          />
-        </div>
-      )}
-
-
-      {/* Client list */}
+      {/* ── Client list ─────────────────────────────────────────────────────── */}
       {clients.length === 0 ? (
-        <div className="animate-fade-in-up flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-300 bg-white px-8 py-20 text-center dark:border-blue-500/10 dark:bg-[#0a1224]">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+        <div className="animate-fade-in-up flex flex-col items-center gap-5 rounded-2xl border border-dashed border-blue-500/10 bg-[#0a1224] px-8 py-20 text-center">
+          {/* Abstract coaching illustration — pure CSS/SVG */}
+          <div className="relative flex h-16 w-16 items-center justify-center">
+            {/* Outer ring */}
+            <div className="absolute inset-0 rounded-full border-2 border-dashed border-zinc-700/60" />
+            {/* Inner circle */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800/60 ring-1 ring-white/[0.06]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            {/* Small satellite dots */}
+            <div className="absolute -right-1 top-1 h-2.5 w-2.5 rounded-full bg-blue-500/30 ring-1 ring-blue-500/40" />
+            <div className="absolute -left-1 bottom-1 h-2 w-2 rounded-full bg-emerald-500/30 ring-1 ring-emerald-500/40" />
           </div>
-          <div>
-            <p className="text-base font-semibold">No clients yet</p>
-            <p className="mt-1.5 text-sm text-zinc-500">
-              <Link href="/coach/clients/invite" className="text-blue-400 hover:underline">Invite existing clients</Link> or share your <Link href="/coach/marketplace/profile" className="text-blue-400 hover:underline">public coaching profile</Link> to attract new ones.
+
+          <div className="space-y-1.5">
+            <p className="text-xl font-bold tracking-tight text-zinc-100">
+              Your roster is empty
             </p>
+            <p className="mx-auto max-w-xs text-sm text-zinc-500">
+              Add your first lead to get started, or invite an existing client directly.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-2 sm:flex-row">
+            <Link
+              href="/coach/leads"
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e] active:scale-[0.97]"
+              style={{ minHeight: "44px" }}
+            >
+              Go to Leads
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            </Link>
+            <Link
+              href="/coach/clients/invite"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-zinc-800 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:border-white/[0.14] hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
+              style={{ minHeight: "44px" }}
+            >
+              Invite Client
+            </Link>
           </div>
         </div>
       ) : (
         <section aria-label="Client inbox">
-          <h2 className="mb-5 text-lg font-semibold tracking-tight">Clients</h2>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+            Clients
+          </h2>
           <CoachInbox clients={clients} />
         </section>
       )}

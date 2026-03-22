@@ -71,12 +71,14 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     </div>
                     <div>
                         <h1 className="text-xl font-bold text-zinc-100">{lead.prospectName}</h1>
-                        <a href={`tel:${(lead.prospectPhone ?? lead.prospectEmail).replace(/\s/g, "")}`} className="mt-0.5 text-sm text-blue-400 hover:underline">
-                            📞 {lead.prospectPhone ?? lead.prospectEmail}
+                        <a href={`tel:${(lead.prospectPhone ?? lead.prospectEmail).replace(/\s/g, "")}`} className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.66a16 16 0 0 0 6 6l1.02-1.02a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            {lead.prospectPhone ?? lead.prospectEmail}
                         </a>
                         {lead.prospectEmailAddr && (
-                            <a href={`mailto:${lead.prospectEmailAddr}`} className="mt-0.5 block text-sm text-blue-400 hover:underline">
-                                ✉️ {lead.prospectEmailAddr}
+                            <a href={`mailto:${lead.prospectEmailAddr}`} className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                {lead.prospectEmailAddr}
                             </a>
                         )}
                         <p className="mt-1 text-xs text-zinc-600">
@@ -120,8 +122,9 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                 <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-3">
                     <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Consultation</h2>
                     {lead.consultationMeeting.scheduledTime && (
-                        <p className="text-sm text-zinc-300">
-                            📅 {new Date(lead.consultationMeeting.scheduledTime).toLocaleString("en-US", {
+                        <p className="inline-flex items-center gap-1.5 text-sm text-zinc-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                            {new Date(lead.consultationMeeting.scheduledTime).toLocaleString("en-US", {
                                 month: "short", day: "numeric", year: "numeric",
                                 hour: "numeric", minute: "2-digit",
                             })}

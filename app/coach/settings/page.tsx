@@ -41,16 +41,16 @@ export default async function CoachSettingsPage({
       <div className="animate-fade-in flex items-center gap-3">
         <Link
           href="/coach/dashboard"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 sm:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 sm:hidden"
           aria-label="Back to dashboard"
         >
           &larr;
         </Link>
         <div>
           <nav className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
-            <Link href="/coach/dashboard" className="hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Dashboard</Link>
+            <Link href="/coach/dashboard" className="hover:text-zinc-300 transition-colors">Dashboard</Link>
             <span>/</span>
-            <span className="text-zinc-600 dark:text-zinc-300">Settings</span>
+            <span className="text-zinc-300">Settings</span>
           </nav>
           <h1 className="text-2xl font-semibold tracking-tight">Coach Settings</h1>
           <p className="text-xs text-zinc-500">
@@ -67,7 +67,7 @@ export default async function CoachSettingsPage({
         >
           Check-in Schedule
         </h2>
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 dark:border-white/[0.06] dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] px-4 py-4">
           <CadenceEditor
             mode="coach"
             initialConfig={cadenceConfig}
@@ -83,7 +83,7 @@ export default async function CoachSettingsPage({
         >
           Check-in Form
         </h2>
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 dark:border-white/[0.06] dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">
@@ -101,7 +101,7 @@ export default async function CoachSettingsPage({
               {template && <ResetTemplateButton />}
               <Link
                 href="/coach/settings/check-in-form"
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                className="rounded-lg border border-white/[0.08] bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-all hover:border-white/[0.14] hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1224]" style={{ minHeight: "44px" }}
               >
                 Customize Form
               </Link>
@@ -118,7 +118,7 @@ export default async function CoachSettingsPage({
         >
           Intake Forms & Documents
         </h2>
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 dark:border-white/[0.06] dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Onboarding Templates</p>
@@ -126,7 +126,7 @@ export default async function CoachSettingsPage({
             </div>
             <Link
               href="/coach/templates/onboarding"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+              className="rounded-lg border border-white/[0.08] bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-all hover:border-white/[0.14] hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1224]" style={{ minHeight: "44px" }}
             >
               Go to Templates →
             </Link>
@@ -142,7 +142,7 @@ export default async function CoachSettingsPage({
         >
           Email Notifications
         </h2>
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 dark:border-white/[0.06] dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] px-4 py-4">
           <CoachEmailSettings
             initialEmailClientCheckIns={user.emailClientCheckIns}
             initialEmailClientMessages={user.emailClientMessages}

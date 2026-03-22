@@ -374,3 +374,157 @@ Before delivering any UI code:
 - [ ] Focus states visible (`focus-visible:ring-2`)
 - [ ] Responsive: 375px, 768px, 1024px, 1440px
 - [ ] No horizontal scroll on mobile
+
+---
+
+## Revamp Decisions (2026-03-22)
+
+Concrete patterns established during the full UI revamp. These override or refine the generic patterns above.
+
+### Card Surfaces
+
+| Context | Background | Border | Hover |
+|---------|------------|--------|-------|
+| Inline page cards | `bg-[#0a1224]` | `border-white/[0.06]` | `hover:border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/[0.07]` |
+| Onboarding card (violet) | `bg-[#0a1224]` | `border-white/[0.06]` | `hover:border-violet-500/20 hover:shadow-violet-500/5` |
+| "Coming soon" card | `bg-[#0a1224]/60` | `border-dashed border-zinc-700/60` | — |
+| Sidebar / sticky panels | `bg-zinc-900/80` | `border-white/[0.08]` | — |
+| Avatar background | `bg-[#111c30]` | — | — |
+
+### Button Hierarchy
+
+| Tier | Classes | Min height |
+|------|---------|-----------|
+| Primary CTA | `bg-blue-600 text-white hover:bg-blue-500 rounded-xl` | 48px |
+| Primary CTA (large) | `bg-blue-600 text-white hover:bg-blue-500 rounded-xl` | 52–56px |
+| Confirm/warning | `bg-amber-500 text-zinc-900 hover:bg-amber-400 rounded-xl` | 48px |
+| Secondary | `border border-white/[0.08] bg-zinc-800 text-zinc-200 hover:border-white/[0.14] hover:bg-zinc-700 rounded-lg` | 44px |
+| Ghost/text | `text-zinc-500 hover:text-zinc-300` | — |
+| Nav CTA (Check-In) | `bg-blue-600 text-white hover:bg-blue-500 rounded-lg` | — |
+
+### KPI / Metric Numbers
+
+```html
+<!-- Large number (dashboard KPI) -->
+<p class="font-mono text-3xl font-bold tabular-nums tracking-tight text-zinc-100">42</p>
+<p class="mt-1.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">LABEL</p>
+```
+
+### Empty States
+
+```html
+<div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed
+            border-zinc-700/50 py-16 text-center">
+  <!-- Icon container -->
+  <div class="flex h-12 w-12 items-center justify-center rounded-full
+              bg-zinc-800/60 ring-1 ring-white/[0.06]">
+    <!-- SVG icon, text-zinc-500 -->
+  </div>
+  <div>
+    <p class="text-sm font-medium text-zinc-300">Heading</p>
+    <p class="mt-0.5 text-xs text-zinc-600">Description</p>
+  </div>
+</div>
+```
+
+### Pipeline / Progress Bar Pattern
+
+```html
+<!-- Track line (spans 10%→90% of width) -->
+<div class="pointer-events-none absolute left-[10%] right-[10%] top-[19px] h-px bg-zinc-800">
+  <div class="h-full bg-gradient-to-r from-emerald-500/50 via-blue-500/40 to-blue-500/40
+              transition-[width] duration-700 ease-out"
+       style="width: {fillPct}%" />
+</div>
+
+<!-- Completed dot: bg-emerald-500/10 ring-1 ring-emerald-500/40 → checkmark SVG (emerald-400) -->
+<!-- Current dot:   bg-blue-600/20 ring-2 ring-blue-500/70 shadow-[0_0_14px_rgba(37,99,235,0.3)] → solid blue dot -->
+<!-- Upcoming dot:  bg-zinc-900 ring-1 ring-zinc-800 → small zinc-700 dot -->
+```
+
+### Section Headers
+
+```html
+<!-- Standard caps section heading -->
+<h2 class="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">
+  Section Title
+</h2>
+```
+
+### Breadcrumb Navigation
+
+```html
+<nav class="hidden sm:flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
+  <a href="/coach/dashboard" class="hover:text-zinc-300 transition-colors">Dashboard</a>
+  <span>/</span>
+  <span class="text-zinc-300">Current Page</span>
+</nav>
+```
+
+### Status Ring / Avatar Pattern
+
+```html
+<div class="relative flex h-11 w-11 shrink-0 items-center justify-center
+            rounded-full bg-[#111c30] ring-2 {ringClass} text-sm font-bold text-zinc-100">
+  {initial}
+  <!-- Message indicator dot (purple pulse) when hasMessage -->
+</div>
+```
+
+Ring colors by cadence status: `ring-blue-500/40` (new/submitted) · `ring-emerald-500/40` (reviewed) · `ring-amber-500/40` (due) · `ring-red-500/40` (overdue) · `ring-zinc-600/40` (not due).
+
+### Icons
+
+- **Never use emojis** — always inline Lucide-style SVGs
+- Icon size: `width="14" height="14"` inline (small), `width="20" height="20"` in icon containers
+- Icon container: `flex h-10 w-10 items-center justify-center rounded-xl bg-{color}/10`
+- Stroke: `strokeWidth="2"` standard, `strokeWidth="2.5"` for small/bold contexts
+- Color: parent text color or explicit `className="text-{color}-400"`
+
+---
+
+## Revamp Decisions — Client Pages (2026-03-22)
+
+### Client Dashboard (`/client/page.tsx`)
+
+- Header: `text-2xl font-bold text-zinc-100` + `text-sm text-zinc-500` subline + cadence preview chip
+- Coach badge: `rounded-full border border-white/[0.08] bg-zinc-800/80 px-3.5 py-1.5` — links to coach profile if published
+- Program cards grid: `grid grid-cols-2 gap-3` — card: `rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5` + icon container `h-8 w-8 rounded-lg bg-{color}/10` + label + name + "Open →" arrow
+- Empty program card: `border-dashed border-zinc-800` + muted icon + `text-zinc-600` text
+- Weight display: `font-mono text-4xl font-bold tabular-nums` + delta badge `bg-emerald-500/20 text-emerald-400` (down) or `bg-amber-500/20 text-amber-400` (up)
+- Check-in list rows: `rounded-2xl border border-white/[0.06] bg-[#0a1224]` + `hover:border-blue-500/20`
+- Status indicator mobile: `h-2 w-2 rounded-full bg-{emerald|amber}-500` dot; desktop: `rounded-full px-2.5 py-0.5 text-xs bg-{emerald|amber}-500/20 text-{emerald|amber}-400` pill
+- Empty check-ins: `rounded-2xl border-dashed border-zinc-700/60 bg-[#0a1224]` + icon ring + CTA link
+
+### Check-In Schedule Banner (`components/client/check-in-schedule-banner.tsx`)
+
+- **due**: `border-blue-500/30` + `linear-gradient(135deg, rgba(37,99,235,0.18) 0%, rgba(59,130,246,0.08) 50%, transparent 100%)` + `h-10 w-1 rounded-full bg-blue-500` accent bar + `bg-blue-600` arrow button; `minHeight: "80px"`
+- **overdue**: red mirror of above + `motion-safe:animate-pulse` overlay on icon container
+- **submitted**: `border-amber-500/20 bg-amber-500/5` + clock SVG + "Update check-in" link
+- **reviewed**: `border-emerald-500/20 bg-emerald-500/5` + checkmark SVG; clickable `<Link>` when `latestReviewedCheckInId` present
+- **upcoming**: `border-zinc-700/60 bg-zinc-800/20` + calendar SVG
+
+### Check-In Status Card (`components/client/check-in-status.tsx`)
+
+- **none**: full blue gradient CTA `linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%)` — `<Link>` to `/client/check-in`; arrow icon translates right on hover
+- **submitted**: `border-amber-500/20 bg-amber-500/5` + clock SVG + "Update check-in" underline link
+- **reviewed**: `border-emerald-500/20 bg-emerald-500/5` + checkmark SVG; clickable link when `checkInId` present
+
+### Meal Plan / Training Pages
+
+- Back link: `text-zinc-500 hover:text-zinc-300` (no `dark:` prefix)
+- Cardio strip: `bg-green-500/[0.05]` (no `dark:bg-green-950/20`); chip text `text-green-300`; notes `text-green-400/60`
+- Empty states: `border-dashed border-zinc-700/60 bg-[#0a1224]` (no `bg-white dark:*`)
+- Training days badge: `bg-zinc-800 text-zinc-400`
+
+### Coach Client Detail (`/coach/clients/[clientId]/page.tsx`)
+
+- Status badges: `bg-{color}-500/20 text-{color}-400` (never `bg-{color}-100 text-{color}-700`)
+- Intake status badges: same dark-first pattern
+- Avatar: `bg-zinc-800 text-zinc-200`
+- Section containers: `border-zinc-800 bg-zinc-900` or `border-zinc-800 bg-[#0a1224]`
+- Dividers in intake: `divide-zinc-800 border-zinc-800`
+- Weight change color: `text-red-400` (up) / `text-emerald-400` (down)
+- Danger zone: `border-red-900/50 bg-zinc-900/50`
+- Check-in history rows: `border-zinc-800 bg-zinc-900 hover:border-zinc-700 hover:bg-zinc-800/50`
+- Secondary action buttons: `border-zinc-700 text-zinc-300 hover:bg-zinc-800`

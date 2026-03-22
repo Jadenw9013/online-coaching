@@ -61,18 +61,6 @@ h6,
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 20%, transparent 85%);
 }
 
-/* Light mode dot grid (even subtler) */
-:root:not(.dark) body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgba(107, 114, 128, 0.08) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 10%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 10%, transparent 80%);
-}
 
 /* ─── Focus ─── */
 

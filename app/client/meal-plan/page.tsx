@@ -35,7 +35,7 @@ export default async function ClientMealPlanPage() {
       <section className="animate-fade-in">
         <Link
           href="/client"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           aria-label="Back to dashboard"
         >
           &larr; Dashboard
@@ -58,35 +58,35 @@ export default async function ClientMealPlanPage() {
       {/* Cardio prescription banner — shown when coach has configured cardio */}
       {cardioPrescription && (
         <section className="animate-fade-in" style={{ animationDelay: "60ms" }} aria-label="Cardio prescription">
-          <div className="rounded-2xl border border-green-500/20 bg-green-500/[0.05] px-5 py-4 dark:bg-green-950/20">
+          <div className="rounded-2xl border border-green-500/20 bg-green-500/[0.05] px-5 py-4">
             <div className="mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-green-600 dark:text-green-400">Cardio Prescription</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-green-400">Cardio Prescription</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {cardioPrescription.modality && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-700 dark:text-green-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
                   <span className="font-normal text-green-500/60">Type</span>{cardioPrescription.modality}
                 </span>
               )}
               {cardioPrescription.frequency && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-700 dark:text-green-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
                   <span className="font-normal text-green-500/60">Frequency</span>{cardioPrescription.frequency}
                 </span>
               )}
               {cardioPrescription.duration && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-700 dark:text-green-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
                   <span className="font-normal text-green-500/60">Duration</span>{cardioPrescription.duration}
                 </span>
               )}
               {cardioPrescription.intensity && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-700 dark:text-green-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300">
                   <span className="font-normal text-green-500/60">Intensity</span>{cardioPrescription.intensity}
                 </span>
               )}
             </div>
             {cardioPrescription.notes && (
-              <p className="mt-2.5 text-xs leading-relaxed text-green-600/70 dark:text-green-400/60">{cardioPrescription.notes}</p>
+              <p className="mt-2.5 text-xs leading-relaxed text-green-400/60">{cardioPrescription.notes}</p>
             )}
           </div>
         </section>
@@ -101,7 +101,7 @@ export default async function ClientMealPlanPage() {
           Meal plan details
         </h2>
         {!mealPlan ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-300 bg-white px-8 py-20 text-center dark:border-zinc-700 dark:bg-[#0a1224]">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-700/60 bg-[#0a1224] px-8 py-20 text-center">
             <div>
               <p className="text-sm font-semibold">No meal plan yet</p>
               <p className="mt-1 text-sm text-zinc-400">

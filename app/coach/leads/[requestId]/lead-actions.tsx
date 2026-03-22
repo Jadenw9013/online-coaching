@@ -117,32 +117,38 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     <p className="text-sm font-semibold text-zinc-200">Schedule Consultation</p>
                     <div className="space-y-3">
                         <div>
-                            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Meeting Link</label>
+                            <label htmlFor="schedMeetingLink" className="mb-1.5 block text-xs font-medium text-zinc-400">Meeting Link</label>
                             <input
+                                id="schedMeetingLink"
                                 type="url"
                                 placeholder="https://cal.com/..."
                                 value={meetingLink}
                                 onChange={(e) => setMeetingLink(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none"
+                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
                             />
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Date &amp; Time</label>
+                            <label htmlFor="schedDateTime" className="mb-1.5 block text-xs font-medium text-zinc-400">Date &amp; Time</label>
                             <input
+                                id="schedDateTime"
                                 type="datetime-local"
                                 value={scheduledTime}
                                 onChange={(e) => setScheduledTime(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-100 focus:border-amber-500/50 focus:outline-none"
+                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
                             />
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Notes (optional)</label>
+                            <label htmlFor="schedNotes" className="mb-1.5 block text-xs font-medium text-zinc-400">Notes (optional)</label>
                             <textarea
+                                id="schedNotes"
                                 rows={2}
                                 placeholder="Topics to cover, etc."
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none"
+                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                style={{ fontSize: "max(1rem, 16px)" }}
                             />
                         </div>
                     </div>
@@ -197,8 +203,9 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     {consultationStage === "CONSULTATION_SCHEDULED" && (
                         <div className="space-y-3">
                             {consultationDate && (
-                                <p className="text-sm text-zinc-300">
-                                    📅 Scheduled:{" "}
+                                <p className="flex items-center gap-1.5 text-sm text-zinc-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500 shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                                    Scheduled:{" "}
                                     {new Date(consultationDate).toLocaleString("en-US", {
                                         month: "short", day: "numeric", year: "numeric",
                                         hour: "numeric", minute: "2-digit",
@@ -269,8 +276,9 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
 
             {isAwaitingSignup && (
                 <div className="space-y-3">
-                    <p className="text-sm text-amber-400">
-                        ⏳ Accepted — waiting for client to sign up.
+                    <p className="flex items-center gap-1.5 text-sm text-amber-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Accepted — waiting for client to sign up.
                     </p>
                     {successMsg && (
                         <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-400">{successMsg}</p>

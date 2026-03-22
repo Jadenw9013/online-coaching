@@ -7,6 +7,8 @@ import { getTrainingProgramForReview } from "@/lib/queries/training-programs";
 import { getCoachTemplatesForPicker } from "@/lib/queries/training-templates";
 import { getWeightHistory } from "@/lib/queries/weight-history";
 import { getClientIntake } from "@/lib/queries/client-intake";
+import { getIntakePacketForClient } from "@/lib/queries/intake";
+import { IntakeSummaryPanel } from "@/components/coach/clients/intake-summary-panel";
 import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getCoachClientForAdherence, getAdherenceSummary } from "@/lib/queries/adherence";
 import { getRecentExerciseProgress } from "@/lib/queries/exercise-results";
@@ -27,15 +29,15 @@ import { ExerciseProgress } from "@/components/coach/exercise-progress";
 const weekStatusConfig = {
   submitted: {
     label: "Submitted",
-    bg: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    bg: "bg-blue-500/20 text-blue-400",
   },
   reviewed: {
     label: "Reviewed",
-    bg: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    bg: "bg-emerald-500/20 text-emerald-400",
   },
   missing: {
     label: "Missing",
-    bg: "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400",
+    bg: "bg-zinc-700 text-zinc-400",
   },
 } as const;
 
@@ -43,12 +45,12 @@ const checkInStatusConfig = {
   SUBMITTED: {
     label: "Submitted",
     dot: "bg-blue-500",
-    text: "text-blue-600 dark:text-blue-400",
+    text: "text-blue-400",
   },
   REVIEWED: {
     label: "Reviewed",
-    dot: "bg-green-500",
-    text: "text-green-600 dark:text-green-400",
+    dot: "bg-emerald-500",
+    text: "text-emerald-400",
   },
 } as const;
 
@@ -69,7 +71,7 @@ export default async function ClientProfilePage({
   const clientTz = profile.client.timezone || "America/New_York";
   const clientTodayDate = getLocalDate(new Date(), clientTz);
 
-  const [effectivePlan, messages, foodLibrary, trainingData, templates, weightHistory, onboardingResponse, clientIntake, coachClientAdherence, adherenceSummary, exerciseProgress] =
+  const [effectivePlan, messages, foodLibrary, trainingData, templates, weightHistory, onboardingResponse, clientIntake, coachClientAdherence, adherenceSummary, exerciseProgress, intakePacket] =
     await Promise.all([
       getEffectiveMealPlanForReview(clientId, weekOf),
       getMessages(clientId, weekOf),
@@ -85,6 +87,7 @@ export default async function ClientProfilePage({
       getCoachClientForAdherence(coach.id, clientId),
       getAdherenceSummary(clientId, clientTodayDate),
       getRecentExerciseProgress(clientId),
+      getIntakePacketForClient(coach.id, clientId),
     ]);
 
   const {
@@ -110,17 +113,17 @@ export default async function ClientProfilePage({
   const intakeStatusConfig = {
     PENDING: {
       label: "Intake Sent",
-      bg: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      bg: "bg-amber-500/20 text-amber-400",
       dot: "bg-amber-400",
     },
     IN_PROGRESS: {
       label: "Intake In Progress",
-      bg: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      bg: "bg-blue-500/20 text-blue-400",
       dot: "bg-blue-500",
     },
     COMPLETED: {
       label: "Intake Completed",
-      bg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      bg: "bg-emerald-500/20 text-emerald-400",
       dot: "bg-emerald-500",
     },
   } as const;
@@ -178,12 +181,12 @@ export default async function ClientProfilePage({
         <div className="flex items-center gap-3">
           <Link
             href="/coach/dashboard"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label="Back to dashboard"
           >
             &larr;
           </Link>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold dark:bg-zinc-800">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-sm font-semibold text-zinc-200">
             {client.firstName?.[0] ?? "?"}
           </div>
           <div>
@@ -201,7 +204,7 @@ export default async function ClientProfilePage({
               <span>{client.email}</span>
               {lastMessageAt && (
                 <>
-                  <span className="text-zinc-300 dark:text-zinc-700">&middot;</span>
+                  <span className="text-zinc-700">&middot;</span>
                   <span>Last msg {timeAgo(lastMessageAt)}</span>
                 </>
               )}
@@ -217,7 +220,7 @@ export default async function ClientProfilePage({
             className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-md transition-all hover:shadow-lg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:justify-start ${
               currentWeekStatus === "submitted"
                 ? "bg-amber-400 text-zinc-900 shadow-amber-400/30 hover:bg-amber-300 focus-visible:ring-amber-400"
-                : "bg-white text-zinc-900 shadow-black/10 hover:bg-zinc-100 focus-visible:ring-zinc-400"
+                : "bg-zinc-800 text-zinc-100 shadow-black/20 hover:bg-zinc-700 focus-visible:ring-zinc-500"
             }`}
           >
             {currentWeekStatus === "submitted" && (
@@ -232,13 +235,13 @@ export default async function ClientProfilePage({
         )}
         <Link
           href={`/coach/clients/${clientId}/import-meal-plan`}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:justify-start"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:justify-start"
         >
           Import Meal Plan
         </Link>
         <Link
           href={`/coach/clients/${clientId}/import-training`}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800 sm:justify-start"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:justify-start"
         >
           Import Training
         </Link>
@@ -308,7 +311,7 @@ export default async function ClientProfilePage({
             })}
           />
 
-          <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
               Change
             </p>
@@ -316,9 +319,9 @@ export default async function ClientProfilePage({
               <div className="mt-1 flex items-baseline gap-1">
                 <span
                   className={`text-2xl font-bold tabular-nums ${weightDelta > 0
-                    ? "text-red-500"
+                    ? "text-red-400"
                     : weightDelta < 0
-                      ? "text-green-600"
+                      ? "text-emerald-400"
                       : ""
                     }`}
                 >
@@ -328,7 +331,7 @@ export default async function ClientProfilePage({
                 <span className="text-xs text-zinc-400">lbs</span>
               </div>
             ) : (
-              <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">
+              <p className="mt-1 text-2xl font-bold text-zinc-600">
                 &mdash;
               </p>
             )}
@@ -343,7 +346,7 @@ export default async function ClientProfilePage({
           )}
         </div>
 
-        <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3">
           <WeightProgress data={weightHistory} clientId={clientId} />
         </div>
       </section>
@@ -359,7 +362,7 @@ export default async function ClientProfilePage({
         <p className="mt-1 text-sm text-zinc-400">
           Send quick updates and keep communication in one place.
         </p>
-        <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900">
           <MessageThread
             messages={serializedMessages}
             clientId={clientId}
@@ -376,7 +379,7 @@ export default async function ClientProfilePage({
           <h2 id="intake-pending-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Intake Questionnaire
           </h2>
-          <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-4">
             <div className="flex items-center gap-3">
               {(() => {
                 const cfg = intakeStatusConfig[clientIntake.status];
@@ -398,38 +401,7 @@ export default async function ClientProfilePage({
         </section>
       )}
 
-      {/* Legacy generic onboarding response (if coach used the custom form system) */}
-      {onboardingResponse && (
-        <section aria-labelledby="onboarding-heading">
-          <h2 id="onboarding-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Onboarding Form Responses
-          </h2>
-          <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0a1224] space-y-4">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {(onboardingResponse.form.questions as any[]).map((q) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const answerObj = (onboardingResponse.answers as any[]).find((a) => a.questionId === q.id);
-              const answer = answerObj?.answer;
 
-              let displayAnswer = answer;
-              if (typeof answer === "boolean") {
-                displayAnswer = answer ? "Yes" : "No";
-              } else if (Array.isArray(answer)) {
-                displayAnswer = answer.join(", ");
-              } else if (answer === "" || answer === null || answer === undefined) {
-                displayAnswer = "—";
-              }
-
-              return (
-                <div key={q.id}>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{q.label}</p>
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">{displayAnswer}</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Daily Adherence — summary only, shown when adherence is enabled */}
       {coachClientAdherence?.adherenceEnabled && (
@@ -445,7 +417,7 @@ export default async function ClientProfilePage({
         <h2 id="plans-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
           Plans
         </h2>
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0a1224]">
+        <div className="rounded-xl border border-zinc-800 bg-[#0a1224] p-5">
           <PlanTabs
             mealPlan={{
               clientId,
@@ -465,12 +437,51 @@ export default async function ClientProfilePage({
         </div>
       </section>
 
-      {/* Structured Intake Summary (completed) */}
-      {clientIntake?.status === "COMPLETED" && (
+      {/* Intake Summary — IntakePacket / legacy / manual coach notes */}
+      <section aria-labelledby="intake-summary-heading">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 id="intake-summary-heading" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              Intake Summary
+            </h2>
+          </div>
+          <IntakeSummaryPanel
+            intakePacketId={intakePacket?.id ?? null}
+            formAnswers={
+              intakePacket?.formAnswers &&
+              typeof intakePacket.formAnswers === "object" &&
+              "sections" in (intakePacket.formAnswers as object)
+                ? (intakePacket.formAnswers as { sections: { sectionId: string; sectionTitle: string; answers: { questionId: string; label: string; value: string }[] }[] })
+                : null
+            }
+            submittedAt={intakePacket?.submittedAt?.toISOString() ?? null}
+            coachNotes={intakePacket?.coachNotes ?? null}
+            legacyResponses={
+              onboardingResponse
+                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (onboardingResponse.form.questions as any[]).map((q) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const answerObj = (onboardingResponse.answers as any[]).find((a: any) => a.questionId === q.id);
+                    const raw = answerObj?.answer;
+                    const answer =
+                      typeof raw === "boolean" ? (raw ? "Yes" : "No")
+                      : Array.isArray(raw) ? raw.join(", ")
+                      : (raw ?? "");
+                    return { questionLabel: q.label as string, answer };
+                  })
+                : null
+            }
+            clientName={`${client.firstName ?? ""} ${client.lastName ?? ""}`.trim() || "the client"}
+            clientId={clientId}
+            manualNotes={profile.coachNotes ?? null}
+          />
+        </section>
+
+      {/* Legacy structured intake (completed via old system) — shown only when no IntakePacket */}
+      {!intakePacket && clientIntake?.status === "COMPLETED" && (
         <section aria-labelledby="intake-heading">
           <div className="mb-3 flex items-center justify-between">
             <h2 id="intake-heading" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Intake Summary
+              Intake Baseline
             </h2>
             <div className="flex items-center gap-2">
               {(() => {
@@ -485,16 +496,16 @@ export default async function ClientProfilePage({
               <SendIntakeButton clientId={clientId} isResend />
             </div>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0a1224]">
+          <div className="rounded-xl border border-zinc-800 bg-[#0a1224]">
             {/* Key stats row */}
-            <div className="grid grid-cols-2 divide-x divide-zinc-100 border-b border-zinc-100 sm:grid-cols-4 dark:divide-zinc-800 dark:border-zinc-800">
+            <div className="grid grid-cols-2 divide-x divide-zinc-800 border-b border-zinc-800 sm:grid-cols-4">
               <IntakeStatCell label="Bodyweight" value={clientIntake.bodyweightLbs ? `${clientIntake.bodyweightLbs} lbs` : "—"} />
               <IntakeStatCell label="Height" value={clientIntake.heightInches ? `${clientIntake.heightInches} in` : "—"} />
               <IntakeStatCell label="Age" value={clientIntake.ageYears ? `${clientIntake.ageYears} yrs` : "—"} />
               <IntakeStatCell label="Gender" value={clientIntake.gender ?? "—"} />
             </div>
             {/* Detail rows */}
-            <div className="divide-y divide-zinc-100 p-5 dark:divide-zinc-800">
+            <div className="divide-y divide-zinc-800 p-5">
               <IntakeRow label="Primary Goal" value={clientIntake.primaryGoal} />
               <IntakeRow label="Training Experience" value={clientIntake.trainingExperience} />
               <IntakeRow label="Training Days / Week" value={clientIntake.trainingDaysPerWeek?.toString()} />
@@ -508,16 +519,6 @@ export default async function ClientProfilePage({
         </section>
       )}
 
-      {/* Notes */}
-      <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Notes
-        </h2>
-        <CoachNotesEditor
-          clientId={clientId}
-          initial={profile.coachNotes ?? ""}
-        />
-      </section>
 
       {/* Check-in History */}
       <section aria-labelledby="history-heading">
@@ -525,7 +526,7 @@ export default async function ClientProfilePage({
           Check-in History
         </h2>
         {checkIns.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-6 py-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="rounded-lg border border-dashed border-zinc-700/60 bg-zinc-900 px-6 py-8 text-center">
             <p className="text-sm text-zinc-400">No check-ins yet.</p>
           </div>
         ) : (
@@ -536,7 +537,7 @@ export default async function ClientProfilePage({
                 <Link
                   key={checkIn.id}
                   href={`/coach/clients/${clientId}/check-ins/${checkIn.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
+                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 transition-colors hover:border-zinc-700 hover:bg-zinc-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">
@@ -546,7 +547,7 @@ export default async function ClientProfilePage({
 
                   {/* Weight */}
                   {checkIn.weight != null && (
-                    <span className="text-sm font-medium tabular-nums text-zinc-700 dark:text-zinc-300">
+                    <span className="text-sm font-medium tabular-nums text-zinc-300">
                       {checkIn.weight}
                       <span className="ml-0.5 text-xs font-normal text-zinc-400">lbs</span>
                     </span>
@@ -572,7 +573,7 @@ export default async function ClientProfilePage({
       </section>
 
       {/* Danger Zone */}
-      <section className="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900/50 dark:bg-zinc-900/50">
+      <section className="rounded-xl border border-red-900/50 bg-zinc-900/50 p-5">
         <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-500">
           Danger Zone
         </h2>
@@ -600,7 +601,7 @@ function MetricCard({
   subtext?: string;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3">
       <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">{label}</p>
       {value != null ? (
         <div className="mt-1">
@@ -611,7 +612,7 @@ function MetricCard({
           {subtext && <p className="text-xs text-zinc-400">{subtext}</p>}
         </div>
       ) : (
-        <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+        <p className="mt-1 text-2xl font-bold text-zinc-600">&mdash;</p>
       )}
     </div>
   );
@@ -621,7 +622,7 @@ function IntakeStatCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-4 py-3">
       <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{value}</p>
+      <p className="mt-0.5 text-sm font-semibold text-zinc-100">{value}</p>
     </div>
   );
 }
@@ -631,7 +632,7 @@ function IntakeRow({ label, value, last }: { label: string; value?: string | nul
   return (
     <div className={`py-3 ${last ? "" : ""}`}>
       <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">{label}</p>
-      <p className="mt-1 text-sm text-zinc-700 whitespace-pre-wrap dark:text-zinc-300">{value}</p>
+      <p className="mt-1 text-sm text-zinc-300 whitespace-pre-wrap">{value}</p>
     </div>
   );
 }
