@@ -3,7 +3,12 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Design System
-Always read docs/design-system/MASTER.md before making any UI changes.
+This project uses the ui-ux-pro-max skill (installed at `.claude/skills/ui-ux-pro-max/`).
+Before ANY UI changes:
+1. Check `design-system/steadfast/pages/[page-name].md` if it exists
+2. Fall back to `design-system/steadfast/MASTER.md`
+Page overrides take priority over MASTER.
+
 The design system is the source of truth for colors, spacing,
 typography, component patterns, and page-specific layout rules.
 Never deviate from it without explicit instruction.
