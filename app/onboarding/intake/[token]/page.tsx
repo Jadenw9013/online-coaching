@@ -54,14 +54,26 @@ export default async function IntakeTokenPage({
         ? (template.sections as unknown as { id: string; title: string; questions: { id: string; label: string; type: string; required: boolean }[] }[])
         : [];
 
-    const documents = packet.documents.map(d => ({
-        id: d.id,
-        coachDocumentId: d.coachDocument.id,
-        title: d.coachDocument.title,
-        type: d.coachDocument.type as "TEXT" | "FILE",
-        content: d.coachDocument.content,
-        fileName: d.coachDocument.fileName,
-        filePath: d.coachDocument.filePath,
+    const documents = await Promise.all(packet.documents.map(async d => {
+        let fileDownloadUrl: string | null = null;
+        if (d.coachDocument.type === "FILE" && d.coachDocument.filePath) {
+            try {
+                const { getDocumentUrl } = await import("@/lib/supabase/document-storage");
+                fileDownloadUrl = await getDocumentUrl(d.coachDocument.filePath);
+            } catch { /* non-blocking */ }
+        }
+        return {
+            id: d.id,
+            coachDocumentId: d.coachDocument.id,
+            title: d.coachDocument.title,
+            type: d.coachDocument.type as "TEXT" | "FILE",
+            content: d.coachDocument.content,
+            fileName: d.coachDocument.fileName,
+            filePath: d.coachDocument.filePath,
+            fileDownloadUrl,
+            uploadedSignedFileName: d.uploadedSignedFileName ?? null,
+            uploadedSignedAt: d.uploadedSignedAt?.toISOString() ?? null,
+        };
     }));
 
     return (

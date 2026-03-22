@@ -1,9 +1,8 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { notFound } from "next/navigation";
-import { getIntakePacketForReview } from "@/lib/queries/intake";
+import { getIntakePacketForReview, getSignedUploadUrl } from "@/lib/queries/intake";
 import { Metadata } from "next";
 import { ReviewSession } from "@/components/coach/intake/review-session";
-import Link from "next/link";
 
 export const metadata: Metadata = { title: "Review Intake | Steadfast" };
 
@@ -21,36 +20,32 @@ export default async function ReviewPage({ params }: { params: Promise<{ request
         sections?: { sectionId: string; sectionTitle: string; answers: { questionId: string; label: string; value: string }[] }[];
     } | null;
 
-    const documents = packet.documents.map(d => ({
-        id: d.id,
-        title: d.coachDocument.title,
-        type: d.coachDocument.type as "TEXT" | "FILE",
-        content: d.coachDocument.content,
-        fileName: d.coachDocument.fileName,
-        signature: d.signature ? {
-            signatureType: d.signature.signatureType as "TYPED" | "DRAWN",
-            signatureValue: d.signature.signatureValue,
-            signedAt: d.signature.signedAt.toISOString(),
-        } : null,
+    // Generate signed URLs for uploaded docs
+    const documents = await Promise.all(packet.documents.map(async d => {
+        let signedFileUrl: string | null = null;
+        if (d.uploadedSignedFilePath) {
+            try { signedFileUrl = await getSignedUploadUrl(d.uploadedSignedFilePath); } catch { /* non-blocking */ }
+        }
+        return {
+            id: d.id,
+            title: d.coachDocument.title,
+            type: d.coachDocument.type as "TEXT" | "FILE",
+            content: d.coachDocument.content,
+            fileName: d.coachDocument.fileName,
+            signature: d.signature ? {
+                signatureType: d.signature.signatureType as "TYPED" | "DRAWN",
+                signatureValue: d.signature.signatureValue,
+                signedAt: d.signature.signedAt.toISOString(),
+            } : null,
+            uploadedSignedFilePath: d.uploadedSignedFilePath,
+            uploadedSignedFileName: d.uploadedSignedFileName,
+            uploadedSignedAt: d.uploadedSignedAt?.toISOString() ?? null,
+            signedFileUrl,
+        };
     }));
 
     return (
-        <div className="mx-auto max-w-3xl space-y-8">
-            <Link href={`/coach/leads/${requestId}`} className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                Back to Lead
-            </Link>
-
-            <div>
-                <h1 className="text-xl font-bold text-zinc-100">Review: {prospectName}</h1>
-                <p className="mt-1 text-sm text-zinc-500">
-                    Review and edit intake answers. Changes auto-save.
-                    {packet.submittedAt && (
-                        <span> · Submitted {new Date(packet.submittedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                    )}
-                </p>
-            </div>
-
+        <div className="mx-auto max-w-6xl px-4">
             <ReviewSession
                 packetId={packet.id}
                 requestId={requestId}
@@ -59,6 +54,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ request
                 coachNotes={packet.coachNotes ?? ""}
                 documents={documents}
                 consultationStage={packet.coachingRequest.consultationStage}
+                prospectEmailAddr={packet.coachingRequest.prospectEmailAddr}
+                submittedAt={packet.submittedAt?.toISOString() ?? null}
             />
         </div>
     );

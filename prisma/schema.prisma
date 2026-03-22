@@ -1026,8 +1026,11 @@ model IntakePacketDocument {
   intakePacket    IntakePacket  @relation(fields: [intakePacketId], references: [id])
   coachDocumentId String
   coachDocument   CoachDocument @relation(fields: [coachDocumentId], references: [id])
-  sortOrder       Int           @default(0)
-  signature       DocumentSignature?
+  sortOrder               Int           @default(0)
+  signature               DocumentSignature?
+  uploadedSignedFilePath  String?
+  uploadedSignedFileName  String?
+  uploadedSignedAt        DateTime?
 
   @@index([intakePacketId])
 }

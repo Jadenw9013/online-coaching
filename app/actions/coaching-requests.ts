@@ -731,8 +731,8 @@ export async function activateClient(input: { requestId: string }) {
     if (request.consultationStage === "ACTIVE") {
         return { success: true, path: "already_active" as const };
     }
-    if (request.consultationStage !== "FORMS_SIGNED") {
-        return { success: false, message: "This lead has not signed their forms yet. Forms must be signed before activating." };
+    if (request.consultationStage !== "FORMS_SIGNED" && request.consultationStage !== "INTAKE_SUBMITTED") {
+        return { success: false, message: "This lead must complete intake before activating." };
     }
 
     const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";

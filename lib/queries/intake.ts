@@ -73,7 +73,7 @@ export async function getIntakePacketForReview(requestId: string, coachUserId: s
             coachingRequest: { coachProfile: { userId: coachUserId } },
         },
         include: {
-            coachingRequest: { select: { id: true, prospectName: true, consultationStage: true } },
+            coachingRequest: { select: { id: true, prospectName: true, consultationStage: true, prospectEmailAddr: true } },
             documents: {
                 orderBy: { sortOrder: "asc" },
                 include: {
@@ -85,4 +85,9 @@ export async function getIntakePacketForReview(requestId: string, coachUserId: s
     });
 
     return packet;
+}
+
+export async function getSignedUploadUrl(filePath: string): Promise<string> {
+    const { getDocumentUrl } = await import("@/lib/supabase/document-storage");
+    return getDocumentUrl(filePath);
 }

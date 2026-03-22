@@ -377,3 +377,111 @@ export async function resendFormsLink(input: { requestId: string }) {
     revalidatePath("/coach/leads");
     return { success: true };
 }
+
+const ALLOWED_UPLOAD_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
+
+export async function uploadSignedDocument(formData: FormData) {
+    const token = formData.get("token") as string;
+    const intakePacketDocumentId = formData.get("intakePacketDocumentId") as string;
+    const file = formData.get("file") as File | null;
+
+    if (!token || !intakePacketDocumentId || !file) {
+        return { success: false, message: "Missing required fields." };
+    }
+
+    // Token-gated — no auth required
+    const packet = await db.intakePacket.findUnique({
+        where: { token },
+        include: { documents: { include: { coachDocument: true } } },
+    });
+
+    if (!packet) return { success: false, message: "Invalid link." };
+    if (packet.tokenExpiresAt < new Date()) return { success: false, message: "This link has expired." };
+    if (packet.submittedAt) return { success: false, message: "This form has already been submitted." };
+
+    const doc = packet.documents.find(d => d.id === intakePacketDocumentId);
+    if (!doc) return { success: false, message: "Document not found." };
+    if (doc.coachDocument.type !== "FILE") return { success: false, message: "This document does not accept file uploads." };
+
+    // Validate file
+    if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
+        return { success: false, message: "Only PDF, JPG, and PNG files are accepted." };
+    }
+    if (file.size > MAX_UPLOAD_SIZE) {
+        return { success: false, message: "File must be under 10MB." };
+    }
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
+    const storagePath = `signed-uploads/${packet.id}/${intakePacketDocumentId}.${ext}`;
+
+    const { uploadCoachDocument } = await import("@/lib/supabase/document-storage");
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await uploadCoachDocument(storagePath, buffer, file.type);
+
+    // Update DB
+    await db.$transaction(async (tx) => {
+        await tx.intakePacketDocument.update({
+            where: { id: intakePacketDocumentId },
+            data: {
+                uploadedSignedFilePath: storagePath,
+                uploadedSignedFileName: file.name,
+                uploadedSignedAt: new Date(),
+            },
+        });
+
+        // Create or update DocumentSignature to mark as signed
+        await tx.documentSignature.upsert({
+            where: { intakePacketDocumentId },
+            create: {
+                intakePacketDocumentId,
+                coachDocumentId: doc.coachDocumentId,
+                signatureType: "TYPED",
+                signatureValue: `FILE_UPLOADED:${file.name}`,
+            },
+            update: {
+                signatureValue: `FILE_UPLOADED:${file.name}`,
+                signedAt: new Date(),
+            },
+        });
+    });
+
+    return { success: true, filePath: storagePath, fileName: file.name };
+}
+
+export async function removeSignedUpload(input: { token: string; intakePacketDocumentId: string }) {
+    const packet = await db.intakePacket.findUnique({
+        where: { token: input.token },
+        include: { documents: true },
+    });
+
+    if (!packet) return { success: false, message: "Invalid link." };
+    if (packet.tokenExpiresAt < new Date()) return { success: false, message: "This link has expired." };
+    if (packet.submittedAt) return { success: false, message: "This form has already been submitted." };
+
+    const doc = packet.documents.find(d => d.id === input.intakePacketDocumentId);
+    if (!doc || !doc.uploadedSignedFilePath) return { success: false, message: "No uploaded file found." };
+
+    // Delete from Supabase
+    try {
+        const { deleteCoachDocumentFile } = await import("@/lib/supabase/document-storage");
+        await deleteCoachDocumentFile(doc.uploadedSignedFilePath);
+    } catch { /* deletion failure must not block */ }
+
+    // Clear DB fields + remove signature
+    await db.$transaction(async (tx) => {
+        await tx.intakePacketDocument.update({
+            where: { id: input.intakePacketDocumentId },
+            data: {
+                uploadedSignedFilePath: null,
+                uploadedSignedFileName: null,
+                uploadedSignedAt: null,
+            },
+        });
+        await tx.documentSignature.deleteMany({
+            where: { intakePacketDocumentId: input.intakePacketDocumentId },
+        });
+    });
+
+    return { success: true };
+}

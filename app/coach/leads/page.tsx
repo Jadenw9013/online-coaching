@@ -30,7 +30,6 @@ const PIPELINE_GROUPS = [
     { key: "INTAKE_RECEIVED", label: "Intake Received", stages: ["INTAKE_SUBMITTED"] },
     { key: "FORMS", label: "Forms Out", stages: ["FORMS_SENT"] },
     { key: "READY_TO_ACTIVATE", label: "Ready to Activate", stages: ["FORMS_SIGNED"] },
-    { key: "ACTIVE", label: "Active", stages: ["ACTIVE"] },
 ] as const;
 
 function daysInStage(updatedAt: Date): number {

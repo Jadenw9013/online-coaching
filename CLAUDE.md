@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Design System
+Always read docs/design-system/MASTER.md before making any UI changes.
+The design system is the source of truth for colors, spacing,
+typography, component patterns, and page-specific layout rules.
+Never deviate from it without explicit instruction.
+
+## Documentation
+Use Context7 MCP to look up live documentation for Next.js, Prisma,
+Tailwind CSS v4, and Clerk before implementing features that use
+these libraries. Do not rely on training data for version-specific APIs.
+
+## Testing
+Playwright MCP is available for browser testing.
+E2E tests live in tests/e2e/
+Run: npx playwright test
+
+## Constraints (always apply)
+- Permanent dark mode — never add light mode conditionals
+- Prisma client imports from @/app/generated/prisma/client
+- Use explicit select on CoachClient queries (never include without select)
+- pnpm for package management (not npm or yarn)
+- Do not use prisma db push — always use prisma migrate dev
+- font-size: max(1rem, 16px) on all inputs
+- Minimum 48px tap targets
+
 ## Project Overview
 
 Cross-platform web + PWA coaching platform (MVP). Clients submit weekly check-ins (metrics + photos); coaches review via an inbox, leave feedback, and publish updated macro targets + meal plans versioned by week.

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { markContacted, scheduleConsultation, acceptClient, declineRequest, resendInvite, updateConsultationStage, bypassPipelineAndActivate, activateClient } from "@/app/actions/coaching-requests";
-import { sendIntakePacket, resendFormsLink } from "@/app/actions/intake";
+import { sendIntakePacket } from "@/app/actions/intake";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -54,7 +54,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
     const [consultDate, setConsultDate] = useState(consultationDate ? new Date(consultationDate).toISOString().slice(0, 16) : "");
     const [confirmBypass, setConfirmBypass] = useState(false);
 
-    const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "CONSULTATION_DONE", "FORMS_SENT"].includes(consultationStage);
+    const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(consultationStage);
 
     return (
         <div className="space-y-3">
@@ -195,7 +195,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     )}
 
                     {consultationStage === "CONSULTATION_SCHEDULED" && (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {consultationDate && (
                                 <p className="text-sm text-zinc-300">
                                     📅 Scheduled:{" "}
@@ -205,21 +205,11 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                     })}
                                 </p>
                             )}
-                            <button
-                                disabled={pending}
-                                onClick={() => run(() => updateConsultationStage({ requestId, stage: "CONSULTATION_DONE" }))}
-                                className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:opacity-50"
-                            >
-                                ✓ Mark Consultation Complete
-                            </button>
+                            <SendIntakePacketSection
+                                requestId={requestId}
+                                activeDocuments={activeDocuments ?? []}
+                            />
                         </div>
-                    )}
-
-                    {consultationStage === "CONSULTATION_DONE" && (
-                        <SendIntakePacketSection
-                            requestId={requestId}
-                            activeDocuments={activeDocuments ?? []}
-                        />
                     )}
 
                     {consultationStage === "INTAKE_SENT" && (
@@ -247,7 +237,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         <div className="space-y-3">
                             <p className="flex items-center gap-2 text-sm text-emerald-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                {prospectName} completed their intake forms
+                                {prospectName} completed their intake{intakePacketSentAt ? ` on ${new Date(intakePacketSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}
                             </p>
                             <Link
                                 href={`/coach/leads/${requestId}/review`}
@@ -259,23 +249,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         </div>
                     )}
 
-                    {consultationStage === "FORMS_SENT" && (
-                        <div className="space-y-3">
-                            <p className="text-sm text-zinc-500">
-                                Forms sent — waiting for prospect to sign.
-                            </p>
-                            <button
-                                disabled={pending}
-                                onClick={() => run(() => resendFormsLink({ requestId }))}
-                                className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all disabled:opacity-50"
-                                style={{ minHeight: "48px" }}
-                            >
-                                {pending ? "Resending..." : "Resend Forms Link"}
-                            </button>
-                        </div>
-                    )}
-
-                    {consultationStage === "FORMS_SIGNED" && (
+                    {(consultationStage === "FORMS_SIGNED" || consultationStage === "FORMS_SENT") && (
                         <ActivateSection
                             requestId={requestId}
                             prospectName={prospectName}

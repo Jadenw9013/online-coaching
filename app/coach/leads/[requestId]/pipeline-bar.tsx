@@ -3,15 +3,10 @@
 const STAGES = [
     { key: "PENDING", label: "Pending" },
     { key: "CONSULTATION_SCHEDULED", label: "Consultation" },
-    { key: "CONSULTATION_DONE", label: "Done" },
     { key: "INTAKE_SENT", label: "Intake Sent" },
-    { key: "INTAKE_SUBMITTED", label: "Intake Done" },
-    { key: "FORMS_SENT", label: "Forms Sent" },
-    { key: "FORMS_SIGNED", label: "Signed" },
+    { key: "INTAKE_SUBMITTED", label: "Intake Received" },
     { key: "ACTIVE", label: "Active" },
 ] as const;
-
-type StageKey = typeof STAGES[number]["key"];
 
 function stageIndex(key: string): number {
     return STAGES.findIndex((s) => s.key === key);
@@ -20,6 +15,14 @@ function stageIndex(key: string): number {
 export function PipelineBar({ currentStage }: { currentStage: string }) {
     const currentIdx = stageIndex(currentStage);
     const isDeclined = currentStage === "DECLINED";
+
+    // Map legacy stages to closest equivalent for display
+    const displayIdx = currentIdx >= 0 ? currentIdx : (() => {
+        if (currentStage === "CONSULTATION_DONE") return stageIndex("CONSULTATION_SCHEDULED");
+        if (currentStage === "FORMS_SENT") return stageIndex("INTAKE_SENT");
+        if (currentStage === "FORMS_SIGNED") return stageIndex("INTAKE_SUBMITTED");
+        return 0;
+    })();
 
     if (isDeclined) {
         return (
@@ -34,9 +37,9 @@ export function PipelineBar({ currentStage }: { currentStage: string }) {
         <nav aria-label="Pipeline progress" className="overflow-x-auto">
             <ol className="flex items-center gap-1">
                 {STAGES.map((stage, idx) => {
-                    const isCompleted = idx < currentIdx;
-                    const isCurrent = idx === currentIdx;
-                    const isUpcoming = idx > currentIdx;
+                    const isCompleted = idx < displayIdx;
+                    const isCurrent = idx === displayIdx;
+                    const isUpcoming = idx > displayIdx;
 
                     return (
                         <li
@@ -59,7 +62,7 @@ export function PipelineBar({ currentStage }: { currentStage: string }) {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
                                 ) : isCurrent ? (
                                     <span className="flex h-2 w-2 shrink-0 rounded-full bg-blue-400" />
-                                ) : isUpcoming && stage.key === "ACTIVE" && currentStage === "FORMS_SIGNED" ? (
+                                ) : isUpcoming && stage.key === "ACTIVE" && displayIdx === STAGES.length - 2 ? (
                                     <span className="flex h-2 w-2 shrink-0 rounded-full bg-blue-400 animate-pulse" />
                                 ) : (
                                     <span className="flex h-2 w-2 shrink-0 rounded-full bg-zinc-700" />
