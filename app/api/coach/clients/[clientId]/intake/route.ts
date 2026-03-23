@@ -49,7 +49,7 @@ export async function GET(
     // Load the coach's intake form template
     const template = await db.intakeFormTemplate.findUnique({
       where: { coachId: user.id },
-      select: { id: true, title: true, sections: true },
+      select: { id: true, sections: true },
     });
 
     // Also surface the legacy ClientIntake record if present
@@ -87,7 +87,7 @@ export async function GET(
             coachNotes: packet.coachNotes ?? null,
             submittedAt: packet.submittedAt?.toISOString() ?? null,
             template: template
-              ? { id: template.id, title: template.title, sections: template.sections }
+              ? { id: template.id, sections: template.sections }
               : null,
           }
         : legacyIntake
