@@ -119,27 +119,18 @@ export default async function CoachDashboard() {
               Your roster is empty
             </p>
             <p className="mx-auto max-w-xs text-sm text-zinc-500">
-              Add your first lead to get started, or invite an existing client directly.
+              Add your first lead to get started.
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-2 sm:flex-row">
-            <Link
-              href="/coach/leads"
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e] active:scale-[0.97]"
-              style={{ minHeight: "44px" }}
-            >
-              Go to Leads
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-            </Link>
-            <Link
-              href="/coach/clients/invite"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-zinc-800 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:border-white/[0.14] hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
-              style={{ minHeight: "44px" }}
-            >
-              Invite Client
-            </Link>
-          </div>
+          <Link
+            href="/coach/leads"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e] active:scale-[0.97]"
+            style={{ minHeight: "44px" }}
+          >
+            Go to Leads
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </Link>
         </div>
       ) : (
         <section aria-label="Client inbox">

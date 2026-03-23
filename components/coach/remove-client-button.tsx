@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { removeClient } from "@/app/actions/coach-client";
 import { useRouter } from "next/navigation";
 
@@ -17,27 +17,15 @@ export function RemoveClientButton({
   const [acknowledged, setAcknowledged] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const isConfirmed =
-    confirmText.toUpperCase() === "REMOVE" && acknowledged;
+  const isConfirmed = confirmText.toUpperCase() === "REMOVE" && acknowledged;
 
-  useEffect(() => {
-    if (open) {
-      dialogRef.current?.showModal();
-      cancelRef.current?.focus();
-    } else {
-      dialogRef.current?.close();
-      triggerRef.current?.focus();
-      setConfirmText("");
-      setAcknowledged(false);
-      setError(null);
-    }
-  }, [open]);
-
-  const handleClose = useCallback(() => setOpen(false), []);
+  function handleClose() {
+    setOpen(false);
+    setConfirmText("");
+    setAcknowledged(false);
+    setError(null);
+  }
 
   async function handleRemove() {
     if (!isConfirmed) return;
@@ -58,99 +46,110 @@ export function RemoveClientButton({
   return (
     <>
       <button
-        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+        className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+        style={{ minHeight: 40 }}
       >
         Remove Client
       </button>
 
-      <dialog
-        ref={dialogRef}
-        onClose={handleClose}
-        className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:border-zinc-700 dark:bg-zinc-900"
-        aria-labelledby="remove-dialog-title"
-        aria-describedby="remove-dialog-desc"
-      >
-        <div className="p-6">
-          <h2
-            id="remove-dialog-title"
-            className="text-lg font-semibold text-red-600 dark:text-red-400"
-          >
-            Remove {clientName}?
-          </h2>
-          <p
-            id="remove-dialog-desc"
-            className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"
-          >
-            This will remove <strong>{clientName}</strong> from your coaching
-            roster. They will no longer appear in your inbox or receive updates
-            from you.
-          </p>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remove-client-title"
+          aria-describedby="remove-client-desc"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={handleClose}
+          />
 
-          {error && (
-            <div
-              role="alert"
-              className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400"
+          {/* Dialog card */}
+          <div className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl">
+            <h2
+              id="remove-client-title"
+              className="text-base font-semibold text-red-400"
             >
-              {error}
+              Remove {clientName}?
+            </h2>
+            <p
+              id="remove-client-desc"
+              className="mt-2 text-sm leading-relaxed text-zinc-400"
+            >
+              This will remove <strong className="text-zinc-200">{clientName}</strong> from
+              your coaching roster. They will no longer appear in your inbox or
+              receive updates from you.
+            </p>
+
+            {error && (
+              <div
+                role="alert"
+                className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-400"
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Type REMOVE */}
+            <div className="mt-4">
+              <label
+                htmlFor="remove-confirm-input"
+                className="block text-xs font-semibold uppercase tracking-widest text-zinc-500"
+              >
+                Type <span className="font-mono text-zinc-300">REMOVE</span> to confirm
+              </label>
+              <input
+                id="remove-confirm-input"
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="REMOVE"
+                className="mt-2 w-full rounded-xl border border-zinc-700/60 bg-zinc-800/30 px-4 py-2.5 font-mono text-sm uppercase tracking-wider text-zinc-100 placeholder-zinc-600 focus:border-red-500/50 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                style={{ fontSize: "max(1rem, 16px)" }}
+                autoComplete="off"
+              />
             </div>
-          )}
 
-          {/* Type REMOVE */}
-          <div className="mt-4">
-            <label
-              htmlFor="remove-confirm-input"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            >
-              Type <span className="font-mono font-bold">REMOVE</span> to
-              confirm
+            {/* Acknowledgment */}
+            <label className="mt-4 flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={acknowledged}
+                onChange={(e) => setAcknowledged(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-red-500 focus:ring-red-500"
+              />
+              <span className="text-sm leading-relaxed text-zinc-400">
+                I understand this does not delete the client&apos;s historical
+                check-ins or meal plans.
+              </span>
             </label>
-            <input
-              id="remove-confirm-input"
-              type="text"
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm font-mono uppercase tracking-wider focus-visible:border-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-zinc-600 dark:bg-zinc-800"
-              autoComplete="off"
-            />
-          </div>
 
-          {/* Acknowledgment checkbox */}
-          <label className="mt-4 flex items-start gap-2">
-            <input
-              type="checkbox"
-              checked={acknowledged}
-              onChange={(e) => setAcknowledged(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 dark:border-zinc-600 dark:bg-zinc-800"
-            />
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              I understand this does not delete the client&apos;s historical
-              check-ins or meal plans.
-            </span>
-          </label>
-
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              ref={cancelRef}
-              type="button"
-              onClick={handleClose}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-600 dark:hover:bg-zinc-800"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleRemove}
-              disabled={!isConfirmed || removing}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {removing ? "Removing..." : "Remove Client"}
-            </button>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="rounded-xl border border-white/[0.08] px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/[0.15] hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                style={{ minHeight: 40 }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRemove}
+                disabled={!isConfirmed || removing}
+                className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ minHeight: 40 }}
+              >
+                {removing ? "Removing…" : "Remove Client"}
+              </button>
+            </div>
           </div>
         </div>
-      </dialog>
+      )}
     </>
   );
 }

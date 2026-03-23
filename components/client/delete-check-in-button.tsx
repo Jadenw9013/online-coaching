@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { deleteCheckIn } from "@/app/actions/check-in";
 import { useRouter } from "next/navigation";
 
@@ -8,21 +9,6 @@ export function DeleteCheckInButton({ checkInId }: { checkInId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      dialogRef.current?.showModal();
-      cancelRef.current?.focus();
-    } else {
-      dialogRef.current?.close();
-      triggerRef.current?.focus();
-    }
-  }, [open]);
-
-  const handleClose = useCallback(() => setOpen(false), []);
 
   async function handleDelete() {
     setDeleting(true);
@@ -37,64 +23,71 @@ export function DeleteCheckInButton({ checkInId }: { checkInId: string }) {
     }
   }
 
+  const modal = open
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-ci-title"
+          aria-describedby="delete-ci-desc"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Dialog card */}
+          <div className="relative w-full max-w-sm rounded-2xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl">
+            <h2 id="delete-ci-title" className="text-base font-semibold text-zinc-100">
+              Delete check-in?
+            </h2>
+            <p id="delete-ci-desc" className="mt-2 text-sm leading-relaxed text-zinc-400">
+              This will remove the check-in from your history and your coach&apos;s
+              inbox. You can resubmit for the same week afterwards.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-xl border border-white/[0.08] px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/[0.15] hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
+
   return (
     <>
+      {/* Three-dot trigger */}
       <button
-        ref={triggerRef}
         type="button"
-        onClick={() => setOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 sm:h-11 sm:w-11"
-        aria-label="Check-in actions"
+        onClick={(e) => { e.preventDefault(); setOpen(true); }}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+        aria-label="Check-in options"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <circle cx="8" cy="3" r="1.5" />
           <circle cx="8" cy="8" r="1.5" />
           <circle cx="8" cy="13" r="1.5" />
         </svg>
       </button>
 
-      <dialog
-        ref={dialogRef}
-        onClose={handleClose}
-        className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:border-zinc-700 dark:bg-zinc-900"
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-desc"
-      >
-        <div className="p-6">
-          <h2
-            id="delete-dialog-title"
-            className="text-lg font-semibold"
-          >
-            Delete check-in?
-          </h2>
-          <p
-            id="delete-dialog-desc"
-            className="mt-2 text-sm text-zinc-500"
-          >
-            This will remove the check-in from your history and your
-            coach&apos;s inbox. You can resubmit for the same week
-            afterwards.
-          </p>
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              ref={cancelRef}
-              type="button"
-              onClick={handleClose}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-600 dark:hover:bg-zinc-800"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50"
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
-          </div>
-        </div>
-      </dialog>
+      {modal}
     </>
   );
 }

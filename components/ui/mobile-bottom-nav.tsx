@@ -48,6 +48,15 @@ const coachItems: NavItem[] = [
     },
 ];
 
+// Check-in icon: clipboard with checkmark — consistent stroke style
+const CheckInIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+        <rect x="9" y="3" width="6" height="4" rx="1" />
+        <path d="m9 12 2 2 4-4" />
+    </svg>
+);
+
 const clientItems: NavItem[] = [
     {
         href: "/client",
@@ -67,9 +76,7 @@ const clientItems: NavItem[] = [
         href: "/client/check-in",
         label: "Check-In",
         isCheckIn: true,
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-        ),
+        icon: <CheckInIcon />,
     },
     {
         href: "/client/settings",
@@ -80,7 +87,15 @@ const clientItems: NavItem[] = [
     },
 ];
 
-export function MobileBottomNav({ role, hasCoach }: { role: "coach" | "client"; hasCoach?: boolean }) {
+export function MobileBottomNav({
+    role,
+    hasCoach,
+    checkInOverdue,
+}: {
+    role: "coach" | "client";
+    hasCoach?: boolean;
+    checkInOverdue?: boolean;
+}) {
     const pathname = usePathname();
     const allItems = role === "coach" ? coachItems : clientItems;
     // Hide "Coaches" tab when client has a coach — already removed from clientItems based on hasCoach requirement
@@ -114,45 +129,37 @@ export function MobileBottomNav({ role, hasCoach }: { role: "coach" | "client"; 
                         const active = isActive(item.href);
                         const isCheckIn = (item as NavItem).isCheckIn;
 
-                        if (isCheckIn) {
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    aria-label="Check-In"
-                                    aria-current={active ? "page" : undefined}
-                                    className="relative flex flex-1 flex-col items-center justify-center py-2"
-                                >
-                                    {/* Floating pill — same height as other tabs but visually distinct */}
-                                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
-                                        active
-                                            ? "bg-blue-500 shadow-lg shadow-blue-500/40"
-                                            : "bg-blue-600/80 shadow-md shadow-blue-600/20 hover:bg-blue-500"
-                                    }`}>
-                                        <span className="text-white">{item.icon}</span>
-                                    </div>
-                                    <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${active ? "text-blue-400" : "text-blue-400/60"}`}>
-                                        {item.label}
-                                    </span>
-                                </Link>
-                            );
-                        }
-
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                aria-label={item.label}
+                                aria-current={active ? "page" : undefined}
                                 className={`relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 pb-1 pt-2 text-[10px] font-medium transition-colors ${
                                     active ? "text-white" : "text-zinc-500 hover:text-zinc-300"
                                 }`}
-                                aria-current={active ? "page" : undefined}
                             >
                                 {/* Active top indicator */}
                                 {active && (
                                     <span className="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-full bg-blue-500" />
                                 )}
-                                <span className={active ? "text-white" : "text-zinc-500"}>{item.icon}</span>
-                                <span className={active ? "text-zinc-200" : "text-zinc-500"}>{item.label}</span>
+
+                                {/* Icon — check-in gets a pulsing red dot when overdue */}
+                                <span className="relative">
+                                    <span className={active ? "text-white" : isCheckIn ? "text-zinc-300" : "text-zinc-500"}>
+                                        {item.icon}
+                                    </span>
+                                    {isCheckIn && checkInOverdue && (
+                                        <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                                        </span>
+                                    )}
+                                </span>
+
+                                <span className={active ? "text-zinc-200" : isCheckIn ? "text-zinc-400" : "text-zinc-500"}>
+                                    {item.label}
+                                </span>
                             </Link>
                         );
                     })}

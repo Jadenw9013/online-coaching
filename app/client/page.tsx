@@ -27,7 +27,7 @@ import { getWeightHistory } from "@/lib/queries/weight-history";
 import dayjs from "dayjs";
 import utcPlugin from "dayjs/plugin/utc";
 import timezonePlugin from "dayjs/plugin/timezone";
-import { ClientTeamBanner } from "@/components/client/ClientTeamBanner";
+
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
@@ -168,9 +168,6 @@ export default async function ClientDashboard() {
           })()}
         </div>
       </section>
-
-      {/* Team banner */}
-      <ClientTeamBanner clientId={user.id} />
 
       {/* Coach connection (only if no coach) */}
       {!coachAssignment && (
@@ -515,9 +512,9 @@ export default async function ClientDashboard() {
                         </div>
                       </div>
 
-                      {/* Status badge */}
+                      {/* Status badge — mr-10 to clear the absolute three-dot button on all sizes */}
                       <span
-                        className={`self-start shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold sm:self-center ${checkIn.status === "REVIEWED"
+                        className={`self-start shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold mr-10 sm:self-center ${checkIn.status === "REVIEWED"
                           ? "bg-emerald-500/20 text-emerald-400"
                           : "bg-amber-500/20 text-amber-400"
                           }`}
