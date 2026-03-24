@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentDbUser } from "@/lib/auth/roles";
+import { clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { createServiceClient } from "@/lib/supabase/server";
-
-async function signProfilePhoto(storagePath: string | null): Promise<string | null> {
-  if (!storagePath) return null;
-  try {
-    const supabase = createServiceClient();
-    const { data } = await supabase.storage
-      .from("profile-photos")
-      .createSignedUrl(storagePath, 60 * 60);
-    return data?.signedUrl ?? null;
-  } catch {
-    return null;
-  }
-}
+import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
@@ -32,36 +20,74 @@ export async function GET() {
   }
 
   try {
-    const coachProfile = await db.coachProfile.findUnique({
-      where: { userId: user.id },
-      select: {
-        id: true,
-        slug: true,
-        headline: true,
-        bio: true,
-        specialties: true,
-        pricing: true,
-        acceptingClients: true,
-        isPublished: true,
-        welcomeMessage: true,
-        bannerPhotoPath: true,
-        experience: true,
-        certifications: true,
-        coachingType: true,
-        location: true,
-        city: true,
-        state: true,
-        serviceTier: true,
-        gymName: true,
-        yearsCoaching: true,
-        phoneNumber: true,
-        services: true,
-        clientGoals: true,
-        clientTypes: true,
-      },
-    });
+    // Fetch coachProfile and team info in parallel
+    const [coachProfile, userWithTeam, userRecord] = await Promise.all([
+      db.coachProfile.findUnique({
+        where: { userId: user.id },
+        select: {
+          id: true,
+          slug: true,
+          headline: true,
+          bio: true,
+          specialties: true,
+          pricing: true,
+          acceptingClients: true,
+          isPublished: true,
+          welcomeMessage: true,
+          bannerPhotoPath: true,
+          experience: true,
+          certifications: true,
+          coachingType: true,
+          location: true,
+          city: true,
+          state: true,
+          serviceTier: true,
+          gymName: true,
+          yearsCoaching: true,
+          phoneNumber: true,
+          services: true,
+          clientGoals: true,
+          clientTypes: true,
+        },
+      }),
+      db.user.findUnique({
+        where: { id: user.id },
+        select: {
+          teamId: true,
+          teamRole: true,
+          team: { select: { id: true, name: true, slug: true } },
+        },
+      }),
+      // Fetch clerkId for service-level Clerk API lookup
+      db.user.findUnique({
+        where: { id: user.id },
+        select: { clerkId: true },
+      }),
+    ]);
 
-    const photoUrl = await signProfilePhoto(user.profilePhotoPath);
+    // Resolve profile photo URL:
+    // 1. Prefer custom Supabase upload (private bucket, signed 1hr TTL)
+    // 2. Fallback to Clerk's imageUrl via service client (works for both web and iOS JWT auth)
+    let profilePhotoUrl: string | null = null;
+    if (user.profilePhotoPath) {
+      try {
+        profilePhotoUrl = await getProfilePhotoUrl(user.profilePhotoPath);
+      } catch {
+        // Degrade gracefully to Clerk fallback
+      }
+    }
+    if (!profilePhotoUrl && userRecord?.clerkId) {
+      // Use clerkClient (service key) — works for both web cookie sessions AND iOS Bearer JWT tokens
+      try {
+        const clerk = await clerkClient();
+        const clerkUser = await clerk.users.getUser(userRecord.clerkId);
+        if (clerkUser.hasImage) {
+          profilePhotoUrl = clerkUser.imageUrl;
+        }
+      } catch {
+        // Non-critical — initials fallback will apply on the client
+      }
+    }
 
     return NextResponse.json({
       profile: {
@@ -70,8 +96,12 @@ export async function GET() {
         lastName: user.lastName,
         email: user.email,
         profilePhotoPath: user.profilePhotoPath,
-        photoUrl,
+        profilePhotoUrl,           // signed Supabase URL or Clerk imageUrl fallback
         timezone: user.timezone,
+        teamId: userWithTeam?.teamId ?? null,
+        teamRole: userWithTeam?.teamRole ?? null,
+        teamName: userWithTeam?.team?.name ?? null,
+        teamSlug: userWithTeam?.team?.slug ?? null,
         coachProfile: coachProfile ?? null,
       },
     });
@@ -95,6 +125,7 @@ const updateProfileSchema = z.object({
   bio: z.string().max(5000).nullable().optional(),
   pricing: z.string().max(500).nullable().optional(),
   acceptingClients: z.boolean().optional(),
+  isPublished: z.boolean().optional(),
   welcomeMessage: z.string().max(2000).nullable().optional(),
   experience: z.string().max(2000).nullable().optional(),
   certifications: z.string().max(1000).nullable().optional(),
@@ -155,6 +186,7 @@ export async function PUT(req: NextRequest) {
       services,
       clientGoals,
       clientTypes,
+      isPublished,
     } = parsed.data;
 
     // Update User fields
@@ -176,6 +208,7 @@ export async function PUT(req: NextRequest) {
     if (bio !== undefined) coachUpdate.bio = bio ?? null;
     if (pricing !== undefined) coachUpdate.pricing = pricing ?? null;
     if (acceptingClients !== undefined) coachUpdate.acceptingClients = acceptingClients;
+    if (isPublished !== undefined) coachUpdate.isPublished = isPublished;
     if (welcomeMessage !== undefined) coachUpdate.welcomeMessage = welcomeMessage ?? null;
     if (experience !== undefined) coachUpdate.experience = experience ?? null;
     if (certifications !== undefined) coachUpdate.certifications = certifications ?? null;

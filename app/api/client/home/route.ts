@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { clerkClient } from "@clerk/nextjs/server";
 import { getClientCheckInsLight } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
 import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
@@ -60,6 +61,7 @@ export async function GET() {
         coach: {
           select: {
             id: true,
+            clerkId: true,
             firstName: true,
             lastName: true,
             profilePhotoPath: true,
@@ -175,15 +177,27 @@ export async function GET() {
         profilePhotoPath: user.profilePhotoPath,
       },
       coachAssignment: coachAssignment
-        ? {
-            coach: {
-              id: coachAssignment.coach.id,
-              firstName: coachAssignment.coach.firstName,
-              lastName: coachAssignment.coach.lastName,
-              profilePhotoPath: coachAssignment.coach.profilePhotoPath,
-              slug: coachAssignment.coach.coachProfile?.slug ?? null,
-            },
-          }
+        ? await (async () => {
+            // Resolve coach photo: Clerk imageUrl (public CDN, no signing needed)
+            let coachImageUrl: string | null = null;
+            try {
+              const clerk = await clerkClient();
+              const clerkUser = await clerk.users.getUser(coachAssignment.coach.clerkId);
+              if (clerkUser.hasImage) coachImageUrl = clerkUser.imageUrl;
+            } catch {
+              // Non-critical — initials fallback applies
+            }
+            return {
+              coach: {
+                id: coachAssignment.coach.id,
+                firstName: coachAssignment.coach.firstName,
+                lastName: coachAssignment.coach.lastName,
+                profilePhotoPath: coachAssignment.coach.profilePhotoPath,
+                imageUrl: coachImageUrl,
+                slug: coachAssignment.coach.coachProfile?.slug ?? null,
+              },
+            };
+          })()
         : null,
       weekStatus: {
         cadenceStatus: cadenceResult?.status ?? "upcoming",

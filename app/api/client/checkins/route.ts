@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { getSignedDownloadUrls } from "@/lib/supabase/storage";
 
 export async function GET() {
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -35,6 +36,13 @@ export async function GET() {
       },
     });
 
+    // Bulk-sign all photo paths across all check-ins in one call
+    const allPaths = checkIns.flatMap((c) => c.photos.map((p) => p.storagePath));
+    const signedList = allPaths.length
+      ? await getSignedDownloadUrls(allPaths).catch(() => [])
+      : [];
+    const urlMap = new Map(signedList.map((u) => [u.path, u.signedUrl]));
+
     return NextResponse.json({
       checkIns: checkIns.map((c) => ({
         id: c.id,
@@ -44,7 +52,11 @@ export async function GET() {
         dietCompliance: c.dietCompliance,
         energyLevel: c.energyLevel,
         submittedAt: c.submittedAt.toISOString(),
-        photos: c.photos.map((p) => ({ id: p.id, path: p.storagePath })),
+        photos: c.photos.map((p) => ({
+          id: p.id,
+          path: p.storagePath,
+          url: urlMap.get(p.storagePath) ?? null,
+        })),
       })),
     });
   } catch (err) {

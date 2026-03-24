@@ -74,6 +74,8 @@ export async function GET() {
                   `${s.name}${s.dosage ? ` (${s.dosage})` : ""} — ${s.timing}`
               )
               .join("; ") || null,
+          // Pass through dayOverrides so iOS can run resolveForDay() client-side
+          dayOverrides: extras.dayOverrides ?? null,
         }
       : null;
 

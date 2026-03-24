@@ -49,8 +49,11 @@ export async function GET(
         currentWeekOf: profile.currentWeekOf.toISOString(),
         lastMessageAt: profile.lastMessageAt?.toISOString() ?? null,
         weightDelta: profile.weightDelta,
-        cadenceStatus: profile.cadenceStatus,
-        cadencePreview: profile.cadencePreview,
+        // cadenceStatus is { status, nextDue, label } from getClientCadenceStatus()
+        // Flatten to primitives so mobile can decode without a nested struct:
+        cadenceStatus: profile.cadenceStatus.status,   // "due"|"overdue"|"upcoming"|"submitted"|"reviewed"
+        cadenceLabel: profile.cadenceStatus.label,     // human-readable string
+        cadencePreview: profile.cadencePreview,        // "Every Monday at 9:00 AM" etc
         latestCheckIn: profile.latestCheckIn
           ? {
               id: profile.latestCheckIn.id,
@@ -75,6 +78,7 @@ export async function GET(
         })),
       },
     });
+
   } catch (err) {
     console.error("[GET /api/coach/clients/[clientId]]", err);
     return NextResponse.json(

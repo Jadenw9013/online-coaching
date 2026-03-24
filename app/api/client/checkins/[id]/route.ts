@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { getSignedDownloadUrls } from "@/lib/supabase/storage";
 
 export async function GET(
   _req: NextRequest,
@@ -68,7 +69,18 @@ export async function GET(
         timezone: checkIn.timezone,
         templateSnapshot: checkIn.templateSnapshot,
         customResponses: checkIn.customResponses,
-        photos: checkIn.photos.map((p) => ({ id: p.id, path: p.storagePath })),
+        photos: await (async () => {
+          const paths = checkIn.photos.map((p) => p.storagePath);
+          const signed = paths.length
+            ? await getSignedDownloadUrls(paths).catch(() => [])
+            : [];
+          const urlMap = new Map(signed.map((u) => [u.path, u.signedUrl]));
+          return checkIn.photos.map((p) => ({
+            id: p.id,
+            path: p.storagePath,
+            url: urlMap.get(p.storagePath) ?? null,
+          }));
+        })(),
       },
     });
   } catch (err) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { getSignedDownloadUrls } from "@/lib/supabase/storage";
 import {
   parseCadenceConfig,
   getEffectiveCadence,
@@ -146,10 +147,19 @@ export async function GET() {
             timezone: currentCheckIn.timezone,
             templateSnapshot: currentCheckIn.templateSnapshot,
             customResponses: currentCheckIn.customResponses,
-            photos: currentCheckIn.photos.map((p) => ({
-              id: p.id,
-              path: p.storagePath,
-            })),
+            photos: await (async () => {
+              const rawPhotos = currentCheckIn.photos;
+              const paths = rawPhotos.map((p) => p.storagePath);
+              const signed = paths.length
+                ? await getSignedDownloadUrls(paths).catch(() => [])
+                : [];
+              const urlMap = new Map(signed.map((u) => [u.path, u.signedUrl]));
+              return rawPhotos.map((p) => ({
+                id: p.id,
+                path: p.storagePath,
+                url: urlMap.get(p.storagePath) ?? null,
+              }));
+            })(),
           }
         : null,
       periodDates: {
