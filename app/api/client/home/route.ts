@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs/server";
+import { createClient } from "@supabase/supabase-js";
 import { getClientCheckInsLight } from "@/lib/queries/check-ins";
 import { getCurrentPublishedMealPlan } from "@/lib/queries/meal-plans";
 import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
@@ -178,22 +179,43 @@ export async function GET() {
       },
       coachAssignment: coachAssignment
         ? await (async () => {
-            // Resolve coach photo: Clerk imageUrl (public CDN, no signing needed)
+            // Resolve coach photo — priority: Supabase signed URL > Clerk imageUrl
+            let coachProfilePhotoUrl: string | null = null;
             let coachImageUrl: string | null = null;
+
+            // 1. Try Supabase signed URL (matches website source of truth)
+            if (coachAssignment.coach.profilePhotoPath) {
+              try {
+                const supabase = createClient(
+                  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                  process.env.SUPABASE_SERVICE_ROLE_KEY!
+                );
+                const { data } = await supabase.storage
+                  .from("profile-photos")
+                  .createSignedUrl(coachAssignment.coach.profilePhotoPath, 3600);
+                if (data?.signedUrl) coachProfilePhotoUrl = data.signedUrl;
+              } catch {
+                // Non-critical
+              }
+            }
+
+            // 2. Clerk imageUrl (no hasImage gate — works for all user types)
             try {
               const clerk = await clerkClient();
               const clerkUser = await clerk.users.getUser(coachAssignment.coach.clerkId);
-              if (clerkUser.hasImage) coachImageUrl = clerkUser.imageUrl;
+              coachImageUrl = clerkUser.imageUrl ?? null;
             } catch {
               // Non-critical — initials fallback applies
             }
+
             return {
               coach: {
                 id: coachAssignment.coach.id,
                 firstName: coachAssignment.coach.firstName,
                 lastName: coachAssignment.coach.lastName,
                 profilePhotoPath: coachAssignment.coach.profilePhotoPath,
-                imageUrl: coachImageUrl,
+                profilePhotoUrl: coachProfilePhotoUrl,  // Supabase signed URL (1hr TTL)
+                imageUrl: coachImageUrl,                 // Clerk CDN (always valid)
                 slug: coachAssignment.coach.coachProfile?.slug ?? null,
               },
             };
