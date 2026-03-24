@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { createServiceClient } from "@/lib/supabase/server";
+
+async function signProfilePhoto(storagePath: string | null): Promise<string | null> {
+  if (!storagePath) return null;
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase.storage
+      .from("profile-photos")
+      .createSignedUrl(storagePath, 60 * 60);
+    return data?.signedUrl ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET() {
   // ── Auth ────────────────────────────────────────────────────────────────
@@ -11,7 +25,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // ── Fetch with explicit select — no select * ─────────────────────────
+  // ── Fetch with explicit select ────────────────────────────────────────
   try {
     const user = await db.user.findUniqueOrThrow({
       where: { id: dbUser.id },
@@ -29,7 +43,10 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(user);
+    // Sign the photo URL server-side so no client ever sees the raw storage path
+    const photoUrl = await signProfilePhoto(user.profilePhotoPath);
+
+    return NextResponse.json({ ...user, photoUrl });
   } catch (err) {
     console.error("[GET /api/me]", err);
     return NextResponse.json(

@@ -7,6 +7,8 @@ import { CoachEmailSettings } from "@/components/coach/coach-email-settings";
 import { parseCadenceConfig, cadenceFromLegacyDays } from "@/lib/scheduling/cadence";
 import { TeamSection } from "@/components/coach/TeamSection";
 import { getTeamWithMembers, getActiveTeamInvite } from "@/lib/queries/teams";
+import { CoachProfilePhotoSection } from "@/components/coach/coach-profile-photo-section";
+import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
 
 export default async function CoachSettingsPage({
   searchParams,
@@ -33,6 +35,13 @@ export default async function CoachSettingsPage({
     ? (template.questions as unknown[]).length
     : 0;
 
+  // Sign the coach's profile photo server-side for the initial render
+  let initialPhotoUrl: string | null = null;
+  if (user.profilePhotoPath) {
+    try { initialPhotoUrl = await getProfilePhotoUrl(user.profilePhotoPath); } catch { /* ignore */ }
+  }
+  const initials = `${(user.firstName ?? "?")[0]}${(user.lastName ?? "")[0] ?? ""}`.toUpperCase();
+
 
 
   return (
@@ -58,6 +67,22 @@ export default async function CoachSettingsPage({
           </p>
         </div>
       </div>
+
+      {/* Profile Photo */}
+      <section aria-labelledby="photo-heading" className="animate-fade-in" style={{ animationDelay: "0ms" }}>
+        <h2
+          id="photo-heading"
+          className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400"
+        >
+          Profile Photo
+        </h2>
+        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] px-5 py-5">
+          <CoachProfilePhotoSection
+            initialPhotoUrl={initialPhotoUrl}
+            initials={initials}
+          />
+        </div>
+      </section>
 
       {/* Check-in Schedule */}
       <section aria-labelledby="schedule-heading" className="animate-fade-in" style={{ animationDelay: "60ms" }}>

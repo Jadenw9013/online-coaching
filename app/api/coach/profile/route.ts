@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { createServiceClient } from "@/lib/supabase/server";
+
+async function signProfilePhoto(storagePath: string | null): Promise<string | null> {
+  if (!storagePath) return null;
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase.storage
+      .from("profile-photos")
+      .createSignedUrl(storagePath, 60 * 60);
+    return data?.signedUrl ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
@@ -47,6 +61,8 @@ export async function GET() {
       },
     });
 
+    const photoUrl = await signProfilePhoto(user.profilePhotoPath);
+
     return NextResponse.json({
       profile: {
         id: user.id,
@@ -54,6 +70,7 @@ export async function GET() {
         lastName: user.lastName,
         email: user.email,
         profilePhotoPath: user.profilePhotoPath,
+        photoUrl,
         timezone: user.timezone,
         coachProfile: coachProfile ?? null,
       },
