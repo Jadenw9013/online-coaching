@@ -74,39 +74,16 @@ describe("parsedMealPlanSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts supplement-only plan with no meals", () => {
-    const result = parsedMealPlanSchema.safeParse({
-      title: "Supplement Stack",
-      meals: [],
-      supplements: [
-        { name: "Creatine", dosage: "5g", timing: "AM" },
-        { name: "Fish Oil", dosage: "2g", timing: "with meal" },
-      ],
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.meals).toEqual([]);
-      expect(result.data.supplements).toHaveLength(2);
-    }
-  });
-
-  it("accepts rules/allowances-only plan with no meals", () => {
+  it("accepts supportContent-only plan with no meals", () => {
     const result = parsedMealPlanSchema.safeParse({
       title: "Coaching Instructions",
       meals: [],
-      rules: [
-        { category: "Hydration", text: "Drink 1 gallon water daily" },
-        { category: "Meal Timing", text: "Eat every 3 hours" },
-      ],
-      allowances: [
-        { category: "Drinks", items: ["Black coffee", "Green tea"] },
-      ],
+      supportContent: "Drink 1 gallon water daily. Eat every 3 hours.",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.meals).toEqual([]);
-      expect(result.data.rules).toHaveLength(2);
-      expect(result.data.allowances).toHaveLength(1);
+      expect(result.data.supportContent).toBe("Drink 1 gallon water daily. Eat every 3 hours.");
     }
   });
 

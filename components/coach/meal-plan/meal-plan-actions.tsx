@@ -20,27 +20,30 @@ export function MealPlanActions({
   onPublish: () => void;
 }) {
   return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={notifyClient}
-          onChange={(e) => onNotifyChange(e.target.checked)}
-          className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
-        />
-        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-          Notify client by email
-        </span>
-      </label>
-      <p className="ml-6 text-xs text-zinc-400">
-        Sends an email if the client has email notifications enabled.
-      </p>
-      <div className="flex items-center gap-2 pt-1">
+    <div className="flex flex-col gap-4 rounded-xl border border-white/[0.04] bg-[#0a1224] p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-1 block">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={notifyClient}
+            onChange={(e) => onNotifyChange(e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-blue-500 focus:ring-blue-500/50"
+          />
+          <span className="text-sm font-semibold text-zinc-200">
+            Notify client by email
+          </span>
+        </label>
+        <p className="ml-6 text-xs text-zinc-500">
+          Sends an email if the client has email notifications enabled.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:opacity-50 lg:w-auto"
         >
           {saving ? "Saving..." : isUnsaved ? "Save Draft" : "Save"}
         </button>
@@ -48,7 +51,7 @@ export function MealPlanActions({
           type="button"
           onClick={onPublish}
           disabled={publishing || itemCount === 0}
-          className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:opacity-50"
+          className="w-full rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none lg:w-auto"
         >
           {publishing ? "Publishing..." : "Publish"}
         </button>

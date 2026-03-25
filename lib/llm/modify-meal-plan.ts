@@ -33,8 +33,7 @@ CAPABILITIES:
 - Remove entire meals
 - Duplicate meals with modifications
 - Create day overrides (e.g., high carb day, free meal day)
-- Add/remove/modify supplements
-- Add/remove/modify rules and allowances
+- Add/remove/modify text-based supplements, rules, and allowances via supportContent
 - Adjust multiple meals at once
 - Create complex multi-day variations
 
@@ -84,33 +83,12 @@ JSON Schema:
       "notes": "string (optional)"
     }
   ],
-  "supplements": [
-    {
-      "name": "string",
-      "dosage": "string (optional)",
-      "timing": "string (upon waking|AM|PM|with meal|after meal|pre workout|intra workout|post workout|before bed)",
-      "required": "boolean (optional)",
-      "notes": "string (optional)"
-    }
-  ],
-  "allowances": [
-    {
-      "category": "string (Spices|Sauces|Sweeteners|Drinks|Other)",
-      "items": ["string"],
-      "restriction": "string (optional)"
-    }
-  ],
-  "rules": [
-    {
-      "category": "string (Meal Timing|Hydration|Cardio|Check-In|Communication|Cooking|Other)",
-      "text": "string"
-    }
-  ]
+  "supportContent": "string (optional) — Multiline markdown string for unstructured guidance like supplements, habits, rules, grocery lists, or general guidance"
 }
 
 IMPORTANT:
 - Always set metadata.highlightedChanges to describe what you changed.
-- If the current plan has extras (supplements, overrides, rules, allowances), preserve them unless the instruction modifies them.
+- If the current plan has supportContent or overrides, preserve them unless the instruction modifies them.
 - Return the full plan structure even if only one item changed.`;
 
 type ModifyInput = {
@@ -118,6 +96,7 @@ type ModifyInput = {
     title: string;
     meals: { name: string; items: { food: string; portion: string }[] }[];
     extras?: Record<string, unknown> | null;
+    supportContent?: string | null;
   };
   instruction: string;
 };
@@ -140,6 +119,7 @@ export async function modifyMealPlan(
       title: input.currentPlan.title,
       meals: input.currentPlan.meals,
       ...(input.currentPlan.extras ?? {}),
+      supportContent: input.currentPlan.supportContent,
     },
     null,
     2

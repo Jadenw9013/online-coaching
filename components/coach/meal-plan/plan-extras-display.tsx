@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useState, useEffect } from "react";
-import type { PlanExtras, Supplement, Rule, DayOverride, MealAdjustment, MealChange, Allowance } from "@/types/meal-plan-extras";
-import { SUPPLEMENT_TIMING_ORDER, OVERRIDE_COLORS, getOverrideColor } from "@/types/meal-plan-extras";
+import type { PlanExtras, DayOverride, MealAdjustment, MealChange } from "@/types/meal-plan-extras";
+import { OVERRIDE_COLORS, getOverrideColor } from "@/types/meal-plan-extras";
 import { copySection, pasteSection } from "@/lib/plan-clipboard";
 import { savePlanSnippet, listPlanSnippets, getPlanSnippet, deletePlanSnippet, type SnippetType } from "@/app/actions/plan-snippets";
 
@@ -33,10 +33,7 @@ export function PlanExtrasEditor({
   // ── Collapse state for sub-sections (all collapsed by default) ────────────
   const [planDetailsOpen, setPlanDetailsOpen] = useState(false);
   const [overridesOpen, setOverridesOpen] = useState(false);
-  const [supplementsOpen, setSupplementsOpen] = useState(false);
-  const [allowancesOpen, setAllowancesOpen] = useState(false);
-  const [rulesOpen, setRulesOpen] = useState(false);
-
+      
   useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(null), 2000);
@@ -82,6 +79,23 @@ export function PlanExtrasEditor({
       ],
     });
   }, [extras, onChange]);
+
+  const handleCopyOverride = useCallback((idx: number) => {
+    const data = extras.dayOverrides?.[idx];
+    if (data) {
+      copySection("override", data);
+      showToast("Override copied");
+    }
+  }, [extras.dayOverrides, showToast]);
+
+  const handlePasteOverride = useCallback(async () => {
+    const data = await pasteSection("override");
+    if (data) {
+      const parsed = data as DayOverride;
+      onChange({ ...extras, dayOverrides: [...(extras.dayOverrides ?? []), parsed] });
+      showToast("Override pasted");
+    }
+  }, [extras, onChange, showToast]);
 
   const duplicateOverride = useCallback(
     (idx: number) => {
@@ -191,152 +205,9 @@ export function PlanExtrasEditor({
     [extras, onChange]
   );
 
-  // ── Supplement helpers ────────────────────────────────────────────────────
-
-  const updateSupplement = useCallback(
-    (idx: number, field: keyof Supplement, value: string | boolean) => {
-      const supps = [...(extras.supplements ?? [])];
-      supps[idx] = { ...supps[idx], [field]: value };
-      onChange({ ...extras, supplements: supps });
-    },
-    [extras, onChange]
-  );
-
-  const removeSupplement = useCallback(
-    (idx: number) => {
-      onChange({ ...extras, supplements: extras.supplements?.filter((_, i) => i !== idx) });
-    },
-    [extras, onChange]
-  );
-
-  const addSupplement = useCallback(() => {
-    onChange({
-      ...extras,
-      supplements: [...(extras.supplements ?? []), { name: "", timing: "AM" }],
-    });
-  }, [extras, onChange]);
-
-  // ── Rule helpers ──────────────────────────────────────────────────────────
-
-  const updateRule = useCallback(
-    (idx: number, field: keyof Rule, value: string) => {
-      const rules = [...(extras.rules ?? [])];
-      rules[idx] = { ...rules[idx], [field]: value };
-      onChange({ ...extras, rules });
-    },
-    [extras, onChange]
-  );
-
-  const removeRule = useCallback(
-    (idx: number) => {
-      onChange({ ...extras, rules: extras.rules?.filter((_, i) => i !== idx) });
-    },
-    [extras, onChange]
-  );
-
-  const addRule = useCallback(() => {
-    onChange({
-      ...extras,
-      rules: [...(extras.rules ?? []), { category: "Other", text: "" }],
-    });
-  }, [extras, onChange]);
-
-  // ── Allowance helpers ─────────────────────────────────────────────────────
-
-  const removeAllowanceItem = useCallback(
-    (catIdx: number, itemIdx: number) => {
-      const allowances = [...(extras.allowances ?? [])];
-      const items = allowances[catIdx].items.filter((_, i) => i !== itemIdx);
-      if (items.length === 0) allowances.splice(catIdx, 1);
-      else allowances[catIdx] = { ...allowances[catIdx], items };
-      onChange({ ...extras, allowances });
-    },
-    [extras, onChange]
-  );
-
-  const addAllowanceItem = useCallback(
-    (catIdx: number) => {
-      const allowances = [...(extras.allowances ?? [])];
-      allowances[catIdx] = { ...allowances[catIdx], items: [...allowances[catIdx].items, ""] };
-      onChange({ ...extras, allowances });
-    },
-    [extras, onChange]
-  );
-
-  const updateAllowanceItem = useCallback(
-    (catIdx: number, itemIdx: number, value: string) => {
-      const allowances = [...(extras.allowances ?? [])];
-      const items = [...allowances[catIdx].items];
-      items[itemIdx] = value;
-      allowances[catIdx] = { ...allowances[catIdx], items };
-      onChange({ ...extras, allowances });
-    },
-    [extras, onChange]
-  );
-
-  const addAllowanceCategory = useCallback(() => {
-    onChange({
-      ...extras,
-      allowances: [...(extras.allowances ?? []), { category: "Other", items: [""] }],
-    });
-  }, [extras, onChange]);
-
   // ── Section copy/paste/template handlers ──────────────────────────────────
 
-  const handleCopySupplements = useCallback(async () => {
-    const ok = await copySection("supplements", extras.supplements ?? []);
-    showToast(ok ? "Supplement stack copied" : "Copy failed");
-  }, [extras.supplements, showToast]);
-
-  const handlePasteSupplements = useCallback(async (mode: "replace" | "merge") => {
-    const data = await pasteSection<Supplement[]>("supplements");
-    if (!data) { showToast("No supplement stack in clipboard"); return; }
-    if (mode === "replace") {
-      onChange({ ...extras, supplements: data });
-    } else {
-      onChange({ ...extras, supplements: [...(extras.supplements ?? []), ...data] });
-    }
-    showToast(mode === "replace" ? "Stack replaced" : "Stack merged");
-  }, [extras, onChange, showToast]);
-
-  const handleCopyOverride = useCallback(async (idx: number) => {
-    const override = extras.dayOverrides?.[idx];
-    if (!override) return;
-    const ok = await copySection("override", override);
-    showToast(ok ? "Override copied" : "Copy failed");
-  }, [extras.dayOverrides, showToast]);
-
-  const handlePasteOverride = useCallback(async () => {
-    const data = await pasteSection<DayOverride>("override");
-    if (!data) { showToast("No override in clipboard"); return; }
-    const copy = { ...data, label: `${data.label} (Pasted)` };
-    onChange({ ...extras, dayOverrides: [...(extras.dayOverrides ?? []), copy] });
-    showToast("Override pasted");
-  }, [extras, onChange, showToast]);
-
-  const handleCopyRules = useCallback(async () => {
-    const ok = await copySection("rules", extras.rules ?? []);
-    showToast(ok ? "Rules copied" : "Copy failed");
-  }, [extras.rules, showToast]);
-
-  const handlePasteRules = useCallback(async () => {
-    const data = await pasteSection<Rule[]>("rules");
-    if (!data) { showToast("No rules in clipboard"); return; }
-    onChange({ ...extras, rules: [...(extras.rules ?? []), ...data] });
-    showToast("Rules pasted");
-  }, [extras, onChange, showToast]);
-
-  const handleCopyAllowances = useCallback(async () => {
-    const ok = await copySection("allowances", extras.allowances ?? []);
-    showToast(ok ? "Allowances copied" : "Copy failed");
-  }, [extras.allowances, showToast]);
-
-  const handlePasteAllowances = useCallback(async () => {
-    const data = await pasteSection<Allowance[]>("allowances");
-    if (!data) { showToast("No allowances in clipboard"); return; }
-    onChange({ ...extras, allowances: [...(extras.allowances ?? []), ...data] });
-    showToast("Allowances pasted");
-  }, [extras, onChange, showToast]);
+  
 
   // ── Template handlers ─────────────────────────────────────────────────────
 
@@ -379,10 +250,7 @@ export function PlanExtrasEditor({
           mode={templateModal.mode}
           saveData={
             templateModal.mode === "save"
-              ? templateModal.type === "supplements" ? extras.supplements
-              : templateModal.type === "rules" ? extras.rules
-              : templateModal.type === "allowances" ? extras.allowances
-              : null
+              ? null
               : undefined
           }
           onApply={(payload) => {
@@ -587,134 +455,7 @@ export function PlanExtrasEditor({
         </ExtrasCard>
       )}
 
-      {/* ── Supplements ── */}
-      {planDetailsOpen && extras.supplements && extras.supplements.length > 0 && (
-        <ExtrasCard>
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              type="button"
-              onClick={() => setSupplementsOpen((v) => !v)}
-              className="flex items-center gap-1.5 text-left"
-              aria-expanded={supplementsOpen}
-            >
-              <ExtrasCardHeader label="Supplements" count={extras.supplements.length} />
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${supplementsOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
-            </button>
-            <SectionMenu
-              actions={[
-                { label: "Copy Stack", onClick: handleCopySupplements },
-                { label: "Paste (Replace)", onClick: () => handlePasteSupplements("replace") },
-                { label: "Paste (Merge)", onClick: () => handlePasteSupplements("merge") },
-                { label: "Save as Template…", onClick: () => handleSaveTemplate("supplements", extras.supplements) },
-                { label: "Apply Template…", onClick: () => handleApplyTemplate("supplements", (payload) => {
-                  onChange({ ...extras, supplements: payload as Supplement[] });
-                  showToast("Supplement template applied");
-                })},
-              ]}
-            />
-          </div>
-          {supplementsOpen && (
-            <>
-              <SupplementEditor supplements={extras.supplements} onUpdate={updateSupplement} onRemove={removeSupplement} />
-              <button type="button" onClick={addSupplement} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Supplement</button>
-            </>
-          )}
-        </ExtrasCard>
-      )}
-
-      {/* ── Allowances ── */}
-      {planDetailsOpen && extras.allowances && extras.allowances.length > 0 && (
-        <ExtrasCard>
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              type="button"
-              onClick={() => setAllowancesOpen((v) => !v)}
-              className="flex items-center gap-1.5 text-left"
-              aria-expanded={allowancesOpen}
-            >
-              <ExtrasCardHeader label="Approved Extras" count={extras.allowances.length} />
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${allowancesOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
-            </button>
-            <SectionMenu
-              actions={[
-                { label: "Copy Allowances", onClick: handleCopyAllowances },
-                { label: "Paste Allowances", onClick: handlePasteAllowances },
-                { label: "Save as Template…", onClick: () => handleSaveTemplate("allowances", extras.allowances) },
-                { label: "Apply Template…", onClick: () => handleApplyTemplate("allowances", (payload) => {
-                  onChange({ ...extras, allowances: payload as Allowance[] });
-                  showToast("Allowances template applied");
-                })},
-              ]}
-            />
-          </div>
-          {allowancesOpen && (
-            <>
-              <div className="space-y-3">
-                {extras.allowances.map((allow, catIdx) => (
-                  <div key={catIdx}>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{allow.category}</span>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {allow.items.map((item, itemIdx) => (
-                        <div key={itemIdx} className="group/chip flex items-center gap-0.5 rounded-md border border-zinc-200 bg-zinc-50 pr-0.5 dark:border-zinc-700 dark:bg-zinc-800">
-                          <input type="text" value={item} onChange={(e) => updateAllowanceItem(catIdx, itemIdx, e.target.value)} className="min-w-[3.5rem] max-w-[10rem] border-0 bg-transparent px-2 py-1 text-[11px] font-medium text-zinc-600 focus:outline-none dark:text-zinc-300" style={{ width: `${Math.max(3.5, item.length * 0.6)}em` }} />
-                          <button type="button" onClick={() => removeAllowanceItem(catIdx, itemIdx)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 opacity-100 transition-opacity hover:text-red-500 sm:opacity-0 sm:group-hover/chip:opacity-100" aria-label={`Remove ${item}`}>&times;</button>
-                        </div>
-                      ))}
-                      <button type="button" onClick={() => addAllowanceItem(catIdx)} className="shrink-0 rounded-md border border-dashed border-zinc-300 px-3 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+</button>
-                    </div>
-                    {allow.restriction && <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{allow.restriction}</p>}
-                  </div>
-                ))}
-              </div>
-              <button type="button" onClick={addAllowanceCategory} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Category</button>
-            </>
-          )}
-        </ExtrasCard>
-      )}
-
-      {/* ── Rules ── */}
-      {planDetailsOpen && extras.rules && extras.rules.length > 0 && (
-        <ExtrasCard>
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              type="button"
-              onClick={() => setRulesOpen((v) => !v)}
-              className="flex items-center gap-1.5 text-left"
-              aria-expanded={rulesOpen}
-            >
-              <ExtrasCardHeader label="Rules & Guidelines" count={extras.rules.length} />
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-zinc-400 transition-transform duration-200 ${rulesOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
-            </button>
-            <SectionMenu
-              actions={[
-                { label: "Copy Rules", onClick: handleCopyRules },
-                { label: "Paste Rules", onClick: handlePasteRules },
-                { label: "Save as Template…", onClick: () => handleSaveTemplate("rules", extras.rules) },
-                { label: "Apply Template…", onClick: () => handleApplyTemplate("rules", (payload) => {
-                  onChange({ ...extras, rules: payload as Rule[] });
-                  showToast("Rules template applied");
-                })},
-              ]}
-            />
-          </div>
-          {rulesOpen && (
-            <>
-              <div className="space-y-1.5">
-                {extras.rules.map((rule, idx) => (
-                  <div key={idx} className="group flex items-start gap-2">
-                    <select value={rule.category} onChange={(e) => updateRule(idx, "category", e.target.value)} className="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-1 text-[10px] font-bold uppercase text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                      {["Meal Timing", "Hydration", "Cardio", "Check-In", "Communication", "Cooking", "Other"].map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
-                    </select>
-                    <input type="text" value={rule.text} onChange={(e) => updateRule(idx, "text", e.target.value)} className="flex-1 border-0 bg-transparent p-0 text-xs leading-relaxed text-zinc-600 focus:outline-none dark:text-zinc-300" placeholder="Rule text" />
-                    <button type="button" onClick={() => removeRule(idx)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
-                  </div>
-                ))}
-              </div>
-              <button type="button" onClick={addRule} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Rule</button>
-            </>
-          )}
-        </ExtrasCard>
-      )}
+      
     </div>
   );
 
@@ -947,42 +688,4 @@ function EditableField({ label, value, onChange, placeholder, multiline }: { lab
   );
 }
 
-function SupplementEditor({ supplements, onUpdate, onRemove }: { supplements: Supplement[]; onUpdate: (idx: number, field: keyof Supplement, value: string | boolean) => void; onRemove: (idx: number) => void }) {
-  const grouped = new Map<string, { supp: Supplement; idx: number }[]>();
-  supplements.forEach((supp, idx) => {
-    const key = supp.timing;
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push({ supp, idx });
-  });
-  const sorted = [...grouped.keys()].sort((a, b) => {
-    const ia = SUPPLEMENT_TIMING_ORDER.indexOf(a as typeof SUPPLEMENT_TIMING_ORDER[number]);
-    const ib = SUPPLEMENT_TIMING_ORDER.indexOf(b as typeof SUPPLEMENT_TIMING_ORDER[number]);
-    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-  });
-  return (
-    <div className="space-y-2.5">
-      {sorted.map((timing) => (
-        <div key={timing}>
-          <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{timing}</span>
-          <div className="mt-1 space-y-1">
-            {grouped.get(timing)!.map(({ supp, idx }) => (
-              <div key={idx} className="group flex flex-col gap-1 rounded py-1 pl-3 sm:flex-row sm:items-center sm:gap-2 sm:py-0.5">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <input type="text" value={supp.name} onChange={(e) => onUpdate(idx, "name", e.target.value)} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-medium text-zinc-700 focus:outline-none dark:text-zinc-200" placeholder="Supplement name" />
-                  <button type="button" onClick={() => onRemove(idx)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-100 transition-opacity hover:text-red-500 sm:hidden">&times;</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input type="text" value={supp.dosage ?? ""} onChange={(e) => onUpdate(idx, "dosage", e.target.value)} className="w-20 shrink-0 border-0 bg-transparent p-0 text-xs text-zinc-400 focus:outline-none dark:text-zinc-500" placeholder="Dosage" />
-                  <select value={supp.timing} onChange={(e) => onUpdate(idx, "timing", e.target.value)} className="shrink-0 rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[10px] font-medium focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                    {SUPPLEMENT_TIMING_ORDER.map((t) => (<option key={t} value={t}>{t}</option>))}
-                  </select>
-                  <button type="button" onClick={() => onRemove(idx)} className="hidden sm:flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+// Remove dead code

@@ -18,6 +18,7 @@ type MealPlanItem = {
 type MealPlan = {
   publishedAt: Date | null;
   planExtras?: unknown;
+  supportContent?: string | null;
   items: MealPlanItem[];
 };
 
@@ -296,163 +297,12 @@ function MetadataSection({ extras }: { extras: PlanExtras }) {
   );
 }
 
-function SupplementsSection({ extras }: { extras: PlanExtras }) {
-  if (!extras.supplements?.length) return null;
-  const grouped = new Map<string, typeof extras.supplements>();
-  for (const supp of extras.supplements!) {
-    const key = supp.timing;
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(supp);
-  }
-  const sortedTimings = [...grouped.keys()].sort((a, b) => {
-    const ia = SUPPLEMENT_TIMING_ORDER.indexOf(a as typeof SUPPLEMENT_TIMING_ORDER[number]);
-    const ib = SUPPLEMENT_TIMING_ORDER.indexOf(b as typeof SUPPLEMENT_TIMING_ORDER[number]);
-    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-  });
-
-  const timingColors: Record<string, { bg: string; text: string; border: string }> = {
-    "upon waking": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30" },
-    "AM": { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/30" },
-    "with meal": { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30" },
-    "after meal": { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/30" },
-    "pre workout": { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/30" },
-    "intra workout": { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/30" },
-    "post workout": { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/30" },
-    "PM": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/30" },
-    "before bed": { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/30" },
-  };
-
+function SupportContentSection({ content }: { content?: string | null }) {
+  if (!content) return null;
   return (
-    <ExtrasSection title="Supplements">
-      <div className="space-y-4">
-        {sortedTimings.map((timing) => {
-          const colors = timingColors[timing] ?? { bg: "bg-zinc-500/10", text: "text-zinc-400", border: "border-zinc-500/30" };
-          return (
-            <div key={timing}>
-              <div className="mb-2 flex items-center gap-2">
-                <span className={`rounded-md ${colors.bg} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${colors.text}`}>{timing}</span>
-                <span className="text-[10px] font-medium tabular-nums text-zinc-400">{grouped.get(timing)!.length}</span>
-              </div>
-              <div className="space-y-1">
-                {grouped.get(timing)!.map((supp, i) => (
-                  <div key={i} className={`flex items-start gap-3 rounded-xl border-l-[3px] ${colors.border} bg-white/[0.03] py-2.5 pl-3.5 pr-4`}>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm font-semibold text-zinc-100">{supp.name}</span>
-                      {supp.notes && <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{supp.notes}</p>}
-                    </div>
-                    {supp.dosage && (
-                      <span className="shrink-0 self-center rounded-lg bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold tabular-nums text-zinc-300">{supp.dosage}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </ExtrasSection>
-  );
-}
-
-function AllowancesSection({ extras }: { extras: PlanExtras }) {
-  if (!extras.allowances?.length) return null;
-
-  const categoryAccents: Record<string, { bg: string; text: string; tag: string }> = {
-    "Spices": { bg: "bg-orange-500/10", text: "text-orange-400", tag: "bg-orange-500/15 text-orange-300 ring-1 ring-orange-500/20" },
-    "Sauces": { bg: "bg-rose-500/10", text: "text-rose-400", tag: "bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/20" },
-    "Sweeteners": { bg: "bg-pink-500/10", text: "text-pink-400", tag: "bg-pink-500/15 text-pink-300 ring-1 ring-pink-500/20" },
-    "Drinks": { bg: "bg-cyan-500/10", text: "text-cyan-400", tag: "bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/20" },
-    "Other": { bg: "bg-zinc-500/10", text: "text-zinc-400", tag: "bg-zinc-500/15 text-zinc-300 ring-1 ring-zinc-500/20" },
-  };
-
-  return (
-    <ExtrasSection title="Approved Extras">
-      <div className="space-y-5">
-        {extras.allowances.map((allow, i) => {
-          const accent = categoryAccents[allow.category] ?? categoryAccents["Other"]!;
-          return (
-            <div key={i}>
-              <div className="mb-2 flex items-center gap-2">
-                <span className={`rounded-md ${accent.bg} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${accent.text}`}>{allow.category}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {allow.items.map((item, j) => (
-                  <span key={j} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${accent.tag}`}>{item}</span>
-                ))}
-              </div>
-              {allow.restriction && (
-                <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-400">
-                  <svg className="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" /></svg>
-                  {allow.restriction}
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </ExtrasSection>
-  );
-}
-
-function RulesSection({ extras }: { extras: PlanExtras }) {
-  if (!extras.rules?.length) return null;
-  const grouped = new Map<string, string[]>();
-  for (const rule of extras.rules) {
-    const key = rule.category;
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(rule.text);
-  }
-
-  const categoryIcons: Record<string, React.ReactNode> = {
-    // Clock — meal timing (blue)
-    "Meal Timing": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
-    // Droplet — hydration (cyan)
-    "Hydration": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>,
-    // Zap — cardio (orange)
-    "Cardio": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
-    // Clipboard check — check-in (emerald)
-    "Check-In": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="m9 12 2 2 4-4" /></svg>,
-    // Message circle — communication (violet)
-    "Communication": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
-    // Flame — cooking (amber)
-    "Cooking": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>,
-    // Pin — other (zinc)
-    "Other": <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22" /><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z" /></svg>,
-  };
-
-  const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
-    "Meal Timing": { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
-    "Hydration": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
-    "Cardio": { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
-    "Check-In": { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
-    "Communication": { bg: "bg-violet-500/10", text: "text-violet-400", border: "border-violet-500/20" },
-    "Cooking": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
-    "Other": { bg: "bg-zinc-500/10", text: "text-zinc-400", border: "border-zinc-500/20" },
-  };
-
-  return (
-    <ExtrasSection title="Rules & Guidelines">
-      <div className="space-y-4">
-        {[...grouped.entries()].map(([category, texts]) => {
-          const colors = categoryColors[category] ?? categoryColors["Other"]!;
-          const icon = categoryIcons[category] ?? "📌";
-          return (
-            <div key={category} className={`rounded-xl border ${colors.border} ${colors.bg.replace("/10", "/5")} px-4 py-3`}>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center" aria-hidden="true">{icon}</span>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${colors.text}`}>{category}</span>
-              </div>
-              <ul className="space-y-1.5 pl-1">
-                {texts.map((text, i) => (
-                  <li key={i} className="flex gap-2 text-sm leading-relaxed text-zinc-300">
-                    <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${colors.bg.replace("/10", "/50")}`} aria-hidden="true" />
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+    <ExtrasSection title="Guidance & Support">
+      <div className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+        {content}
       </div>
     </ExtrasSection>
   );
@@ -775,13 +625,9 @@ export function SimpleMealPlan({
         );
       })}
 
-      {/* Extended sections — Rules first (most important for clients) */}
-      {extras && (
-        <>
-          <RulesSection extras={extras} />
-          <SupplementsSection extras={extras} />
-          <AllowancesSection extras={extras} />
-        </>
+      {/* Extended sections */}
+      {mealPlan.supportContent && (
+        <SupportContentSection content={mealPlan.supportContent} />
       )}
 
       {/* Day overrides reference (collapsed) */}

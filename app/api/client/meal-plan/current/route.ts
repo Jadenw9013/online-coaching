@@ -27,6 +27,7 @@ export async function GET() {
         weekOf: true,
         status: true,
         planExtras: true,
+        supportContent: true,
         items: {
           orderBy: { sortOrder: "asc" },
           select: {
@@ -56,24 +57,10 @@ export async function GET() {
 
     const planExtrasOut = extras
       ? {
-          rules: extras.rules?.map((r) => r.text) ?? null,
-          cardio:
-            extras.rules
-              ?.filter((r) => r.category.toLowerCase() === "cardio")
-              .map((r) => r.text)
-              .join("; ") || null,
-          hydration:
-            extras.rules
-              ?.filter((r) => r.category.toLowerCase() === "hydration")
-              .map((r) => r.text)
-              .join("; ") || null,
-          supplements:
-            extras.supplements
-              ?.map(
-                (s) =>
-                  `${s.name}${s.dosage ? ` (${s.dosage})` : ""} — ${s.timing}`
-              )
-              .join("; ") || null,
+          rules: null,
+          cardio: null,
+          hydration: null,
+          supplements: null,
           // Pass through dayOverrides so iOS can run resolveForDay() client-side
           dayOverrides: extras.dayOverrides ?? null,
         }
@@ -85,6 +72,7 @@ export async function GET() {
         weekOf: plan.weekOf.toISOString(),
         status: plan.status,
         planExtras: planExtrasOut,
+        supportContent: plan.supportContent,
         items: plan.items.map((item) => ({
           id: item.id,
           mealName: item.mealName,

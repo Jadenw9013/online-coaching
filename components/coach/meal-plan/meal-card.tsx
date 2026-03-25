@@ -49,9 +49,9 @@ export const MealCard = memo(function MealCard({
   );
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="group overflow-hidden rounded-2xl border bg-[#0a1224] border-white/[0.04] transition-all hover:shadow-lg hover:shadow-blue-500/[0.03] hover:border-white/[0.08]">
       {/* Meal header */}
-      <div className="flex items-center justify-between border-b border-zinc-100 px-3 py-2 dark:border-zinc-800">
+      <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-3.5">
         {editingName ? (
           <input
             autoFocus
@@ -80,7 +80,7 @@ export const MealCard = memo(function MealCard({
               setTempName(meal.mealName);
               setEditingName(true);
             }}
-            className="text-sm font-semibold transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+            className="text-sm font-bold uppercase tracking-wider text-zinc-200 transition-colors hover:text-white"
           >
             {meal.mealName}
           </button>
@@ -96,7 +96,7 @@ export const MealCard = memo(function MealCard({
             type="button"
             onClick={onMoveMealUp}
             disabled={isFirst}
-            className="rounded p-1.5 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-zinc-800"
+            className="rounded-lg p-2 text-xs text-zinc-500 transition-colors hover:bg-white/[0.04] hover:text-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label={`Move ${meal.mealName} up`}
           >
             ↑
@@ -105,7 +105,7 @@ export const MealCard = memo(function MealCard({
             type="button"
             onClick={onMoveMealDown}
             disabled={isLast}
-            className="rounded p-1.5 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-zinc-800"
+            className="rounded-lg p-2 text-xs text-zinc-500 transition-colors hover:bg-white/[0.04] hover:text-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label={`Move ${meal.mealName} down`}
           >
             ↓
@@ -113,7 +113,7 @@ export const MealCard = memo(function MealCard({
           <button
             type="button"
             onClick={onDuplicateMeal}
-            className="rounded p-1.5 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+            className="rounded-lg p-2 text-xs text-zinc-500 transition-colors hover:bg-white/[0.04] hover:text-blue-400"
             aria-label={`Duplicate ${meal.mealName}`}
           >
             ⧉
@@ -121,7 +121,7 @@ export const MealCard = memo(function MealCard({
           <button
             type="button"
             onClick={onRemoveMeal}
-            className="rounded p-1.5 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-500 dark:hover:bg-zinc-800"
+            className="rounded-lg p-2 text-xs text-zinc-500 transition-colors hover:bg-white/[0.04] hover:text-red-400"
             aria-label={`Remove ${meal.mealName}`}
           >
             &times;
@@ -130,7 +130,7 @@ export const MealCard = memo(function MealCard({
       </div>
 
       {/* Food rows */}
-      <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
+      <div className="divide-y divide-white/[0.02]">
         {meal.items.map((item) => (
           <FoodRow
             key={item.id}
@@ -144,11 +144,11 @@ export const MealCard = memo(function MealCard({
       </div>
 
       {/* Add food */}
-      <div className="relative border-t border-zinc-100 px-3 py-2 dark:border-zinc-800">
+      <div className="relative border-t border-white/[0.04] px-5 py-3">
         <button
           type="button"
           onClick={() => setAddingFood(true)}
-          className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+          className="text-xs font-semibold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300"
         >
           + Add Food
         </button>

@@ -1,7 +1,6 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import type { PlanExtras } from "@/types/meal-plan-extras";
-import { SUPPLEMENT_TIMING_ORDER } from "@/types/meal-plan-extras";
 
 const styles = StyleSheet.create({
   page: {
@@ -247,6 +246,7 @@ export type MealPlanPdfData = {
   weekLabel?: string;
   items: MealPlanPdfItem[];
   planExtras?: PlanExtras | null;
+  supportContent?: string | null;
 };
 
 export async function renderMealPlanPdf(data: MealPlanPdfData): Promise<Buffer> {
@@ -254,7 +254,7 @@ export async function renderMealPlanPdf(data: MealPlanPdfData): Promise<Buffer> 
 }
 
 function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
-  const { clientName, coachName, coachHeadline, weekLabel, items, planExtras } = data;
+  const { clientName, coachName, coachHeadline, weekLabel, items, planExtras, supportContent } = data;
 
   // Group items by meal name
   const grouped = new Map<string, MealPlanPdfItem[]>();
@@ -314,16 +314,13 @@ function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
           </View>
         )}
 
-        {/* Rules & Guidelines — placed early for visibility */}
-        {planExtras?.rules && planExtras.rules.length > 0 && (
+        {/* Guidance & Support — placed early for visibility */}
+        {supportContent && (
           <View style={styles.sectionDivider} wrap={false}>
-            <Text style={styles.sectionTitle}>Rules & Guidelines</Text>
-            {planExtras.rules.map((rule, i) => (
-              <View key={i} style={styles.ruleRow}>
-                <Text style={styles.ruleCategory}>{rule.category}</Text>
-                <Text style={styles.ruleText}>{rule.text}</Text>
-              </View>
-            ))}
+            <Text style={styles.sectionTitle}>Guidance & Support</Text>
+            <Text style={{ fontSize: 10, color: "#3f3f46", lineHeight: 1.4 }}>
+              {supportContent}
+            </Text>
           </View>
         )}
 
@@ -394,53 +391,7 @@ function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
           </View>
         )}
 
-        {/* Supplements */}
-        {planExtras?.supplements && planExtras.supplements.length > 0 && (
-          <View style={styles.sectionDivider} wrap={false}>
-            <Text style={styles.sectionTitle}>Supplement Stack</Text>
-            {(() => {
-              const grouped = new Map<string, typeof planExtras.supplements>();
-              for (const supp of planExtras.supplements!) {
-                const key = supp.timing;
-                if (!grouped.has(key)) grouped.set(key, []);
-                grouped.get(key)!.push(supp);
-              }
-              const sortedTimings = [...grouped.keys()].sort((a, b) => {
-                const ia = SUPPLEMENT_TIMING_ORDER.indexOf(a as typeof SUPPLEMENT_TIMING_ORDER[number]);
-                const ib = SUPPLEMENT_TIMING_ORDER.indexOf(b as typeof SUPPLEMENT_TIMING_ORDER[number]);
-                return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-              });
-              return sortedTimings.map((timing) => (
-                <View key={timing}>
-                  <Text style={styles.timingLabel}>{timing}</Text>
-                  {grouped.get(timing)!.map((supp, i) => (
-                    <View key={i} style={styles.supplementRow}>
-                      <Text style={styles.supplementName}>
-                        {supp.name}
-                        {supp.notes ? ` — ${supp.notes}` : ""}
-                      </Text>
-                      {supp.dosage && <Text style={styles.supplementDosage}>{supp.dosage}</Text>}
-                    </View>
-                  ))}
-                </View>
-              ));
-            })()}
-          </View>
-        )}
-
-        {/* Allowances */}
-        {planExtras?.allowances && planExtras.allowances.length > 0 && (
-          <View style={styles.sectionDivider} wrap={false}>
-            <Text style={styles.sectionTitle}>Approved Extras</Text>
-            {planExtras.allowances.map((allow, i) => (
-              <View key={i}>
-                <Text style={styles.allowanceCategory}>{allow.category}</Text>
-                <Text style={styles.allowanceItems}>{allow.items.join(", ")}</Text>
-                {allow.restriction && <Text style={{ fontSize: 8, color: "#d97706", paddingHorizontal: 4 }}>{allow.restriction}</Text>}
-              </View>
-            ))}
-          </View>
-        )}
+        {/* Obsolete sections removed */}
 
         {/* Footer */}
         <View style={styles.footer} fixed>

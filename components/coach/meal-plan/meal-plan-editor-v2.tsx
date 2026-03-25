@@ -52,8 +52,10 @@ export function MealPlanEditorV2({
     groupItemsToMeals(effectivePlan.items)
   );
   const [planExtras, setPlanExtras] = useState<PlanExtras | null>(effectivePlan.planExtras);
+  const [supportContent, setSupportContent] = useState<string>(effectivePlan.supportContent || "");
   const [previousMeals, setPreviousMeals] = useState<MealGroup[] | null>(null);
   const [previousExtras, setPreviousExtras] = useState<PlanExtras | null>(null);
+  const [previousSupport, setPreviousSupport] = useState<string | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -81,6 +83,7 @@ export function MealPlanEditorV2({
       meals.map((m) => ({ ...m, items: [...m.items] }))
     );
     setPreviousExtras(planExtras);
+    setPreviousSupport(supportContent);
   }
 
   function undo() {
@@ -92,14 +95,19 @@ export function MealPlanEditorV2({
       setPlanExtras(previousExtras);
       setPreviousExtras(null);
     }
+    if (previousSupport !== null) {
+      setSupportContent(previousSupport);
+      setPreviousSupport(null);
+    }
     setHighlightedMeals(new Set());
   }
 
   /** Apply AI-generated changes */
-  function applyAiChanges(newMeals: MealGroup[], newExtras: PlanExtras | null) {
+  function applyAiChanges(newMeals: MealGroup[], newExtras: PlanExtras | null, newSupport: string | null) {
     saveSnapshot();
     setMeals(newMeals);
     if (newExtras) setPlanExtras(newExtras);
+    if (newSupport !== null) setSupportContent(newSupport);
     // Flash highlight on changed meals
     const changedNames = new Set(
       newMeals
@@ -127,6 +135,7 @@ export function MealPlanEditorV2({
       weekStartDate,
       items: flattenMeals(meals),
       planExtras: planExtras ?? undefined,
+      supportContent: supportContent || undefined,
     });
     if ("mealPlanId" in result) {
       setDraftId(result.mealPlanId);
@@ -143,6 +152,7 @@ export function MealPlanEditorV2({
           mealPlanId: draftId,
           items: flattenMeals(meals),
           planExtras: planExtras ?? undefined,
+          supportContent: supportContent || undefined,
         });
       } else {
         await ensureDraft();
@@ -163,6 +173,7 @@ export function MealPlanEditorV2({
         mealPlanId: id,
         items: flattenMeals(meals),
         planExtras: planExtras ?? undefined,
+        supportContent: supportContent || undefined,
       });
       await publishMealPlan({ mealPlanId: id, notifyClient });
       // Clear stale draft ID — the plan is now PUBLISHED.
@@ -383,10 +394,27 @@ export function MealPlanEditorV2({
       <button
         type="button"
         onClick={addMeal}
-        className="w-full rounded-lg border border-dashed border-zinc-300 py-2.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300"
+        className="w-full mt-4 rounded-xl border border-dashed border-white/[0.1] bg-white/[0.01] py-3.5 text-xs font-bold uppercase tracking-wider text-zinc-400 transition-all hover:bg-white/[0.03] hover:text-white"
       >
-        + Add Meal
+        + Add New Meal
       </button>
+
+      {/* Support Content (Guidelines, Extras, etc) */}
+      <div className="rounded-2xl border border-white/[0.04] bg-[#0a1224] p-6 shadow-xl shadow-black/40">
+        <label htmlFor="supportContent" className="mb-3 block text-xs font-bold uppercase tracking-wider text-zinc-500">
+          Support Content & Guidelines
+        </label>
+        <textarea
+          id="supportContent"
+          value={supportContent}
+          onChange={(e) => {
+            if (!previousSupport) saveSnapshot();
+            setSupportContent(e.target.value);
+          }}
+          className="w-full min-h-[160px] resize-y rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm leading-relaxed text-zinc-200 placeholder:text-zinc-600 focus:border-blue-500/50 focus:bg-white/[0.04] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          placeholder="Add unconstrained text here for supplements, allowances, rules, substitutions, coach notes, or whatever else formatting you need."
+        />
+      </div>
 
       {/* Plan extras (editable) — show empty-state CTA when not yet configured */}
       {planExtras ? (
@@ -396,39 +424,39 @@ export function MealPlanEditorV2({
           mealNames={meals.map((m) => m.mealName)}
         />
       ) : (
-        <div className="relative rounded-xl border border-dashed border-zinc-300 bg-zinc-50/50 px-5 py-5 dark:border-zinc-700/60 dark:bg-zinc-800/20">
+        <div className="relative overflow-hidden rounded-2xl border border-dashed border-white/[0.08] bg-gradient-to-b from-[#0a1224] to-[#0d162c] px-6 py-6 shadow-inner">
           {/* ? help button — top right */}
-          <div className="absolute right-3 top-3">
+          <div className="absolute right-4 top-4">
             <PlanDetailsHelp />
           </div>
 
-          <div className="mb-4 flex items-start gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+          <div className="mb-6 flex items-start gap-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 shadow-inner">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
             </span>
-            <div>
-              <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">No Plan Details yet</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                Add rules, supplements, day overrides, and plan metadata. Pick a section to start, or add everything at once.
+            <div className="pt-0.5">
+              <p className="text-base font-bold tracking-tight text-white">No Plan Details yet</p>
+              <p className="mt-1 text-sm text-zinc-400">
+                Add day overrides and metadata to complete the package.
               </p>
             </div>
           </div>
 
           {/* Quick-start section buttons */}
-          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-2">
             {([
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>, label: "Rules & Guidelines", seed: { rules: [{ category: "Meal Timing", text: "" }] } },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>, label: "Supplements", seed: { supplements: [{ name: "", timing: "AM" }] } },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Day Overrides", seed: { dayOverrides: [{ label: "High Carb Day", color: "blue", weekdays: [] }] } },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Day Overrides", seed: { dayOverrides: [{ label: "High Carb Day", color: "blue", weekdays: [], mealAdjustments: [], notes: "" }] } },
               { icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>, label: "Plan Metadata", seed: { metadata: { phase: "", coachNotes: "" } } },
             ] as const).map(({ icon, label, seed }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => setPlanExtras(seed as unknown as typeof planExtras)}
-                className="group flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-3 text-center text-xs font-medium text-zinc-600 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm active:scale-[0.97] dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20 dark:hover:text-blue-400"
+                className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 text-center text-sm font-semibold text-zinc-300 transition-all hover:bg-white/[0.05] hover:text-white"
               >
-                <span className="flex h-5 w-5 items-center justify-center">{icon}</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/50 text-zinc-400 transition-colors group-hover:bg-blue-500/20 group-hover:text-blue-400">
+                  {icon}
+                </div>
                 <span className="leading-tight">{label}</span>
               </button>
             ))}
@@ -438,10 +466,10 @@ export function MealPlanEditorV2({
           <button
             type="button"
             onClick={() => setPlanExtras({})}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-zinc-500 transition-all hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800/40 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 active:scale-[0.98]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Plan Details (all sections)
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Full Plan Details
           </button>
         </div>
       )}

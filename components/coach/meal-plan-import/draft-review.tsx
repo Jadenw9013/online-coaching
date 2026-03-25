@@ -191,26 +191,7 @@ export function DraftReview({
 
   // ── Extended section editors ──────────────────────────────────────────────
 
-  const removeSupplement = useCallback((idx: number) => {
-    setPlan((prev) => {
-      if (!prev?.supplements) return prev;
-      return { ...prev, supplements: prev.supplements.filter((_, i) => i !== idx) };
-    });
-  }, []);
-
-  const removeRule = useCallback((idx: number) => {
-    setPlan((prev) => {
-      if (!prev?.rules) return prev;
-      return { ...prev, rules: prev.rules.filter((_, i) => i !== idx) };
-    });
-  }, []);
-
-  const removeAllowance = useCallback((idx: number) => {
-    setPlan((prev) => {
-      if (!prev?.allowances) return prev;
-      return { ...prev, allowances: prev.allowances.filter((_, i) => i !== idx) };
-    });
-  }, []);
+  // ── Extended section editors ──────────────────────────────────────────────
 
   const removeOverride = useCallback((idx: number) => {
     setPlan((prev) => {
@@ -220,8 +201,7 @@ export function DraftReview({
   }, []);
 
   const hasExtrasContent =
-    !!plan?.metadata || (plan?.dayOverrides?.length ?? 0) > 0 || (plan?.supplements?.length ?? 0) > 0 ||
-    (plan?.allowances?.length ?? 0) > 0 || (plan?.rules?.length ?? 0) > 0;
+    !!plan?.metadata || (plan?.dayOverrides?.length ?? 0) > 0 || !!plan?.supportContent;
 
   async function handleImport() {
     if (!draftId || !plan) return;
@@ -312,19 +292,9 @@ export function DraftReview({
         <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${plan.meals.length > 0 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800'}`}>
           {plan.meals.length} meal{plan.meals.length !== 1 ? 's' : ''}
         </span>
-        {(plan.supplements?.length ?? 0) > 0 && (
+        {!!plan.supportContent && (
           <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:text-purple-400">
-            {plan.supplements!.length} supplement{plan.supplements!.length !== 1 ? 's' : ''}
-          </span>
-        )}
-        {(plan.rules?.length ?? 0) > 0 && (
-          <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
-            {plan.rules!.length} rule{plan.rules!.length !== 1 ? 's' : ''}
-          </span>
-        )}
-        {(plan.allowances?.length ?? 0) > 0 && (
-          <span className="inline-flex items-center rounded-full bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-700 dark:text-teal-400">
-            {plan.allowances!.length} allowance{plan.allowances!.length !== 1 ? 's' : ''}
+            Guidance Included
           </span>
         )}
         {(plan.dayOverrides?.length ?? 0) > 0 && (
@@ -557,99 +527,19 @@ export function DraftReview({
         </ReviewSection>
       )}
 
-      {/* ── Supplements ── */}
-      {plan.supplements && plan.supplements.length > 0 && (
+      {/* ── Guidance & Support ── */}
+      {plan.supportContent && (
         <ReviewSection
-          title="Supplements"
-          confidence={plan.confidence?.supplements}
-          count={plan.supplements.length}
+          title="Guidance & Support"
+          confidence={plan.confidence?.supportContent}
         >
           <div className="space-y-1.5">
-            {plan.supplements.map((supp, idx) => (
-              <div key={idx} className="flex items-center gap-2 rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/50">
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium">{supp.name}</span>
-                  {supp.dosage && <span className="ml-1 text-xs text-zinc-500">({supp.dosage})</span>}
-                  <span className="ml-2 rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                    {supp.timing}
-                  </span>
-                  {supp.notes && <span className="ml-1 text-xs text-zinc-400">— {supp.notes}</span>}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeSupplement(idx)}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
-                  aria-label={`Remove ${supp.name}`}
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-          </div>
-        </ReviewSection>
-      )}
-
-      {/* ── Allowances ── */}
-      {plan.allowances && plan.allowances.length > 0 && (
-        <ReviewSection
-          title="Allowances"
-          confidence={plan.confidence?.allowances}
-          count={plan.allowances.length}
-        >
-          <div className="space-y-2">
-            {plan.allowances.map((allow, idx) => (
-              <div key={idx} className="rounded-lg bg-zinc-50 p-2.5 dark:bg-zinc-800/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{allow.category}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeAllowance(idx)}
-                    className="flex h-7 w-7 items-center justify-center rounded text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
-                    aria-label={`Remove ${allow.category}`}
-                  >
-                    &times;
-                  </button>
-                </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {allow.items.map((item, i) => (
-                    <span key={i} className="rounded bg-zinc-200 px-1.5 py-0.5 text-xs dark:bg-zinc-700">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-                {allow.restriction && (
-                  <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{allow.restriction}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </ReviewSection>
-      )}
-
-      {/* ── Rules ── */}
-      {plan.rules && plan.rules.length > 0 && (
-        <ReviewSection
-          title="Rules"
-          confidence={plan.confidence?.rules}
-          count={plan.rules.length}
-        >
-          <div className="space-y-1.5">
-            {plan.rules.map((rule, idx) => (
-              <div key={idx} className="flex items-center gap-2 rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/50">
-                <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                  {rule.category}
-                </span>
-                <span className="flex-1 text-sm">{rule.text}</span>
-                <button
-                  type="button"
-                  onClick={() => removeRule(idx)}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
-                  aria-label="Remove rule"
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
+            <textarea
+              value={plan.supportContent}
+              onChange={(e) => setPlan({ ...plan, supportContent: e.target.value })}
+              rows={8}
+              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+            />
           </div>
         </ReviewSection>
       )}

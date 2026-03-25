@@ -34,7 +34,7 @@ const QUICK_ACTIONS = [
 type AiState =
   | { phase: "idle" }
   | { phase: "thinking" }
-  | { phase: "preview"; changes: ChangeEntry[]; newMeals: MealGroup[]; newExtras: PlanExtras | null; summary: string }
+  | { phase: "preview"; changes: ChangeEntry[]; newMeals: MealGroup[]; newExtras: PlanExtras | null; newSupportContent: string | null; summary: string }
   | { phase: "error"; message: string };
 
 type AiPlanAssistantProps = {
@@ -42,7 +42,7 @@ type AiPlanAssistantProps = {
   onClose: () => void;
   currentMeals: MealGroup[];
   currentExtras: PlanExtras | null;
-  onApply: (meals: MealGroup[], extras: PlanExtras | null) => void;
+  onApply: (meals: MealGroup[], extras: PlanExtras | null, newSupport: string | null) => void;
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ export function AiPlanAssistant({
           currentPlan: {
             title: "Meal Plan",
             meals: mealsToApiFormat(currentMeals),
-            extras: currentExtras,
+            extras: currentExtras, // this is legacy, we can keep it here
           },
           instruction: trimmed,
         }),
@@ -154,9 +154,10 @@ export function AiPlanAssistant({
       // Convert to MealGroups
       const newMeals = parsedPlanToMealGroups(plan);
       const newExtras = extractPlanExtras(plan) as PlanExtras | null;
+      const newSupportContent = plan.supportContent ?? null;
 
       // Diff
-      const changes = diffMealPlans(currentMeals, newMeals, currentExtras, newExtras);
+      const changes = diffMealPlans(currentMeals, newMeals, currentExtras, newExtras, newSupportContent);
 
       const summary =
         plan.metadata?.highlightedChanges ||
@@ -164,7 +165,7 @@ export function AiPlanAssistant({
           ? `${changes.length} change${changes.length !== 1 ? "s" : ""} detected`
           : "No changes detected");
 
-      setAiState({ phase: "preview", changes, newMeals, newExtras, summary });
+      setAiState({ phase: "preview", changes, newMeals, newExtras, summary, newSupportContent });
     } catch (error) {
       setAiState({
         phase: "error",
@@ -175,7 +176,7 @@ export function AiPlanAssistant({
 
   function handleApply() {
     if (aiState.phase !== "preview") return;
-    onApply(aiState.newMeals, aiState.newExtras);
+    onApply(aiState.newMeals, aiState.newExtras, aiState.newSupportContent);
     setAiState({ phase: "idle" });
     setInstruction("");
     onClose();

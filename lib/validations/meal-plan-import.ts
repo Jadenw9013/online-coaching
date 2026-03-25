@@ -29,9 +29,7 @@ export const parsedMealPlanSchema = z.object({
   // Extended sections — all optional for backward compatibility
   metadata: planMetadataSchema.optional(),
   dayOverrides: z.array(dayOverrideSchema).optional(),
-  supplements: z.array(supplementSchema).optional(),
-  allowances: z.array(allowanceSchema).optional(),
-  rules: z.array(ruleSchema).optional(),
+  supportContent: z.string().optional(),
   confidence: confidenceSchema.optional(),
 });
 
@@ -74,9 +72,6 @@ export function extractPlanExtras(plan: ParsedMealPlan) {
   const extras: Record<string, unknown> = {};
   if (plan.metadata) extras.metadata = plan.metadata;
   if (plan.dayOverrides?.length) extras.dayOverrides = plan.dayOverrides;
-  if (plan.supplements?.length) extras.supplements = plan.supplements;
-  if (plan.allowances?.length) extras.allowances = plan.allowances;
-  if (plan.rules?.length) extras.rules = plan.rules;
   if (plan.confidence) extras.confidence = plan.confidence;
   return Object.keys(extras).length > 0 ? extras : null;
 }

@@ -28,6 +28,7 @@ const createDraftSchema = z.object({
   copyFromPublished: z.boolean().default(false),
   items: z.array(mealPlanItemSchema).max(50).optional(),
   planExtras: planExtrasSchema.optional(),
+  supportContent: z.string().optional().nullable(),
 });
 
 export async function createDraftMealPlan(input: unknown) {
@@ -51,6 +52,7 @@ export async function createDraftMealPlan(input: unknown) {
   let itemsToCreate: z.infer<typeof mealPlanItemSchema>[] = [];
   let extrasToStore: z.infer<typeof planExtrasSchema> | undefined =
     parsed.data.planExtras;
+  let supportContent = parsed.data.supportContent;
 
   if (parsed.data.items) {
     itemsToCreate = parsed.data.items;
@@ -73,10 +75,13 @@ export async function createDraftMealPlan(input: unknown) {
         carbs: item.carbs,
         fats: item.fats,
       }));
-      // Also copy plan extras from the published plan
+      // Also copy plan extras and support content from the published plan
       if (!extrasToStore && published.planExtras) {
         const validated = planExtrasSchema.safeParse(published.planExtras);
         if (validated.success) extrasToStore = validated.data;
+      }
+      if (supportContent === undefined && published.supportContent) {
+        supportContent = published.supportContent;
       }
     }
   }
@@ -88,6 +93,7 @@ export async function createDraftMealPlan(input: unknown) {
       version: nextVersion,
       status: "DRAFT",
       planExtras: extrasToStore ?? undefined,
+      supportContent: supportContent ?? undefined,
       items: { create: itemsToCreate },
     },
     include: { items: { orderBy: { sortOrder: "asc" } } },
@@ -101,6 +107,7 @@ const saveDraftSchema = z.object({
   mealPlanId: z.string().min(1),
   items: z.array(mealPlanItemSchema).max(50),
   planExtras: planExtrasSchema.optional().nullable(),
+  supportContent: z.string().optional().nullable(),
 });
 
 export async function saveDraftMealPlan(input: unknown) {
@@ -109,7 +116,7 @@ export async function saveDraftMealPlan(input: unknown) {
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { mealPlanId, items, planExtras } = parsed.data;
+  const { mealPlanId, items, planExtras, supportContent } = parsed.data;
 
   const plan = await db.mealPlan.findUnique({
     where: { id: mealPlanId },
@@ -139,12 +146,15 @@ export async function saveDraftMealPlan(input: unknown) {
         },
       })
     ),
-    // Update planExtras if provided (null = clear, undefined = keep as is)
-    ...(planExtras !== undefined
+    // Update planExtras/supportContent if provided
+    ...(planExtras !== undefined || supportContent !== undefined
       ? [
           db.mealPlan.update({
             where: { id: mealPlanId },
-            data: { planExtras: planExtras ?? undefined },
+            data: {
+              ...(planExtras !== undefined && { planExtras: planExtras ?? undefined }),
+              ...(supportContent !== undefined && { supportContent: supportContent ?? undefined }),
+            },
           }),
         ]
       : []),

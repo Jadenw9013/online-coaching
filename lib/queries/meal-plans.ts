@@ -42,6 +42,7 @@ export type EffectiveMealPlan = {
   draftId: string | null;
   publishedId: string | null;
   planExtras: PlanExtras | null;
+  supportContent: string | null;
   items: {
     mealName: string;
     foodName: string;
@@ -103,6 +104,7 @@ export async function getEffectiveMealPlanForReview(
       draftId: draft.id,
       publishedId: published?.id ?? null,
       planExtras: parsePlanExtras(draft.planExtras),
+      supportContent: draft.supportContent,
       items: mapItems(draft.items),
     };
   }
@@ -113,10 +115,11 @@ export async function getEffectiveMealPlanForReview(
       draftId: null,
       publishedId: published.id,
       planExtras: parsePlanExtras(published.planExtras),
+      supportContent: published.supportContent,
       items: mapItems(published.items),
     };
   }
 
   // 3. No plan at all
-  return { source: "empty", draftId: null, publishedId: null, planExtras: null, items: [] };
+  return { source: "empty", draftId: null, publishedId: null, planExtras: null, supportContent: null, items: [] };
 }

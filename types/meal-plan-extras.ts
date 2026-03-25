@@ -63,18 +63,13 @@ export const ruleSchema = z.object({
 
 export const confidenceSchema = z.object({
   meals: z.number().min(0).max(1).optional(),
-  supplements: z.number().min(0).max(1).optional(),
   overrides: z.number().min(0).max(1).optional(),
-  allowances: z.number().min(0).max(1).optional(),
-  rules: z.number().min(0).max(1).optional(),
+  supportContent: z.number().min(0).max(1).optional(),
 });
 
 export const planExtrasSchema = z.object({
   metadata: planMetadataSchema.optional(),
   dayOverrides: z.array(dayOverrideSchema).optional(),
-  supplements: z.array(supplementSchema).optional(),
-  allowances: z.array(allowanceSchema).optional(),
-  rules: z.array(ruleSchema).optional(),
   confidence: confidenceSchema.optional(),
 });
 

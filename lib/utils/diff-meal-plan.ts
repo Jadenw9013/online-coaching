@@ -10,7 +10,7 @@ import type { PlanExtras } from "@/types/meal-plan-extras";
 
 export type ChangeEntry = {
   type: "added" | "removed" | "modified" | "info";
-  category: "meal" | "item" | "supplement" | "override" | "rule" | "allowance" | "meta";
+  category: "meal" | "item" | "supplement" | "override" | "rule" | "allowance" | "meta" | "support";
   label: string;
   detail?: string;
 };
@@ -19,7 +19,9 @@ export function diffMealPlans(
   before: MealGroup[],
   after: MealGroup[],
   extrasBefore: PlanExtras | null,
-  extrasAfter: PlanExtras | null
+  extrasAfter: PlanExtras | null,
+  supportBefore: string | null = null,
+  supportAfter: string | null = null
 ): ChangeEntry[] {
   const changes: ChangeEntry[] = [];
 
@@ -122,48 +124,14 @@ export function diffMealPlans(
     }
   }
 
-  // Supplements
-  const beforeSupps = new Set(
-    (extrasBefore?.supplements ?? []).map((s) => s.name.toLowerCase())
-  );
-  for (const supp of extrasAfter?.supplements ?? []) {
-    if (!beforeSupps.has(supp.name.toLowerCase())) {
-      changes.push({
-        type: "added",
-        category: "supplement",
-        label: `Supplement: ${supp.name}`,
-        detail: [supp.dosage, supp.timing].filter(Boolean).join(" · ") || undefined,
-      });
-    }
-  }
-
-  // Removed supplements
-  const afterSupps = new Set(
-    (extrasAfter?.supplements ?? []).map((s) => s.name.toLowerCase())
-  );
-  for (const supp of extrasBefore?.supplements ?? []) {
-    if (!afterSupps.has(supp.name.toLowerCase())) {
-      changes.push({
-        type: "removed",
-        category: "supplement",
-        label: `Supplement: ${supp.name}`,
-      });
-    }
-  }
-
-  // Rules
-  const beforeRules = new Set(
-    (extrasBefore?.rules ?? []).map((r) => r.text.toLowerCase())
-  );
-  for (const rule of extrasAfter?.rules ?? []) {
-    if (!beforeRules.has(rule.text.toLowerCase())) {
-      changes.push({
-        type: "added",
-        category: "rule",
-        label: `Rule: ${rule.text}`,
-        detail: rule.category,
-      });
-    }
+  // Support Content
+  if (supportBefore !== supportAfter) {
+    changes.push({
+      type: "modified",
+      category: "support",
+      label: "Support notes updated",
+      detail: "Guidance, rules, or supplements were modified",
+    });
   }
 
   // Highlighted changes from metadata

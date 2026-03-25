@@ -21,6 +21,7 @@ const requestSchema = z.object({
     ),
     // Use z.any() — PlanExtras contains arrays which z.record() rejects
     extras: z.any().optional(),
+    supportContent: z.string().nullable().optional(),
   }),
   instruction: z.string().min(1).max(2000),
 });

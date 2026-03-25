@@ -20,7 +20,6 @@ import { BecomeCoachForm } from "@/components/client/become-coach-form";
 import { CheckInStatus } from "@/components/client/check-in-status";
 import { CheckInScheduleBanner } from "@/components/client/check-in-schedule-banner";
 import { TodayAdherence } from "@/components/client/today-adherence";
-import { CoachRulesCard } from "@/components/client/coach-rules-card";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { WeightProgress } from "@/components/charts/weight-progress";
 import { getWeightHistory } from "@/lib/queries/weight-history";
@@ -104,9 +103,8 @@ export default async function ClientDashboard() {
   const statusLabel = cadenceResult?.label;
   const nextDueLabel = cadencePreview ?? undefined;
 
-  // ── Coach rules from latest published plan ────────────────────────────────
+  // ── Legacy overrides check using PlanExtras ────────────────────────────────
   const planExtras = parsePlanExtras(mealPlan?.planExtras);
-  const coachRules = planExtras?.rules ?? [];
 
   const latestWeight = checkIns.find((c) => c.weight != null);
   const prevWeight = latestWeight
@@ -357,10 +355,15 @@ export default async function ClientDashboard() {
         );
       })()}
 
-      {/* Coach Rules card */}
-      {coachRules.length > 0 && (
-        <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
-          <CoachRulesCard rules={coachRules} />
+      {/* Guidance & Support */}
+      {mealPlan?.supportContent && (
+        <div className="animate-fade-in rounded-2xl border border-white/[0.06] bg-[#0d1829] p-4" style={{ animationDelay: "120ms" }}>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            Guidance &amp; Support
+          </p>
+          <div className="whitespace-pre-wrap text-sm leading-snug text-zinc-300 line-clamp-4">
+            {mealPlan.supportContent}
+          </div>
         </div>
       )}
 

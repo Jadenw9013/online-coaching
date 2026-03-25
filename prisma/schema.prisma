@@ -255,6 +255,7 @@ model MealPlan {
   weekOf      DateTime
   version     Int            @default(1)
   status      MealPlanStatus @default(DRAFT)
+  supportContent String?     @db.Text
   planExtras  Json?          // PlanExtras object (see types/meal-plan-extras.ts)
   publishedAt DateTime?
   createdAt   DateTime       @default(now())
@@ -359,6 +360,7 @@ model MealPlanDraft {
   id            String   @id @default(cuid())
   uploadId      String   @unique
   extractedText String?  @db.Text
+  supportContent String? @db.Text
   parsedJson    Json
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
