@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
+import { createServiceClient } from "@/lib/supabase/server";
+
+const PHOTO_BUCKET = "profile-photos";
+const TTL = 60 * 60; // 1 hour
+
+async function signPhotoUrl(path: string | null): Promise<string | null> {
+  if (!path) return null;
+  const supabase = createServiceClient();
+  const { data } = await supabase.storage
+    .from(PHOTO_BUCKET)
+    .createSignedUrl(path, TTL);
+  return data?.signedUrl ?? null;
+}
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
@@ -17,17 +30,16 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const signedPhotoUrl = await signPhotoUrl(user.profilePhotoPath);
+
   return NextResponse.json({
-    user: {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      profilePhotoPath: user.profilePhotoPath,
-      timezone: user.timezone,
-      bio: user.clientBio,
-      fitnessGoal: user.fitnessGoal,
-    },
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    photoUrl: signedPhotoUrl,
+    timezone: user.timezone,
+    clientBio: user.clientBio,
+    fitnessGoal: user.fitnessGoal,
   });
 }
 
@@ -36,7 +48,7 @@ export async function GET() {
 const updateProfileSchema = z.object({
   firstName: z.string().min(1).max(50).optional(),
   lastName: z.string().max(50).nullable().optional(),
-  bio: z.string().max(300).nullable().optional(),
+  clientBio: z.string().max(300).nullable().optional(),
   fitnessGoal: z.string().max(100).nullable().optional(),
   timezone: z.string().min(1).max(100).optional(),
 });
@@ -63,14 +75,14 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const { firstName, lastName, bio, fitnessGoal, timezone } = parsed.data;
+    const { firstName, lastName, clientBio, fitnessGoal, timezone } = parsed.data;
 
     const updated = await db.user.update({
       where: { id: user.id },
       data: {
         ...(firstName !== undefined && { firstName }),
         ...(lastName !== undefined && { lastName: lastName ?? null }),
-        ...(bio !== undefined && { clientBio: bio ?? null }),
+        ...(clientBio !== undefined && { clientBio: clientBio ?? null }),
         ...(fitnessGoal !== undefined && { fitnessGoal: fitnessGoal ?? null }),
         ...(timezone !== undefined && { timezone }),
       },
@@ -86,17 +98,16 @@ export async function PUT(req: NextRequest) {
       },
     });
 
+    const signedPhotoUrl = await signPhotoUrl(updated.profilePhotoPath);
+
     return NextResponse.json({
-      user: {
-        id: updated.id,
-        firstName: updated.firstName,
-        lastName: updated.lastName,
-        email: updated.email,
-        profilePhotoPath: updated.profilePhotoPath,
-        timezone: updated.timezone,
-        bio: updated.clientBio,
-        fitnessGoal: updated.fitnessGoal,
-      },
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      email: updated.email,
+      photoUrl: signedPhotoUrl,
+      timezone: updated.timezone,
+      clientBio: updated.clientBio,
+      fitnessGoal: updated.fitnessGoal,
     });
   } catch (err) {
     console.error("[PUT /api/client/profile]", err);
@@ -106,3 +117,4 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
+

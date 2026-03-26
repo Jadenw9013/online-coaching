@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { createServiceClient } from "@/lib/supabase/server";
+
+const PHOTO_BUCKET = "profile-photos";
+const PORTFOLIO_BUCKET = "portfolio";
+const TTL = 60 * 60; // 1 hour
 
 // ── GET — public coach profile by slug (no auth) ─────────────────────────────
 
@@ -58,13 +63,43 @@ export async function GET(
       orderBy: { createdAt: "desc" },
     });
 
+    // Sign Supabase URLs for profile photo and portfolio items
+    const supabase = createServiceClient();
+
+    let signedPhotoUrl: string | null = null;
+    if (profile.user.profilePhotoPath) {
+      const { data } = await supabase.storage
+        .from(PHOTO_BUCKET)
+        .createSignedUrl(profile.user.profilePhotoPath, TTL);
+      signedPhotoUrl = data?.signedUrl ?? null;
+    }
+
+    const signedPortfolioItems = await Promise.all(
+      profile.portfolioItems.map(async (p) => {
+        let signedUrl = "";
+        if (p.mediaPath) {
+          // Portfolio items may be in the portfolio bucket or profile-photos bucket
+          const bucket = p.mediaPath.startsWith("portfolio") ? PHOTO_BUCKET : PORTFOLIO_BUCKET;
+          const { data } = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(p.mediaPath, TTL);
+          signedUrl = data?.signedUrl ?? p.mediaPath;
+        }
+        return {
+          id: p.id,
+          path: signedUrl,
+          caption: p.title,
+        };
+      })
+    );
+
     return NextResponse.json({
       profile: {
         id: profile.id,
         slug: profile.slug,
         firstName: profile.user.firstName,
         lastName: profile.user.lastName,
-        profilePhotoPath: profile.user.profilePhotoPath,
+        profilePhotoPath: signedPhotoUrl,
         bio: profile.bio,
         specialties: profile.specialties,
         pricing: profile.pricing,
@@ -75,11 +110,7 @@ export async function GET(
           reviewText: t.reviewText,
           createdAt: t.createdAt.toISOString(),
         })),
-        portfolioItems: profile.portfolioItems.map((p) => ({
-          id: p.id,
-          path: p.mediaPath ?? "",
-          caption: p.title,
-        })),
+        portfolioItems: signedPortfolioItems,
       },
     });
   } catch (err) {
@@ -90,3 +121,4 @@ export async function GET(
     );
   }
 }
+
