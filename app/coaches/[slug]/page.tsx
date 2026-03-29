@@ -102,13 +102,13 @@ export default async function CoachProfilePage({ params }: PageProps) {
     const initials = `${profile.user.firstName?.[0] ?? ""}${profile.user.lastName?.[0] ?? ""}`.toUpperCase() || "?";
 
     return (
-        <div className="min-h-screen bg-zinc-50">
+        <div className="min-h-screen bg-[#020815]">
             {/* ── Nav ── */}
-            <header className="sticky top-0 z-30 bg-zinc-50">
+            <header className="sticky top-0 z-30 border-b border-white/[0.04] bg-[#020815]/80 backdrop-blur-xl">
                 <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-5 sm:px-8">
                     <Link
                         href="/coaches"
-                        className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                        className="text-sm font-medium text-zinc-400 transition-colors hover:text-white"
                     >
                         ← Directory
                     </Link>
@@ -124,14 +124,13 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                     alt=""
                                     fill
                                     priority
-                                    className="object-contain brightness-0"
+                                    className="object-contain brightness-0 invert"
                                 />
                             </div>
-                            <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-gray-900 sm:inline">Steadfast</span>
+                            <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-zinc-100 sm:inline">Steadfast</span>
                         </Link>
                     </div>
                 </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300/60 to-transparent" />
             </header>
 
             <main className="mx-auto max-w-4xl px-5 pb-24 pt-8 sm:px-8 lg:pb-8" id="main-content">
@@ -152,7 +151,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
                     </div>
                     {/* Avatar — anchored to bottom-left of banner */}
                     <div className="absolute -bottom-14 left-6 sm:left-8">
-                        <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-zinc-50 bg-zinc-100 shadow-lg">
+                        <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-[#0d1526] bg-[#111c30] shadow-lg">
                             {avatarUrl ? (
                                 <Image
                                     src={avatarUrl}
@@ -515,7 +514,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
 
             {/* ── Mobile Sticky CTA ── */}
             {!isExistingClient && (
-                <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-zinc-200 bg-white/95 px-5 py-3 backdrop-blur-sm lg:hidden">
+                <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/[0.08] bg-[#020815]/95 px-5 py-3 backdrop-blur-sm lg:hidden">
                     <div className="flex items-center gap-3">
                         <Link
                             href={`/coaches/${profile.slug}/request`}

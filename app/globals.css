@@ -7,6 +7,35 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sora);
   --font-mono: var(--font-geist-mono);
+
+  /* ─── Dark-only color overrides ───────────────────────────────────────
+     Remap light-mode Tailwind utilities so existing classes like
+     bg-white, bg-zinc-50, text-zinc-700, border-zinc-200, etc.
+     render correctly on the dark background without editing each file. */
+
+  /* Backgrounds: light surfaces → dark surfaces */
+  --color-white: #0a1224;
+  --color-zinc-50: #0d1526;
+  --color-zinc-100: #111c30;
+  --color-gray-50: #0d1526;
+  --color-gray-100: #111c30;
+
+  /* Borders: light borders → subtle dark borders */
+  --color-zinc-200: rgba(255, 255, 255, 0.10);
+  --color-zinc-300: rgba(255, 255, 255, 0.14);
+  --color-gray-200: rgba(255, 255, 255, 0.10);
+  --color-gray-300: rgba(255, 255, 255, 0.14);
+
+  /* Text: dark text → light text */
+  --color-zinc-600: #a1a1aa;
+  --color-zinc-700: #d4d4d8;
+  --color-zinc-800: #e4e4e7;
+  --color-zinc-900: #fafafa;
+  --color-gray-500: #a1a1aa;
+  --color-gray-600: #a1a1aa;
+  --color-gray-700: #d4d4d8;
+  --color-gray-800: #e4e4e7;
+  --color-gray-900: #fafafa;
 }
 
 /* ─── Dark-only theme ─── */
