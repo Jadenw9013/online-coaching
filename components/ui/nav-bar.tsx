@@ -77,8 +77,8 @@ export function NavBar({
                 key={link.href}
                 href={link.href}
                 className={`hidden rounded-lg px-3 py-1.5 text-sm font-medium transition-colors sm:block ${active
-                  ? "bg-blue-500/[0.18] text-white border border-blue-500/30"
-                  : "text-zinc-300 hover:bg-white/[0.07] hover:text-white"
+                  ? "bg-white/[0.10] text-white"
+                  : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
                   }`}
                 aria-current={active ? "page" : undefined}
               >
@@ -91,10 +91,10 @@ export function NavBar({
           {role === "client" && (
             <Link
               href="/client/check-in"
-              className={`hidden rounded-lg px-3 py-1.5 text-sm font-semibold transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:block ${
+              className={`hidden rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:block ${
                 isActive("/client/check-in")
-                  ? "bg-white text-zinc-900 shadow-[0_0_12px_rgba(255,255,255,0.15)]"
-                  : "bg-white text-zinc-900 hover:bg-zinc-100"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                  : "bg-blue-600 text-white hover:bg-blue-500 shadow-sm shadow-blue-600/20"
               }`}
             >
               Check-In

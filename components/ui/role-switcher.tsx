@@ -30,7 +30,7 @@ export function RoleSwitcher({
       onClick={handleSwitch}
       disabled={switching}
       aria-label={label}
-      className="sf-button-secondary !min-h-[44px] !px-3 !py-2 text-xs"
+      className="hidden sm:inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-500/[0.08] hover:text-blue-300 disabled:opacity-40"
     >
       {switching ? "Switching..." : label}
     </button>
