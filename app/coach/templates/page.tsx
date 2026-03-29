@@ -32,7 +32,7 @@ export default async function TemplatesHubPage() {
         >
           &larr; Dashboard
         </Link>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">Templates</h1>
+        <h1 className="mt-3 text-3xl font-black tracking-tight">Templates</h1>
         <p className="mt-1.5 text-sm text-zinc-500">Manage your reusable content and onboarding assets</p>
       </section>
 
@@ -40,7 +40,7 @@ export default async function TemplatesHubPage() {
         {/* Workouts */}
         <Link
           href="/coach/templates/workouts"
-          className="group flex flex-col rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 transition-all hover:border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/5"
+          className="group flex flex-col sf-glass-card p-6 transition-all hover:border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/5"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
@@ -58,7 +58,7 @@ export default async function TemplatesHubPage() {
         </Link>
 
         {/* Meal Plans — coming soon */}
-        <div className="flex flex-col rounded-2xl border border-dashed border-zinc-700/60 bg-[#0a1224]/60 p-6">
+        <div className="flex flex-col sf-surface-card p-6 opacity-60">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M13 21v-4"/><path d="M11 21v-4"/></svg>
           </div>
@@ -70,7 +70,7 @@ export default async function TemplatesHubPage() {
         {/* Onboarding */}
         <Link
           href="/coach/templates/onboarding"
-          className="group flex flex-col rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 transition-all hover:border-violet-500/20 hover:shadow-lg hover:shadow-violet-500/5"
+          className="group flex flex-col sf-glass-card p-6 transition-all hover:border-violet-500/20 hover:shadow-lg hover:shadow-violet-500/5"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>

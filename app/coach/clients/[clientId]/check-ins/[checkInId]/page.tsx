@@ -79,14 +79,14 @@ export default async function CheckInReviewPage({
         <div className="flex items-center gap-3">
           <Link
             href="/coach/dashboard"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="sf-button-ghost !p-0 flex h-8 w-8 items-center justify-center rounded-lg"
             aria-label="Back to inbox"
           >
             &larr;
           </Link>
           <Link
             href={`/coach/clients/${clientId}`}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-zinc-800 dark:hover:bg-zinc-700 overflow-hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06] border border-white/[0.08] text-sm font-semibold transition-colors hover:bg-white/[0.10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 overflow-hidden"
             aria-label="View client profile"
           >
             {clientPhotoUrl ? (

@@ -68,7 +68,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         <button
                             disabled={pending}
                             onClick={() => run(() => markContacted(requestId))}
-                            className="rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-300 transition-all hover:bg-violet-500/20 disabled:opacity-50"
+                            className="sf-button-secondary !border-violet-500/30 !bg-violet-500/10 text-violet-300 hover:!bg-violet-500/20 disabled:opacity-50"
                         >
                             Mark Contacted
                         </button>
@@ -78,7 +78,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         <button
                             disabled={pending}
                             onClick={() => setShowSchedule((v) => !v)}
-                            className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all hover:bg-amber-500/20 disabled:opacity-50"
+                            className="sf-button-secondary !border-amber-500/30 !bg-amber-500/10 text-amber-300 hover:!bg-amber-500/20 disabled:opacity-50"
                         >
                             {showSchedule ? "Hide" : "Schedule Consultation"}
                         </button>
@@ -87,7 +87,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     <button
                         disabled={pending}
                         onClick={() => run(() => acceptClient(requestId))}
-                        className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-emerald-500 disabled:opacity-50"
+                        className="sf-button-primary disabled:opacity-50"
                     >
                         Accept Client
                     </button>
@@ -95,7 +95,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     <button
                         disabled={pending}
                         onClick={() => run(() => declineRequest(requestId))}
-                        className="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm font-semibold text-zinc-400 transition-all hover:border-red-500/40 hover:text-red-400 disabled:opacity-50"
+                        className="sf-button-danger disabled:opacity-50"
                     >
                         Decline
                     </button>
@@ -112,7 +112,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         );
                         setShowSchedule(false);
                     }}
-                    className="rounded-2xl border border-white/[0.06] bg-zinc-900/60 p-5 space-y-4"
+                    className="sf-glass-card p-5 space-y-4"
                 >
                     <p className="text-sm font-semibold text-zinc-200">Schedule Consultation</p>
                     <div className="space-y-3">
@@ -124,7 +124,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                 placeholder="https://cal.com/..."
                                 value={meetingLink}
                                 onChange={(e) => setMeetingLink(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                className="sf-input w-full"
                                 style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
                             />
                         </div>
@@ -135,7 +135,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                 type="datetime-local"
                                 value={scheduledTime}
                                 onChange={(e) => setScheduledTime(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                className="sf-input w-full"
                                 style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
                             />
                         </div>
@@ -147,7 +147,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                 placeholder="Topics to cover, etc."
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30"
+                                className="sf-textarea w-full"
                                 style={{ fontSize: "max(1rem, 16px)" }}
                             />
                         </div>
@@ -156,11 +156,11 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         <button
                             type="submit"
                             disabled={pending}
-                            className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-amber-400 disabled:opacity-50"
+                            className="sf-button-primary disabled:opacity-50"
                         >
                             Save & Mark Scheduled
                         </button>
-                        <button type="button" onClick={() => setShowSchedule(false)} className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-300">
+                        <button type="button" onClick={() => setShowSchedule(false)} className="sf-button-ghost">
                             Cancel
                         </button>
                     </div>
@@ -187,13 +187,13 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                     type="datetime-local"
                                     value={consultDate}
                                     onChange={(e) => setConsultDate(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 px-4 py-3 text-sm text-zinc-100 focus:border-blue-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30"
+                                    className="sf-input w-full"
                                 />
                             </div>
                             <button
                                 disabled={pending || !consultDate}
                                 onClick={() => run(() => updateConsultationStage({ requestId, stage: "CONSULTATION_SCHEDULED", consultationDate: consultDate }))}
-                                className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                                className="sf-button-primary w-full disabled:opacity-50"
                             >
                                 Schedule Consultation
                             </button>
@@ -232,7 +232,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                             <button
                                 disabled={pending}
                                 onClick={() => run(() => sendIntakePacket({ requestId, documentIds: [] }))}
-                                className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all disabled:opacity-50"
+                                className="sf-button-secondary disabled:opacity-50"
                                 style={{ minHeight: "48px" }}
                             >
                                 {pending ? "Resending..." : "Resend Intake Packet"}
@@ -248,7 +248,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                             </p>
                             <Link
                                 href={`/coach/leads/${requestId}/review`}
-                                className="block w-full rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                className="sf-button-primary block w-full text-center"
                                 style={{ minHeight: "48px" }}
                             >
                                 Review Intake →
@@ -302,7 +302,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                 }
                             });
                         }}
-                        className="rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-300 transition-all hover:bg-blue-500/20 disabled:opacity-50"
+                        className="sf-button-secondary !border-blue-500/30 !bg-blue-500/10 text-blue-300 hover:!bg-blue-500/20 disabled:opacity-50"
                     >
                         Send Invite
                     </button>
@@ -316,7 +316,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                         <button
                             disabled={pending}
                             onClick={() => setConfirmBypass(true)}
-                            className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-medium text-zinc-500 transition-all hover:border-zinc-500 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                            className="sf-button-secondary disabled:opacity-50"
                         >
                             Bypass Pipeline — Activate Directly
                         </button>
@@ -346,14 +346,14 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                         });
                                         setConfirmBypass(false);
                                     }}
-                                    className="rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:bg-amber-400 disabled:opacity-50"
+                                    className="sf-button-primary disabled:opacity-50"
                                 >
                                     Yes, Activate Now
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setConfirmBypass(false)}
-                                    className="px-4 py-2.5 text-sm text-zinc-500 hover:text-zinc-300"
+                                    className="sf-button-ghost"
                                 >
                                     Cancel
                                 </button>
@@ -411,7 +411,7 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                 <button
                     disabled={pending}
                     onClick={() => setStep("confirm")}
-                    className="w-full rounded-xl bg-blue-600 px-6 py-4 text-base font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                    className="sf-button-primary w-full text-base disabled:opacity-50"
                     style={{ minHeight: "56px" }}
                 >
                     Activate {prospectName} as a Client
@@ -436,7 +436,7 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                             autoFocus
                             disabled={pending}
                             onClick={handleActivate}
-                            className="rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-900 transition-all hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                            className="sf-button-primary disabled:opacity-50"
                             style={{ minHeight: "48px" }}
                         >
                             {pending ? "Activating..." : "Yes, Activate"}
@@ -444,7 +444,7 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                         <button
                             type="button"
                             onClick={() => setStep("idle")}
-                            className="px-5 py-3 text-sm text-zinc-500 hover:text-zinc-300"
+                            className="sf-button-ghost"
                             style={{ minHeight: "48px" }}
                         >
                             Cancel
@@ -486,7 +486,7 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                     <button
                         disabled={pending}
                         onClick={() => { setStep("idle"); setErrorMsg(null); }}
-                        className="rounded-xl border border-zinc-700 px-5 py-3 text-sm font-semibold text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all disabled:opacity-50"
+                        className="sf-button-secondary disabled:opacity-50"
                         style={{ minHeight: "48px" }}
                     >
                         Try Again
@@ -578,7 +578,7 @@ function SendIntakePacketSection({ requestId, activeDocuments }: { requestId: st
             <button
                 disabled={pending}
                 onClick={handleSend}
-                className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                className="sf-button-primary w-full disabled:opacity-50"
                 style={{ minHeight: "48px" }}
             >
                 {pending ? "Sending..." : `Send Intake Packet${selectedDocs.size > 0 ? ` (${selectedDocs.size} doc${selectedDocs.size > 1 ? "s" : ""})` : ""}`}

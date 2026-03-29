@@ -167,11 +167,7 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-white/[0.08] p-4 transition-all duration-200 hover:border-white/[0.16] hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] sm:p-5"
-      style={{
-        background: "linear-gradient(135deg, #0d1829 0%, #0a1224 100%)",
-        minHeight: "64px",
-      }}
+      className="group relative overflow-hidden sf-glass-card p-4 transition-all duration-200 hover:border-white/[0.16] hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] sm:p-5"
     >
       <Link
         href={profileHref}
@@ -275,7 +271,7 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
         <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:right-5">
           <Link
             href={reviewHref}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d1a2e] px-3.5 py-2 text-xs font-semibold text-zinc-100 shadow-lg shadow-black/20 backdrop-blur-sm transition-all hover:border-blue-500/40 hover:bg-[#111f36] hover:shadow-blue-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
+            className="sf-button-secondary !px-3.5 !py-2 text-xs shadow-lg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             Review

@@ -44,7 +44,7 @@ export default async function ClientTrainingPage() {
           <div className="flex items-baseline gap-3">
             <h1 className="text-2xl font-black tracking-tight text-white">Training Program</h1>
             {program && program.days.length > 0 && (
-              <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
+              <span className="sf-section-label text-xs">
                 {program.days.length} {program.days.length === 1 ? "day" : "days"}
               </span>
             )}

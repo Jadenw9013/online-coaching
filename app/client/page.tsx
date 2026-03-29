@@ -286,7 +286,7 @@ export default async function ClientDashboard() {
             {mealPlan ? (
               <Link
                 href="/client/meal-plan"
-                className="group flex flex-col gap-2 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 transition-all hover:border-blue-500/20 hover:shadow-lg hover:shadow-zinc-950/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
+                className="group flex flex-col gap-2 overflow-hidden sf-glass-card p-5 transition-all hover:border-blue-500/20 hover:shadow-lg hover:shadow-zinc-950/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
                 aria-label="View your nutrition plan"
                 style={{ minHeight: "100px" }}
               >
@@ -300,7 +300,7 @@ export default async function ClientDashboard() {
                 </span>
               </Link>
             ) : (
-              <div className="flex flex-col gap-2 overflow-hidden rounded-2xl border border-dashed border-zinc-800 bg-[#0a1224] p-5" style={{ minHeight: "100px" }}>
+              <div className="flex flex-col gap-2 overflow-hidden sf-surface-card p-5" style={{ minHeight: "100px" }}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/60">
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
                 </div>
@@ -312,7 +312,7 @@ export default async function ClientDashboard() {
             {trainingProgram && trainingProgram.days.length > 0 ? (
               <Link
                 href="/client/training"
-                className="group flex flex-col gap-2 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 transition-all hover:border-emerald-500/20 hover:shadow-lg hover:shadow-zinc-950/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
+                className="group flex flex-col gap-2 overflow-hidden sf-glass-card p-5 transition-all hover:border-emerald-500/20 hover:shadow-lg hover:shadow-zinc-950/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
                 aria-label="View your training program"
                 style={{ minHeight: "100px" }}
               >
@@ -326,7 +326,7 @@ export default async function ClientDashboard() {
                 </span>
               </Link>
             ) : (
-              <div className="flex flex-col gap-2 overflow-hidden rounded-2xl border border-dashed border-zinc-800 bg-[#0a1224] p-5" style={{ minHeight: "100px" }}>
+              <div className="flex flex-col gap-2 overflow-hidden sf-surface-card p-5" style={{ minHeight: "100px" }}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/60">
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
                 </div>
@@ -376,7 +376,7 @@ export default async function ClientDashboard() {
 
       {/* Guidance & Support */}
       {mealPlan?.supportContent && (
-        <div className="animate-fade-in rounded-2xl border border-white/[0.06] bg-[#0d1829] p-4" style={{ animationDelay: "120ms" }}>
+        <div className="animate-fade-in sf-glass-card p-4" style={{ animationDelay: "120ms" }}>
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
             Guidance &amp; Support
           </p>
@@ -455,7 +455,7 @@ export default async function ClientDashboard() {
           Recent Check-Ins
         </h2>
         {checkIns.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-700 bg-[#0a1224] px-8 py-16 text-center">
+          <div className="sf-surface-card flex flex-col items-center gap-4 px-8 py-16 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /></svg>
             </div>
@@ -488,7 +488,7 @@ export default async function ClientDashboard() {
               return (
                 <div
                   key={checkIn.id}
-                  className="relative rounded-2xl border border-white/[0.06] bg-[#0a1224] transition-all hover:border-blue-500/20"
+                  className="relative sf-glass-card transition-all hover:border-blue-500/20"
                 >
                   {/* Overflow menu — top right */}
                   <div className="absolute right-1 top-1 z-10 sm:right-2 sm:top-2">
@@ -563,7 +563,7 @@ export default async function ClientDashboard() {
       {latestCoachMessage && (
         <Link
           href={`/client/messages/${formatDateUTC(latestCoachMessage.weekOf)}`}
-          className="group animate-fade-in block overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 transition-all hover:border-blue-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
+          className="group animate-fade-in block overflow-hidden sf-glass-card p-5 transition-all hover:border-blue-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1e]"
           style={{ animationDelay: "160ms" }}
         >
           <div className="flex items-center justify-between">

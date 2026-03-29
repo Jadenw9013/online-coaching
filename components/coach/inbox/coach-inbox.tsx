@@ -143,7 +143,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
           placeholder="Search clients…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-xl border border-zinc-700/60 bg-zinc-800/30 py-2.5 pl-9 pr-4 text-zinc-100 placeholder-zinc-600 transition-colors focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="sf-input w-full py-2.5 pl-9 pr-4"
           style={{ fontSize: "max(1rem, 16px)" }}
           aria-label="Search clients by name"
         />
@@ -161,7 +161,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
 
       {/* Filter bar — horizontally scrollable on mobile */}
       <div
-        className="flex gap-1 overflow-x-auto rounded-xl bg-zinc-800/60 p-1 scrollbar-none"
+        className="flex gap-1 overflow-x-auto rounded-xl bg-white/[0.04] border border-white/[0.06] p-1 scrollbar-none"
         role="tablist"
         aria-label="Filter clients"
       >
@@ -185,7 +185,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
               onKeyDown={(e) => handleKeyDown(e, i)}
               className={`min-h-[44px] shrink-0 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
                 activeFilter === f.key
-                  ? "bg-zinc-900 text-zinc-100 shadow-sm"
+                  ? "bg-white/[0.08] text-zinc-100 shadow-sm border border-white/[0.08]"
                   : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
@@ -211,7 +211,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
       {/* Client cards */}
       <div role="tabpanel">
         {filtered.length === 0 ? (
-          <div className="animate-fade-in flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-700/50 py-16">
+          <div className="animate-fade-in sf-surface-card flex flex-col items-center gap-2 py-16">
             <p className="text-sm font-medium text-zinc-400">
               {query ? `No clients match "${query}"` : "No clients match this filter"}
             </p>

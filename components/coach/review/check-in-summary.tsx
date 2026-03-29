@@ -29,8 +29,8 @@ export function CheckInSummary({
 }) {
   if (!checkIn) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center dark:border-zinc-700 dark:bg-[#0a1224]">
-        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800">
+      <div className="sf-surface-card px-6 py-10 text-center">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.06] text-lg">
           &#128203;
         </div>
         <p className="mt-3 text-sm font-semibold">No check-in submitted yet</p>
@@ -55,8 +55,8 @@ export function CheckInSummary({
           <span
             className={`text-xs font-medium ${
               checkIn.status === "REVIEWED"
-                ? "text-green-600 dark:text-green-400"
-                : "text-blue-600 dark:text-blue-400"
+                ? "text-green-400"
+                : "text-blue-400"
             }`}
           >
             {checkIn.status === "REVIEWED" ? "Reviewed" : "New"}
@@ -72,7 +72,7 @@ export function CheckInSummary({
 
       {/* Metrics — weight prominent */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="sf-glass-card px-3 py-3">
           <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
             Weight
           </p>
@@ -88,8 +88,8 @@ export function CheckInSummary({
                 <span
                   className={`mt-0.5 block text-xs font-medium ${
                     weightDelta < 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-amber-500 dark:text-amber-400"
+                      ? "text-green-400"
+                      : "text-amber-400"
                   }`}
                 >
                   {weightDelta > 0 ? "+" : ""}{weightDelta} lbs
@@ -97,7 +97,7 @@ export function CheckInSummary({
               )}
             </div>
           ) : (
-            <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+            <p className="mt-1 text-2xl font-bold text-zinc-600">&mdash;</p>
           )}
         </div>
         <MetricCard
@@ -114,7 +114,7 @@ export function CheckInSummary({
 
       {/* Notes */}
       {checkIn.notes && (
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="sf-glass-card px-4 py-3">
           <p className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-400">
             Notes
           </p>
@@ -145,7 +145,7 @@ function MetricCard({
   suffix: string;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="sf-glass-card px-3 py-3">
       <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
         {label}
       </p>
@@ -155,7 +155,7 @@ function MetricCard({
           <span className="text-xs text-zinc-400">{suffix}</span>
         </div>
       ) : (
-        <p className="mt-1 text-2xl font-bold text-zinc-300 dark:text-zinc-600">&mdash;</p>
+        <p className="mt-1 text-2xl font-bold text-zinc-600">&mdash;</p>
       )}
     </div>
   );

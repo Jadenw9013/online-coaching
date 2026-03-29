@@ -59,18 +59,18 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
             </Link>
 
             {/* Pipeline */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-4">
+            <div className="sf-glass-card p-4">
                 <PipelineBar currentStage={lead.consultationStage} />
             </div>
 
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6">
+            <div className="flex items-start justify-between gap-4 sf-glass-card p-6">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-800 text-xl font-bold text-zinc-200">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/[0.06] text-xl font-bold text-zinc-200">
                         {lead.prospectName[0]?.toUpperCase() ?? "?"}
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-zinc-100">{lead.prospectName}</h1>
+                        <h1 className="text-xl font-black tracking-tight text-zinc-100">{lead.prospectName}</h1>
                         <a href={`tel:${(lead.prospectPhone ?? lead.prospectEmail).replace(/\s/g, "")}`} className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.66a16 16 0 0 0 6 6l1.02-1.02a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                             {lead.prospectPhone ?? lead.prospectEmail}
@@ -92,8 +92,8 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
             </div>
 
             {/* Intake answers */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 space-y-5">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Intake Answers</h2>
+            <div className="sf-glass-card p-6 space-y-5">
+                <h2 className="sf-section-label">Intake Answers</h2>
                 {answers.goals && (
                     <div>
                         <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Goals</p>
@@ -119,7 +119,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
 
             {/* Consultation */}
             {lead.consultationMeeting && (
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-3">
+                <div className="sf-glass-card p-6 space-y-3" style={{ borderColor: "rgba(245, 158, 11, 0.20)" }}>
                     <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Consultation</h2>
                     {lead.consultationMeeting.scheduledTime && (
                         <p className="inline-flex items-center gap-1.5 text-sm text-zinc-300">
@@ -143,8 +143,8 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
             )}
 
             {/* Actions */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 space-y-4">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Actions</h2>
+            <div className="sf-glass-card p-6 space-y-4">
+                <h2 className="sf-section-label">Actions</h2>
                 <LeadActions
                     requestId={lead.id}
                     status={lead.status}
