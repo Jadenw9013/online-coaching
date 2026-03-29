@@ -33,14 +33,14 @@ export default async function OnboardingPage() {
     if (response) redirect("/client/dashboard");
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#020815]">
+        <div className="min-h-screen bg-zinc-50">
             <NavBar role="client" canSwitchRole={user.isCoach && user.isClient} />
             <main className="mx-auto max-w-2xl px-5 py-12 sm:px-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
                         Welcome to Steadfast
                     </h1>
-                    <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+                    <p className="mt-2 text-zinc-600">
                         {coachClient.coach.firstName} has requested you complete this onboarding questionnaire before starting.
                     </p>
                 </div>

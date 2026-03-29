@@ -48,28 +48,28 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
         switch (status) {
             case "PENDING":
                 return (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                         Pending
                     </span>
                 );
             case "WAITLISTED":
                 return (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-600">
                         <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                         Waitlisted
                     </span>
                 );
             case "APPROVED":
                 return (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                         Accepted
                     </span>
                 );
             case "REJECTED":
                 return (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-500/20 dark:text-zinc-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-xs font-medium text-zinc-500">
                         Declined
                     </span>
                 );
@@ -82,11 +82,11 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
         new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
     return (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-5 dark:border-zinc-800/80 dark:bg-[#0a1224]">
-            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Your Coaching Requests</h2>
+        <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-5">
+            <h2 className="text-base font-semibold text-zinc-900">Your Coaching Requests</h2>
 
             {error && (
-                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                     {error}
                 </div>
             )}
@@ -96,11 +96,11 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
                     {active.map((req) => {
                         const coachName = `${req.coachProfile.user.firstName ?? ""} ${req.coachProfile.user.lastName ?? ""}`.trim() || "Coach";
                         return (
-                            <div key={req.id} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+                            <div key={req.id} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3">
                                 <div className="min-w-0">
                                     <Link
                                         href={`/coaches/${req.coachProfile.slug}`}
-                                        className="text-sm font-medium text-zinc-900 hover:underline dark:text-zinc-100"
+                                        className="text-sm font-medium text-zinc-900 hover:underline"
                                     >
                                         {coachName}
                                     </Link>
@@ -115,8 +115,8 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
                                         disabled={cancelingId !== null}
                                         className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                                             confirmId === req.id
-                                                ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
-                                                : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                                                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                                : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
                                         }`}
                                     >
                                         {cancelingId === req.id ? "Canceling..." : confirmId === req.id ? "Confirm Cancel" : "Cancel"}
@@ -139,7 +139,7 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
                                     <div className="min-w-0">
                                         <Link
                                             href={`/coaches/${req.coachProfile.slug}`}
-                                            className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+                                            className="text-sm text-zinc-600 hover:underline"
                                         >
                                             {coachName}
                                         </Link>

@@ -242,7 +242,7 @@ export function IntakeSession({ requestId, prospectName, prospectEmail, prefillG
             <p className="text-xs text-zinc-500 text-center">{steps[step].label}</p>
 
             {/* Dynamic sections */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 space-y-5 transition-opacity duration-200">
+            <div className="sf-glass-card p-6 space-y-5 transition-opacity duration-200">
                 {currentSection && (
                     <div className="space-y-4">
                         <h2 className="text-xl font-bold text-zinc-100">{currentSection.title}</h2>

@@ -23,10 +23,10 @@ export function AdherenceCard({ clientId, adherenceEnabled, summary }: Props) {
   return (
     <section
       aria-labelledby="adherence-heading"
-      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:shadow-none"
+      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
         <h2 id="adherence-heading" className="text-sm font-semibold tracking-tight">
           Daily Adherence
         </h2>
@@ -40,7 +40,7 @@ export function AdherenceCard({ clientId, adherenceEnabled, summary }: Props) {
           <>
             {/* Today snapshot */}
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                 Today
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -63,7 +63,7 @@ export function AdherenceCard({ clientId, adherenceEnabled, summary }: Props) {
 
             {/* 7-day summary */}
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                 Last 7 Days
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -92,7 +92,7 @@ export function AdherenceCard({ clientId, adherenceEnabled, summary }: Props) {
         )}
 
         {!adherenceEnabled && (
-          <p className="text-sm text-gray-400 dark:text-zinc-500">
+          <p className="text-sm text-gray-400">
             Enable to let this client track daily meals and workouts.
           </p>
         )}
@@ -113,16 +113,16 @@ function StatCell({
   completed?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-gray-100 p-3 dark:border-white/[0.06]">
-      <p className="text-[11px] font-medium text-gray-500 dark:text-zinc-400">{label}</p>
+    <div className="rounded-xl border border-gray-100 p-3">
+      <p className="text-[11px] font-medium text-gray-500">{label}</p>
       <p
         className={`mt-1 text-lg font-bold tabular-nums ${
-          completed ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-zinc-100"
+          completed ? "text-emerald-600" : "text-gray-900"
         }`}
       >
         {value}
       </p>
-      {sub && <p className="mt-0.5 text-[11px] text-gray-400 dark:text-zinc-500">{sub}</p>}
+      {sub && <p className="mt-0.5 text-[11px] text-gray-400">{sub}</p>}
     </div>
   );
 }
@@ -144,15 +144,15 @@ function DayBar({ days }: { days: { date: string; mealsCompleted: number; mealsT
               aria-hidden="true"
               className={`h-6 w-full rounded-md ${
                 !hasData
-                  ? "bg-gray-100 dark:bg-zinc-800"
+                  ? "bg-gray-100"
                   : allMealsDone && d.workoutCompleted
-                  ? "bg-emerald-500 dark:bg-emerald-600"
+                  ? "bg-emerald-500"
                   : d.mealsCompleted > 0 || d.workoutCompleted
-                  ? "bg-emerald-200 dark:bg-emerald-900/50"
-                  : "bg-gray-100 dark:bg-zinc-800"
+                  ? "bg-emerald-200"
+                  : "bg-gray-100"
               }`}
             />
-            <span className="text-[10px] font-medium text-gray-400 dark:text-zinc-500">
+            <span className="text-[10px] font-medium text-gray-400">
               {dayLabel}
             </span>
           </div>

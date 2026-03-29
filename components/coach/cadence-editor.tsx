@@ -112,19 +112,19 @@ export function CadenceEditor({
         return (
             <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white dark:bg-blue-600 dark:text-white">
+                    <span className="inline-flex items-center rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white">
                         {displayPreview}
                     </span>
                     {mode === "client" && !hasOverride && (
                         <span className="text-xs text-zinc-400">(coach default)</span>
                     )}
                     {mode === "client" && hasOverride && (
-                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Custom</span>
+                        <span className="text-xs font-medium text-blue-600">Custom</span>
                     )}
                 </div>
                 <button
                     onClick={() => setEditing(true)}
-                    className="text-xs font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    className="text-xs font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
                 >
                     {mode === "coach" ? "Edit" : "Customize"}
                 </button>
@@ -148,8 +148,8 @@ export function CadenceEditor({
                             onClick={() => setCadenceType(ct.value)}
                             aria-pressed={cadenceType === ct.value}
                             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${cadenceType === ct.value
-                                ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                ? "bg-zinc-900 text-white"
+                                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                                 }`}
                         >
                             {ct.label}
@@ -172,8 +172,8 @@ export function CadenceEditor({
                                     onClick={() => setDayOfWeek(i)}
                                     aria-pressed={dayOfWeek === i}
                                     className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${dayOfWeek === i
-                                        ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                        ? "bg-zinc-900 text-white"
+                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                                         }`}
                                 >
                                     {name}
@@ -196,7 +196,7 @@ export function CadenceEditor({
                                 max={90}
                                 value={intervalDays}
                                 onChange={(e) => setIntervalDays(Math.max(2, parseInt(e.target.value) || 2))}
-                                className="w-16 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                                className="w-16 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-zinc-500"
                             />
                             <span className="text-xs text-zinc-500">days</span>
                         </div>
@@ -216,7 +216,7 @@ export function CadenceEditor({
                                 max={23}
                                 value={intervalHours}
                                 onChange={(e) => setIntervalHours(Math.max(2, parseInt(e.target.value) || 2))}
-                                className="w-16 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                                className="w-16 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-zinc-500"
                             />
                             <span className="text-xs text-zinc-500">hours</span>
                         </div>
@@ -232,7 +232,7 @@ export function CadenceEditor({
                             id="cadence-time"
                             value={timeOfDay}
                             onChange={(e) => setTimeOfDay(e.target.value)}
-                            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500"
                         >
                             {TIME_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>
@@ -245,7 +245,7 @@ export function CadenceEditor({
             </div>
 
             {/* Preview */}
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800/50">
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
                 <p className="text-xs text-zinc-500">Preview</p>
                 <p className="text-sm font-medium">{previewText}</p>
             </div>
@@ -262,7 +262,7 @@ export function CadenceEditor({
                 <button
                     onClick={handleSave}
                     disabled={isPending}
-                    className="rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+                    className="rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
                 >
                     {isPending ? "Saving..." : "Save"}
                 </button>
@@ -270,7 +270,7 @@ export function CadenceEditor({
                     <button
                         onClick={handleReset}
                         disabled={isPending}
-                        className="rounded-lg border border-zinc-300 px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                        className="rounded-lg border border-zinc-300 px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-100 disabled:opacity-50"
                     >
                         Reset to default
                     </button>
@@ -285,7 +285,7 @@ export function CadenceEditor({
                         if (effectiveInitial.type === "every_n_hours") setIntervalHours(effectiveInitial.intervalHours);
                         setEditing(false);
                     }}
-                    className="text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    className="text-xs font-medium text-zinc-500 hover:text-zinc-700"
                 >
                     Cancel
                 </button>

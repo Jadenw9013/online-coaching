@@ -27,7 +27,7 @@ export function WeightSparkline({
           cx={width / 2}
           cy={height / 2}
           r={3}
-          className="fill-zinc-600 dark:fill-zinc-400"
+          className="fill-zinc-600"
         />
       </svg>
     );
@@ -56,7 +56,7 @@ export function WeightSparkline({
         points={polyline}
         fill="none"
         strokeWidth={1.5}
-        className="stroke-zinc-500 dark:stroke-zinc-400"
+        className="stroke-zinc-500"
       />
       {points.map((p, i) => (
         <circle
@@ -64,7 +64,7 @@ export function WeightSparkline({
           cx={p.x}
           cy={p.y}
           r={2.5}
-          className="fill-zinc-600 dark:fill-zinc-400"
+          className="fill-zinc-600"
         />
       ))}
     </svg>

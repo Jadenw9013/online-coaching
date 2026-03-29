@@ -56,7 +56,7 @@ export function NavBar({
               alt=""
               fill
               priority
-              className="object-contain brightness-0 dark:brightness-100"
+              className="object-contain brightness-0"
             />
           </div>
           <span className="hidden font-display text-xs font-bold uppercase tracking-[0.25em] text-zinc-100 sm:inline">

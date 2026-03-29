@@ -32,11 +32,11 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 
 const BLOCK_TYPE_BADGE: Record<BlockType, string> = {
   EXERCISE: "",
-  ACTIVATION: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  INSTRUCTION: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
-  SUPERSET: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-  CARDIO: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  OPTIONAL: "bg-zinc-50 text-zinc-500 dark:bg-zinc-800/60 dark:text-zinc-400",
+  ACTIVATION: "bg-yellow-50 text-yellow-700",
+  INSTRUCTION: "bg-zinc-100 text-zinc-600",
+  SUPERSET: "bg-purple-50 text-purple-700",
+  CARDIO: "bg-green-50 text-green-700",
+  OPTIONAL: "bg-zinc-50 text-zinc-500",
 };
 
 // Cardio is stored as a special day named "__CARDIO__" in the template
@@ -189,7 +189,7 @@ export function TemplateEditor({
   return (
     <div className="space-y-5">
       {/* Template metadata + top save */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+      <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="template-name" className="text-xs font-semibold text-zinc-500">
@@ -201,7 +201,7 @@ export function TemplateEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 4-Day Upper/Lower Split"
-              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700"
+              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -215,7 +215,7 @@ export function TemplateEditor({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Who is this template for?"
-              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700"
+              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             />
           </div>
           {/* Top save bar */}
@@ -229,7 +229,7 @@ export function TemplateEditor({
               type="button"
               onClick={handleSave}
               disabled={saving || deleting}
-              className="rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+              className="rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             >
               {saving ? "Saving…" : "Save template"}
             </button>
@@ -243,7 +243,7 @@ export function TemplateEditor({
           <button
             type="button"
             onClick={() => setShowCardio(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-green-300 py-4 text-sm font-semibold text-green-700 transition-colors hover:border-green-400 hover:bg-green-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-green-800 dark:text-green-400 dark:hover:border-green-700 dark:hover:bg-green-900/20"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-green-300 py-4 text-sm font-semibold text-green-700 transition-colors hover:border-green-400 hover:bg-green-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -251,9 +251,9 @@ export function TemplateEditor({
             Add Cardio
           </button>
         ) : (
-          <div className="rounded-2xl border-2 border-green-200 bg-white dark:border-green-900/60 dark:bg-[#0a1224]">
-            <div className="flex items-center justify-between border-b border-green-100 px-5 py-3 dark:border-green-900/40">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-green-700 dark:text-green-300">
+          <div className="rounded-2xl border-2 border-green-200 bg-white">
+            <div className="flex items-center justify-between border-b border-green-100 px-5 py-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-green-700">
                 Cardio Prescription
               </h3>
               <button
@@ -266,7 +266,7 @@ export function TemplateEditor({
                   setCardioIntensity("");
                   setCardioNotes("");
                 }}
-                className="rounded-lg px-2 py-1 text-[11px] font-semibold text-red-500 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:bg-red-900/20"
+                className="rounded-lg px-2 py-1 text-[11px] font-semibold text-red-500 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 Remove
               </button>
@@ -283,7 +283,7 @@ export function TemplateEditor({
                     value={cardioModality}
                     onChange={(e) => setCardioModality(e.target.value)}
                     placeholder="e.g. Stairmaster, Incline walk"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700"
+                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -296,7 +296,7 @@ export function TemplateEditor({
                     value={cardioFrequency}
                     onChange={(e) => setCardioFrequency(e.target.value)}
                     placeholder="e.g. 5 days/week"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700"
+                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -309,7 +309,7 @@ export function TemplateEditor({
                     value={cardioDuration}
                     onChange={(e) => setCardioDuration(e.target.value)}
                     placeholder="e.g. 30 min"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700"
+                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -322,7 +322,7 @@ export function TemplateEditor({
                     value={cardioIntensity}
                     onChange={(e) => setCardioIntensity(e.target.value)}
                     placeholder="e.g. Level 5, Zone 2"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700"
+                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                   />
                 </div>
               </div>
@@ -336,7 +336,7 @@ export function TemplateEditor({
                   onChange={(e) => setCardioNotes(e.target.value)}
                   placeholder="Any additional cardio instructions"
                   rows={2}
-                  className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700"
+                  className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                 />
               </div>
             </div>
@@ -345,18 +345,18 @@ export function TemplateEditor({
       )}
 
       {/* Training days */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-[#0a1224]">
-        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3 dark:border-zinc-800">
+      <div className="rounded-2xl border border-zinc-200/80 bg-white">
+        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
           <h2 className="text-sm font-semibold">Training Days</h2>
           <div className="flex items-center gap-2">
             {/* Editor / Preview toggle */}
-            <div className="flex rounded-lg border border-zinc-200 p-0.5 text-xs dark:border-zinc-700">
+            <div className="flex rounded-lg border border-zinc-200 p-0.5 text-xs">
               <button
                 type="button"
                 onClick={() => setViewMode("editor")}
                 className={`rounded-md px-2.5 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${viewMode === "editor"
-                  ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:text-zinc-700"
                   }`}
               >
                 Editor
@@ -365,8 +365,8 @@ export function TemplateEditor({
                 type="button"
                 onClick={() => setViewMode("preview")}
                 className={`rounded-md px-2.5 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${viewMode === "preview"
-                  ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:text-zinc-700"
                   }`}
               >
                 Preview
@@ -376,7 +376,7 @@ export function TemplateEditor({
               <button
                 type="button"
                 onClick={addDay}
-                className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 + Add Day
               </button>
@@ -386,7 +386,7 @@ export function TemplateEditor({
 
         {viewMode === "preview" ? (
           /* Preview */
-          <div className="space-y-0 divide-y divide-zinc-100/80 dark:divide-zinc-800/60">
+          <div className="space-y-0 divide-y divide-zinc-100/80">
             {days.length === 0 ? (
               <div className="px-5 py-12 text-center">
                 <p className="text-sm text-zinc-400">No training days yet.</p>
@@ -414,7 +414,7 @@ export function TemplateEditor({
                             )}
                           </div>
                           {block.content && (
-                            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-600">
                               {block.content}
                             </p>
                           )}
@@ -428,14 +428,14 @@ export function TemplateEditor({
           </div>
         ) : (
           /* Editor */
-          <div className="divide-y divide-zinc-100/80 dark:divide-zinc-800/60">
+          <div className="divide-y divide-zinc-100/80">
             {days.length === 0 ? (
               <div className="px-5 py-12 text-center">
                 <p className="text-sm text-zinc-400">No training days yet.</p>
                 <button
                   type="button"
                   onClick={addDay}
-                  className="mt-3 text-sm font-semibold text-zinc-900 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:text-zinc-100"
+                  className="mt-3 text-sm font-semibold text-zinc-900 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                 >
                   Add your first day
                 </button>
@@ -461,7 +461,7 @@ export function TemplateEditor({
           type="button"
           onClick={handleDelete}
           disabled={deleting || saving}
-          className="rounded-xl px-4 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:bg-red-950/30"
+          className="rounded-xl px-4 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           {deleting ? "Deleting…" : "Delete template"}
         </button>
@@ -476,7 +476,7 @@ export function TemplateEditor({
             type="button"
             onClick={handleSave}
             disabled={saving || deleting}
-            className="rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+            className="rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             {saving ? "Saving…" : "Save template"}
           </button>

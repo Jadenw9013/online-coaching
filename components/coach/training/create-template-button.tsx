@@ -30,7 +30,7 @@ export function CreateTemplateButton({
         type="button"
         onClick={handleCreate}
         disabled={creating}
-        className="mt-1 text-sm font-semibold text-zinc-900 underline underline-offset-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:text-zinc-100"
+        className="mt-1 text-sm font-semibold text-zinc-900 underline underline-offset-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
       >
         {creating ? "Creating…" : "Create your first template"}
       </button>
@@ -42,7 +42,7 @@ export function CreateTemplateButton({
       type="button"
       onClick={handleCreate}
       disabled={creating}
-      className="rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+      className="rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
     >
       {creating ? "Creating…" : "New Template"}
     </button>

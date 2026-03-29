@@ -238,7 +238,7 @@ export function PlanExtrasEditor({
     <div className="space-y-3">
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900">
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
@@ -265,7 +265,7 @@ export function PlanExtrasEditor({
       <button
         type="button"
         onClick={() => setPlanDetailsOpen((v) => !v)}
-        className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition-all hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition-all hover:border-zinc-300 hover:bg-zinc-100"
         aria-expanded={planDetailsOpen}
       >
         <div className="flex items-center gap-2.5">
@@ -273,8 +273,8 @@ export function PlanExtrasEditor({
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
             </span>
           <div>
-            <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Plan Details</span>
-            <span className="ml-2 text-xs text-zinc-400 dark:text-zinc-500">
+            <span className="text-sm font-semibold text-zinc-700">Plan Details</span>
+            <span className="ml-2 text-xs text-zinc-400">
               {planDetailsOpen ? "Click to collapse" : "Overrides, supplements, rules & more"}
             </span>
           </div>
@@ -289,7 +289,7 @@ export function PlanExtrasEditor({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 ${planDetailsOpen ? "rotate-180" : ""}`}
+          className={`shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-600 ${planDetailsOpen ? "rotate-180" : ""}`}
           aria-hidden
         >
           <path d="m6 9 6 6 6-6" />
@@ -367,7 +367,7 @@ export function PlanExtrasEditor({
                   const adjustments = override.mealAdjustments ?? [];
 
                   return (
-                    <div key={oi} className={`rounded-xl border p-3 ${color.border} bg-white dark:bg-zinc-900/50`}>
+                    <div key={oi} className={`rounded-xl border p-3 ${color.border} bg-white`}>
                       {/* Header */}
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
@@ -375,12 +375,12 @@ export function PlanExtrasEditor({
                           type="text"
                           value={override.label}
                           onChange={(e) => updateOverride(oi, { label: e.target.value })}
-                          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-bold text-zinc-800 focus:outline-none dark:text-zinc-100"
+                          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-bold text-zinc-800 focus:outline-none"
                           placeholder="Override name"
                         />
                         <div className="flex items-center gap-0.5 order-last w-full sm:order-none sm:w-auto">
                           {OVERRIDE_COLORS.map((c) => (
-                            <button key={c.id} type="button" onClick={() => updateOverride(oi, { color: c.id })} className={`h-4 w-4 rounded-full transition-all ${c.dot} ${override.color === c.id ? "ring-2 ring-offset-1 ring-zinc-400 dark:ring-offset-zinc-900" : "opacity-40 hover:opacity-70"}`} aria-label={`Color: ${c.label}`} />
+                            <button key={c.id} type="button" onClick={() => updateOverride(oi, { color: c.id })} className={`h-4 w-4 rounded-full transition-all ${c.dot} ${override.color === c.id ? "ring-2 ring-offset-1 ring-zinc-400" : "opacity-40 hover:opacity-70"}`} aria-label={`Color: ${c.label}`} />
                           ))}
                         </div>
                         <SectionMenu
@@ -405,7 +405,7 @@ export function PlanExtrasEditor({
                         {WEEKDAYS.map((day) => {
                           const active = override.weekdays?.includes(day);
                           return (
-                            <button key={day} type="button" onClick={() => toggleOverrideDay(oi, day)} className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all ${active ? `${color.bg} ${color.text}` : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-700"}`}>
+                            <button key={day} type="button" onClick={() => toggleOverrideDay(oi, day)} className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all ${active ? `${color.bg} ${color.text}` : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200"}`}>
                               {day.slice(0, 3)}
                             </button>
                           );
@@ -417,39 +417,39 @@ export function PlanExtrasEditor({
                         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Meal Modifications</span>
                         {adjustments.length === 0 && <p className="text-[11px] text-zinc-400">No meal modifications yet</p>}
                         {adjustments.map((adj, ai) => (
-                          <div key={ai} className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-2.5 dark:border-zinc-700/50 dark:bg-zinc-800/30">
+                          <div key={ai} className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-2.5">
                             <div className="flex items-center gap-2">
                               {mealNames && mealNames.length > 0 ? (
-                                <select value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                                <select value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-zinc-400">
                                   {mealNames.map((m) => (<option key={m} value={m}>{m}</option>))}
                                 </select>
                               ) : (
-                                <input type="text" value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200" placeholder="Meal name" />
+                                <input type="text" value={adj.mealName} onChange={(e) => updateMealAdjustment(oi, ai, { mealName: e.target.value })} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs font-bold focus:outline-none" placeholder="Meal name" />
                               )}
-                              <input type="text" value={adj.notes ?? ""} onChange={(e) => updateMealAdjustment(oi, ai, { notes: e.target.value })} className="flex-1 border-0 bg-transparent p-0 text-[11px] text-zinc-400 focus:outline-none dark:text-zinc-500" placeholder="Meal notes" />
-                              <button type="button" onClick={() => removeMealAdjustment(oi, ai)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950">&times;</button>
+                              <input type="text" value={adj.notes ?? ""} onChange={(e) => updateMealAdjustment(oi, ai, { notes: e.target.value })} className="flex-1 border-0 bg-transparent p-0 text-[11px] text-zinc-400 focus:outline-none" placeholder="Meal notes" />
+                              <button type="button" onClick={() => removeMealAdjustment(oi, ai)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 hover:bg-red-50 hover:text-red-500">&times;</button>
                             </div>
                             <div className="mt-2 space-y-1">
                               {adj.changes.map((change, ci) => (
                                 <MealChangeRow key={ci} change={change} onUpdate={(patch) => updateChange(oi, ai, ci, patch)} onRemove={() => removeChange(oi, ai, ci)} />
                               ))}
                             </div>
-                            <button type="button" onClick={() => addChange(oi, ai)} className="mt-1.5 rounded-md border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600">+ Add Change</button>
+                            <button type="button" onClick={() => addChange(oi, ai)} className="mt-1.5 rounded-md border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-400 hover:border-zinc-400 hover:text-zinc-600">+ Add Change</button>
                           </div>
                         ))}
                       </div>
 
-                      <button type="button" onClick={() => addMealAdjustment(oi)} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Meal Modification</button>
+                      <button type="button" onClick={() => addMealAdjustment(oi)} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600">+ Add Meal Modification</button>
 
                       <div className="mt-2">
-                        <input type="text" value={override.notes ?? ""} onChange={(e) => updateOverride(oi, { notes: e.target.value })} className="w-full border-0 bg-transparent p-0 text-[11px] text-zinc-500 focus:outline-none dark:text-zinc-400" placeholder="Override notes (optional)" />
+                        <input type="text" value={override.notes ?? ""} onChange={(e) => updateOverride(oi, { notes: e.target.value })} className="w-full border-0 bg-transparent p-0 text-[11px] text-zinc-500 focus:outline-none" placeholder="Override notes (optional)" />
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <button type="button" onClick={addOverride} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300">+ Add Day Override</button>
+              <button type="button" onClick={addOverride} className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600">+ Add Day Override</button>
             </>
           )}
         </ExtrasCard>
@@ -476,7 +476,7 @@ function SectionMenu({ actions }: { actions: { label: string; onClick: () => voi
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
         aria-label="Section actions"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -489,7 +489,7 @@ function SectionMenu({ actions }: { actions: { label: string; onClick: () => voi
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-7 z-50 min-w-[160px] rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="absolute right-0 top-7 z-50 min-w-[160px] rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
             {actions.map((action, i) => (
               <button
                 key={i}
@@ -497,8 +497,8 @@ function SectionMenu({ actions }: { actions: { label: string; onClick: () => voi
                 onClick={() => { setOpen(false); action.onClick(); }}
                 className={`w-full px-3 py-1.5 text-left text-xs font-medium transition-colors ${
                   action.danger
-                    ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
-                    : "text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    ? "text-red-500 hover:bg-red-50"
+                    : "text-zinc-700 hover:bg-zinc-50"
                 }`}
               >
                 {action.label}
@@ -570,8 +570,8 @@ function TemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-zinc-900">
-        <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+        <h3 className="text-sm font-bold text-zinc-800">
           {mode === "save" ? `Save ${typeLabel} Template` : `Apply ${typeLabel} Template`}
         </h3>
 
@@ -582,14 +582,14 @@ function TemplateModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={`e.g. Default ${typeLabel}`}
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               autoFocus
             />
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={handleSave} disabled={saving || !name.trim()} className="flex-1 rounded-lg bg-zinc-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+              <button type="button" onClick={handleSave} disabled={saving || !name.trim()} className="flex-1 rounded-lg bg-zinc-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50">
                 {saving ? "Saving…" : "Save Template"}
               </button>
-              <button type="button" onClick={onClose} className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">Cancel</button>
+              <button type="button" onClick={onClose} className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50">Cancel</button>
             </div>
           </div>
         )}
@@ -602,21 +602,21 @@ function TemplateModal({
             )}
             <div className="max-h-60 space-y-1 overflow-y-auto">
               {snippets.map((s) => (
-                <div key={s.id} className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                  <button type="button" onClick={() => handleApply(s.id)} className="flex-1 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                <div key={s.id} className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50">
+                  <button type="button" onClick={() => handleApply(s.id)} className="flex-1 text-left text-sm font-medium text-zinc-700">
                     {s.name}
                   </button>
                   <button type="button" onClick={() => handleDelete(s.id)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
                 </div>
               ))}
             </div>
-            <button type="button" onClick={onClose} className="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">Close</button>
+            <button type="button" onClick={onClose} className="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50">Close</button>
           </div>
         )}
 
         {/* Show existing templates in save mode too */}
         {mode === "save" && snippets.length > 0 && (
-          <div className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <div className="mt-3 border-t border-zinc-100 pt-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Existing Templates</p>
             <div className="max-h-32 space-y-0.5 overflow-y-auto">
               {snippets.map((s) => (
@@ -637,19 +637,19 @@ function TemplateModal({
 
 function MealChangeRow({ change, onUpdate, onRemove }: { change: MealChange; onUpdate: (patch: Partial<MealChange>) => void; onRemove: () => void }) {
   return (
-    <div className="group flex items-center gap-1.5 rounded-md bg-white px-2 py-1.5 text-xs dark:bg-zinc-800/80">
-      <select value={change.type} onChange={(e) => onUpdate({ type: e.target.value as MealChange["type"] })} className="shrink-0 rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[10px] font-bold uppercase focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+    <div className="group flex items-center gap-1.5 rounded-md bg-white px-2 py-1.5 text-xs">
+      <select value={change.type} onChange={(e) => onUpdate({ type: e.target.value as MealChange["type"] })} className="shrink-0 rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[10px] font-bold uppercase focus:outline-none">
         {CHANGE_TYPES.map((ct) => (<option key={ct.id} value={ct.id}>{ct.label}</option>))}
       </select>
-      <input type="text" value={change.food} onChange={(e) => onUpdate({ food: e.target.value })} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-medium focus:outline-none dark:text-zinc-200" placeholder={change.type === "add" ? "New food" : "Food to modify"} />
+      <input type="text" value={change.food} onChange={(e) => onUpdate({ food: e.target.value })} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-medium focus:outline-none" placeholder={change.type === "add" ? "New food" : "Food to modify"} />
       {(change.type === "update" || change.type === "add") && (
-        <input type="text" value={change.newPortion ?? ""} onChange={(e) => onUpdate({ newPortion: e.target.value })} className="w-20 border-0 bg-transparent p-0 text-xs text-zinc-500 focus:outline-none dark:text-zinc-400" placeholder="Amount" />
+        <input type="text" value={change.newPortion ?? ""} onChange={(e) => onUpdate({ newPortion: e.target.value })} className="w-20 border-0 bg-transparent p-0 text-xs text-zinc-500 focus:outline-none" placeholder="Amount" />
       )}
       {change.type === "replace" && (
         <>
           <span className="text-[10px] text-zinc-400">→</span>
-          <input type="text" value={change.replacementFood ?? ""} onChange={(e) => onUpdate({ replacementFood: e.target.value })} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-medium focus:outline-none dark:text-zinc-200" placeholder="Replacement" />
-          <input type="text" value={change.replacementPortion ?? ""} onChange={(e) => onUpdate({ replacementPortion: e.target.value })} className="w-20 border-0 bg-transparent p-0 text-xs text-zinc-500 focus:outline-none dark:text-zinc-400" placeholder="Amount" />
+          <input type="text" value={change.replacementFood ?? ""} onChange={(e) => onUpdate({ replacementFood: e.target.value })} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-medium focus:outline-none" placeholder="Replacement" />
+          <input type="text" value={change.replacementPortion ?? ""} onChange={(e) => onUpdate({ replacementPortion: e.target.value })} className="w-20 border-0 bg-transparent p-0 text-xs text-zinc-500 focus:outline-none" placeholder="Amount" />
         </>
       )}
       <button type="button" onClick={onRemove} className="flex h-4 w-4 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
@@ -660,22 +660,22 @@ function MealChangeRow({ change, onUpdate, onRemove }: { change: MealChange; onU
 // ── Shared Sub-components ────────────────────────────────────────────────────
 
 function ExtrasCard({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-xl border border-zinc-200 bg-white p-3.5 dark:border-zinc-700/50 dark:bg-zinc-900/80">{children}</div>;
+  return <div className="rounded-xl border border-zinc-200 bg-white p-3.5">{children}</div>;
 }
 
 function ExtrasCardHeader({ label, count }: { label: string; count?: number }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">{label}</span>
       {count != null && count > 0 && (
-        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{count}</span>
+        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500">{count}</span>
       )}
     </div>
   );
 }
 
 function EditableField({ label, value, onChange, placeholder, multiline }: { label?: string; value: string; onChange: (value: string) => void; placeholder?: string; multiline?: boolean }) {
-  const cls = "w-full rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200";
+  const cls = "w-full rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400";
   return (
     <div>
       {label && <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</span>}

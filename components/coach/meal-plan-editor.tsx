@@ -136,14 +136,14 @@ export function MealPlanEditor({
   // No draft — show create button
   if (!plan) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4">
         <h3 className="mb-3 text-sm font-semibold">Meal Plan</h3>
         <p className="mb-3 text-sm text-zinc-500">No draft for this week.</p>
         <div className="space-y-2">
           <button
             onClick={() => handleCreate(false)}
             disabled={creating}
-            className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+            className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
           >
             {creating ? "Creating..." : "New Draft"}
           </button>
@@ -151,7 +151,7 @@ export function MealPlanEditor({
             <button
               onClick={() => handleCreate(true)}
               disabled={creating}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
             >
               Copy from last published
             </button>
@@ -173,8 +173,8 @@ export function MealPlanEditor({
   );
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+    <div className="rounded-lg border border-zinc-200 bg-white">
+      <div className="border-b border-zinc-200 px-4 py-3">
         <h3 className="text-sm font-semibold">Meal Plan (Draft)</h3>
       </div>
 
@@ -188,7 +188,7 @@ export function MealPlanEditor({
             {plan.items.map((item, i) => (
               <fieldset
                 key={i}
-                className="space-y-1.5 rounded-md border border-zinc-100 p-2 dark:border-zinc-800"
+                className="space-y-1.5 rounded-md border border-zinc-100 p-2"
               >
                 <legend className="sr-only">Meal item {i + 1}</legend>
                 <div className="flex gap-2">
@@ -197,14 +197,14 @@ export function MealPlanEditor({
                     value={item.mealName}
                     onChange={(e) => updateItem(i, "mealName", e.target.value)}
                     aria-label={`Meal name for item ${i + 1}`}
-                    className="w-1/3 rounded-md border border-zinc-300 px-2 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-1/3 rounded-md border border-zinc-300 px-2 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     placeholder="Food name"
                     value={item.foodName}
                     onChange={(e) => updateItem(i, "foodName", e.target.value)}
                     aria-label={`Food name for item ${i + 1}`}
-                    className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <button
                     onClick={() => removeItem(i)}
@@ -220,14 +220,14 @@ export function MealPlanEditor({
                     value={item.quantity}
                     onChange={(e) => updateItem(i, "quantity", e.target.value)}
                     aria-label={`Quantity for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     placeholder="Unit"
                     value={item.unit}
                     onChange={(e) => updateItem(i, "unit", e.target.value)}
                     aria-label={`Unit for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     type="number"
@@ -235,7 +235,7 @@ export function MealPlanEditor({
                     value={item.calories || ""}
                     onChange={(e) => updateItem(i, "calories", e.target.value)}
                     aria-label={`Calories for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     type="number"
@@ -243,7 +243,7 @@ export function MealPlanEditor({
                     value={item.protein || ""}
                     onChange={(e) => updateItem(i, "protein", e.target.value)}
                     aria-label={`Protein for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     type="number"
@@ -251,7 +251,7 @@ export function MealPlanEditor({
                     value={item.carbs || ""}
                     onChange={(e) => updateItem(i, "carbs", e.target.value)}
                     aria-label={`Carbs for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <input
                     type="number"
@@ -259,7 +259,7 @@ export function MealPlanEditor({
                     value={item.fats || ""}
                     onChange={(e) => updateItem(i, "fats", e.target.value)}
                     aria-label={`Fats for item ${i + 1}`}
-                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-md border border-zinc-300 px-1.5 py-1 text-xs transition-colors focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                 </div>
               </fieldset>
@@ -270,7 +270,7 @@ export function MealPlanEditor({
 
       {/* Totals */}
       {plan.items.length > 0 && (
-        <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-800">
+        <div className="border-t border-zinc-200 px-4 py-2">
           <div className="flex gap-4 text-xs text-zinc-500">
             <span>Total: {totals.calories} kcal</span>
             <span>P: {totals.protein}g</span>
@@ -281,10 +281,10 @@ export function MealPlanEditor({
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 border-t border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="flex gap-2 border-t border-zinc-200 p-3">
         <button
           onClick={addItem}
-          className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
         >
           + Add Row
         </button>
@@ -292,7 +292,7 @@ export function MealPlanEditor({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+          className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Draft"}
         </button>

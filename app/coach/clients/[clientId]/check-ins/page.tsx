@@ -34,7 +34,7 @@ export default async function ClientCheckInsPage({
       </div>
 
       {checkIns.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center">
           <p className="text-zinc-500">No check-ins from this client yet.</p>
         </div>
       ) : (
@@ -43,7 +43,7 @@ export default async function ClientCheckInsPage({
             <Link
               key={checkIn.id}
               href={`/coach/clients/${clientId}/check-ins/${checkIn.id}`}
-              className="block rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+              className="block rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -67,7 +67,7 @@ export default async function ClientCheckInsPage({
                 </p>
               </div>
               {checkIn.notes && (
-                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                <p className="mt-2 text-sm text-zinc-600 line-clamp-2">
                   {checkIn.notes}
                 </p>
               )}

@@ -20,7 +20,7 @@ export function MealPlanActions({
   onPublish: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-white/[0.04] bg-[#0a1224] p-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-4 sf-glass-card p-5 lg:flex-row lg:items-center lg:justify-between">
       <div className="space-y-1 block">
         <label className="flex items-center gap-2 cursor-pointer">
           <input

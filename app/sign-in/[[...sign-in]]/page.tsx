@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen bg-zinc-50 dark:bg-[#020815]">
+    <div className="flex min-h-screen bg-zinc-50">
       {/* Left panel — brand / hero (hidden on mobile) */}
       <div className="relative hidden w-1/2 overflow-hidden lg:flex lg:flex-col lg:items-center lg:justify-center" style={{ background: "linear-gradient(135deg, #020815 0%, #071228 50%, #0a1832 100%)" }}>
         {/* Dot mesh pattern */}
@@ -33,10 +33,10 @@ export default function SignInPage() {
             </div>
           </Link>
 
-          <h1 className="font-display text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-gray-900">
             Welcome back.
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-gray-500 dark:text-zinc-400">
+          <p className="mt-3 text-base leading-relaxed text-gray-500">
             Your coaching workspace is waiting. Pick up right where you left off.
           </p>
 
@@ -45,7 +45,7 @@ export default function SignInPage() {
             {["Weekly check-ins", "Meal plans", "Progress tracking", "Coach inbox"].map((f) => (
               <span
                 key={f}
-                className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-500 dark:border-white/[0.06] dark:bg-white/[0.04] dark:text-zinc-400"
+                className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-500"
               >
                 {f}
               </span>
@@ -53,8 +53,8 @@ export default function SignInPage() {
           </div>
 
           {/* Scripture accent */}
-          <div className="mt-16 border-t border-gray-200 pt-8 dark:border-white/[0.06]">
-            <blockquote className="text-sm italic leading-relaxed text-gray-400 dark:text-zinc-500">
+          <div className="mt-16 border-t border-gray-200 pt-8">
+            <blockquote className="text-sm italic leading-relaxed text-gray-400">
               &ldquo;Blessed is the one who perseveres under trial&rdquo;
             </blockquote>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-500">
@@ -81,7 +81,7 @@ export default function SignInPage() {
               className="object-contain"
             />
           </div>
-          <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-zinc-500">
+          <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-gray-400">
             Steadfast
           </span>
         </Link>
@@ -100,7 +100,7 @@ export default function SignInPage() {
               fontFamily: "var(--font-sora), sans-serif",
             },
             elements: {
-              card: "shadow-2xl shadow-blue-500/5 border border-white/[0.06] bg-[#0a1224]",
+              card: "shadow-2xl shadow-blue-500/5 border border-white/[0.06] bg-[rgba(255,255,255,0.03)] backdrop-blur-xl",
               headerTitle: "font-display font-bold",
               headerSubtitle: "text-zinc-400",
               socialButtonsBlockButton:

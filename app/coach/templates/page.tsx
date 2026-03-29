@@ -28,7 +28,7 @@ export default async function TemplatesHubPage() {
       <section className="animate-fade-in">
         <Link
           href="/coach/dashboard"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700"
         >
           &larr; Dashboard
         </Link>

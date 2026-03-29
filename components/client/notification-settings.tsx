@@ -163,7 +163,7 @@ export function NotificationSettings({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <label htmlFor="phoneNumber" className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+        <label htmlFor="phoneNumber" className="text-sm font-medium text-zinc-900">
           Phone Number <span className="text-zinc-400 font-normal">(Optional)</span>
         </label>
         <p id="phone-help" className="text-xs text-zinc-500">
@@ -177,16 +177,16 @@ export function NotificationSettings({
             onChange={(e) => setPhoneNumber(e.target.value)}
             disabled={isPending}
             aria-describedby="phone-help"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 placeholder:text-zinc-400"
             placeholder="+1234567890"
           />
         </div>
-        {error && <p className="text-xs font-medium text-red-600 dark:text-red-400" role="alert">{error}</p>}
+        {error && <p className="text-xs font-medium text-red-600" role="alert">{error}</p>}
       </div>
 
-      <div className="flex items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800 pt-6">
+      <div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-6">
         <div>
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          <p className="text-sm font-medium text-zinc-900">
             Receive SMS Notifications
           </p>
           <p className="text-xs text-zinc-500">
@@ -202,19 +202,19 @@ export function NotificationSettings({
       </div>
 
       {smsOptIn && phoneNumber && (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
           <p className="text-xs leading-relaxed text-zinc-500">
             By enabling SMS notifications you agree to receive transactional text messages from Steadfast
             regarding coaching updates, messages, and reminders. Message frequency varies. Message &amp; data
             rates may apply. Reply STOP to opt out.{" "}
-            <a href="/sms-policy" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
+            <a href="/sms-policy" className="underline hover:text-zinc-700">
               View SMS Policy
             </a>
           </p>
         </div>
       )}
 
-      <div className={`space-y-8 pl-4 border-l-2 ${canToggleEvents ? "border-zinc-200 dark:border-zinc-800" : "border-transparent opacity-40"}`}>
+      <div className={`space-y-8 pl-4 border-l-2 ${canToggleEvents ? "border-zinc-200" : "border-transparent opacity-40"}`}>
 
         {/* CLIENT TOGGLES */}
         {(role === "CLIENT" || role === "BOTH") && (
@@ -225,7 +225,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Meal Plan Updates
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -242,7 +242,7 @@ export function NotificationSettings({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Daily Check-in Reminder
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -256,7 +256,7 @@ export function NotificationSettings({
                   onChange={(e) => setSmsCheckInReminderTime(e.target.value)}
                   disabled={isPending || !canToggleEvents || !smsDailyCheckInReminder}
                   aria-label="Daily Check-in Reminder Time"
-                  className="rounded border border-zinc-200 px-2 py-1 text-sm bg-white dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-100 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                  className="rounded border border-zinc-200 px-2 py-1 text-sm bg-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                 />
                 <Toggle
                   checked={smsDailyCheckInReminder}
@@ -269,7 +269,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Coach Messages
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -286,7 +286,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Check-in Feedback
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -312,7 +312,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Client Check-ins
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -329,7 +329,7 @@ export function NotificationSettings({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Missed Check-in Alerts
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -343,7 +343,7 @@ export function NotificationSettings({
                   onChange={(e) => setSmsMissedCheckInAlertTime(e.target.value)}
                   disabled={isPending || !canToggleEvents || !smsMissedCheckInAlerts}
                   aria-label="Missed Check-in Alert Time"
-                  className="rounded border border-zinc-200 px-2 py-1 text-sm bg-white dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-100 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                  className="rounded border border-zinc-200 px-2 py-1 text-sm bg-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                 />
                 <Toggle
                   checked={smsMissedCheckInAlerts}
@@ -356,7 +356,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Client Messages
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -373,7 +373,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   New Client Signups
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -393,9 +393,9 @@ export function NotificationSettings({
       </div>
 
       {/* ── Email Notifications ──────────────────────────────────────────── */}
-      <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 space-y-6">
+      <div className="border-t border-zinc-200 pt-6 space-y-6">
         <div>
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          <p className="text-sm font-medium text-zinc-900">
             Email Notifications
           </p>
           <p className="text-xs text-zinc-500">
@@ -412,7 +412,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Check-in Reminders
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -429,7 +429,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Meal Plan Updates
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -446,7 +446,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Coach Messages
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -472,7 +472,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Client Check-ins
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -489,7 +489,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Client Messages
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -506,7 +506,7 @@ export function NotificationSettings({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-medium text-zinc-900">
                   Coaching Requests
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -526,13 +526,13 @@ export function NotificationSettings({
 
       <div className="flex items-center justify-between gap-3 pt-4">
         {hasUnsavedChanges && (
-          <p className="text-xs font-medium text-amber-600 dark:text-amber-400" role="status">
+          <p className="text-xs font-medium text-amber-600" role="status">
             Unsaved changes
           </p>
         )}
         <div className="ml-auto flex items-center gap-3">
           {toast && (
-            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400" role="alert">
+            <p className="text-xs font-medium text-emerald-600" role="alert">
               {toast}
             </p>
           )}
@@ -540,7 +540,7 @@ export function NotificationSettings({
             type="button"
             disabled={isPending || !hasUnsavedChanges}
             onClick={handleSave}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110 whitespace-nowrap"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 whitespace-nowrap"
           >
             {isPending ? "Saving..." : "Save Preferences"}
           </button>

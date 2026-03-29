@@ -12,9 +12,9 @@ export default function SmsPolicyPage() {
             <h1 className="text-3xl font-semibold tracking-tight">SMS Policy</h1>
             <p className="mt-2 text-sm text-zinc-500">Last updated: March 4, 2026</p>
 
-            <div className="mt-10 space-y-8 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <div className="mt-10 space-y-8 text-sm leading-relaxed text-zinc-600">
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">1. Opt-In Requirement</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">1. Opt-In Requirement</h2>
                     <p className="mt-2">
                         Steadfast will never send you SMS messages unless you have explicitly opted in. To receive SMS notifications, you must:
                     </p>
@@ -27,7 +27,7 @@ export default function SmsPolicyPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">2. Types of Messages</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">2. Types of Messages</h2>
                     <p className="mt-2">
                         When opted in, you may receive the following types of transactional SMS messages:
                     </p>
@@ -45,21 +45,21 @@ export default function SmsPolicyPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">3. Message Frequency</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">3. Message Frequency</h2>
                     <p className="mt-2">
                         Message frequency varies based on coaching activity and your enabled notification types. You control which notification types are active and can adjust them at any time in your Settings.
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">4. Message & Data Rates</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">4. Message & Data Rates</h2>
                     <p className="mt-2">
                         Message and data rates may apply. Standard carrier messaging charges may be incurred depending on your mobile plan. Steadfast is not responsible for any charges from your wireless provider.
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">5. How to Opt Out</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">5. How to Opt Out</h2>
                     <p className="mt-2">
                         You can stop receiving SMS notifications at any time by:
                     </p>
@@ -71,21 +71,21 @@ export default function SmsPolicyPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">6. Help</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">6. Help</h2>
                     <p className="mt-2">
                         Reply <strong>HELP</strong> to any Steadfast SMS for assistance, or contact us at:{" "}
-                        <a href="mailto:wong.jaden@icloud.com" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">
+                        <a href="mailto:wong.jaden@icloud.com" className="underline hover:text-zinc-900">
                             wong.jaden@icloud.com
                         </a>
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">7. Related Policies</h2>
+                    <h2 className="text-lg font-semibold text-zinc-900">7. Related Policies</h2>
                     <p className="mt-2">
                         For more information on how we handle your data, see our{" "}
-                        <Link href="/privacy" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">Privacy Policy</Link> and{" "}
-                        <Link href="/terms" className="underline hover:text-zinc-900 dark:hover:text-zinc-100">Terms of Service</Link>.
+                        <Link href="/privacy" className="underline hover:text-zinc-900">Privacy Policy</Link> and{" "}
+                        <Link href="/terms" className="underline hover:text-zinc-900">Terms of Service</Link>.
                     </p>
                 </section>
             </div>

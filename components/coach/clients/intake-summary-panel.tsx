@@ -111,7 +111,7 @@ function ManualIntakeForm({ clientId, initial }: { clientId: string; initial: Ma
     };
 
     return (
-        <div className="rounded-xl border border-white/[0.06] bg-[#0a1224]">
+        <div className="sf-glass-card">
             <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
                 <p className="flex items-center gap-1.5 text-xs text-zinc-500">
                     <PencilIcon />
@@ -189,7 +189,7 @@ export function IntakeSummaryPanel({
     // ── IntakePacket mode ─────────────────────────────────────────────────────
     if (formAnswers && sections.length > 0) {
         return (
-            <div className="rounded-xl border border-white/[0.06] bg-[#0a1224]">
+            <div className="sf-glass-card">
                 <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
                     <p className="flex items-center gap-1.5 text-xs text-zinc-500">
                         <PencilIcon />
@@ -273,7 +273,7 @@ export function IntakeSummaryPanel({
     // ── Legacy OnboardingResponse mode ────────────────────────────────────────
     if (legacyResponses && legacyResponses.length > 0) {
         return (
-            <div className="rounded-xl border border-white/[0.06] bg-[#0a1224] divide-y divide-white/[0.04]">
+            <div className="sf-glass-card divide-y divide-white/[0.04]">
                 <div className="px-5 py-3">
                     <p className="text-xs italic text-zinc-600">Collected via legacy intake form</p>
                 </div>

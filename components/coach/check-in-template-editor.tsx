@@ -177,7 +177,7 @@ export function TemplateEditor({
   return (
     <div className="space-y-5">
       {/* Template name */}
-      <div className="rounded-lg border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-lg border border-zinc-200 bg-white px-4 py-4">
         <div>
           <label
             htmlFor="template-name"
@@ -190,13 +190,13 @@ export function TemplateEditor({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+            className="block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           />
         </div>
       </div>
 
       {/* Core fields note */}
-      <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-800/50">
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
         <p className="text-xs font-medium text-zinc-500">
           Core fields (weight, diet compliance, energy level, notes, photos)
           are always included in every check-in. Add custom questions below.
@@ -212,7 +212,7 @@ export function TemplateEditor({
           <button
             type="button"
             onClick={addQuestion}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             + Add Question
           </button>
@@ -221,7 +221,7 @@ export function TemplateEditor({
         {questions.map((q, i) => (
           <div
             key={q.id}
-            className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
+            className="rounded-lg border border-zinc-200 bg-white px-4 py-3"
           >
             <div className="flex items-start gap-3">
               {/* Reorder buttons */}
@@ -230,7 +230,7 @@ export function TemplateEditor({
                   type="button"
                   onClick={() => moveQuestion(i, -1)}
                   disabled={i === 0}
-                  className="text-xs text-zinc-400 hover:text-zinc-600 disabled:opacity-30 dark:hover:text-zinc-300"
+                  className="text-xs text-zinc-400 hover:text-zinc-600 disabled:opacity-30"
                   aria-label="Move up"
                 >
                   &#9650;
@@ -239,7 +239,7 @@ export function TemplateEditor({
                   type="button"
                   onClick={() => moveQuestion(i, 1)}
                   disabled={i === questions.length - 1}
-                  className="text-xs text-zinc-400 hover:text-zinc-600 disabled:opacity-30 dark:hover:text-zinc-300"
+                  className="text-xs text-zinc-400 hover:text-zinc-600 disabled:opacity-30"
                   aria-label="Move down"
                 >
                   &#9660;
@@ -256,7 +256,7 @@ export function TemplateEditor({
                       updateQuestion(q.id, { label: e.target.value })
                     }
                     placeholder="Question label"
-                    className="flex-1 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="flex-1 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                   <select
                     value={q.type}
@@ -266,7 +266,7 @@ export function TemplateEditor({
                         e.target.value as QuestionType,
                       )
                     }
-                    className="rounded-lg border border-zinc-300 px-2 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="rounded-lg border border-zinc-300 px-2 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   >
                     {questionTypeOptions.map((t) => (
                       <option key={t} value={t}>
@@ -293,7 +293,7 @@ export function TemplateEditor({
                           },
                         })
                       }
-                      className="w-14 rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+                      className="w-14 rounded border border-zinc-300 px-2 py-1 text-xs"
                     />
                     <span>Max:</span>
                     <input
@@ -309,7 +309,7 @@ export function TemplateEditor({
                           },
                         })
                       }
-                      className="w-14 rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+                      className="w-14 rounded border border-zinc-300 px-2 py-1 text-xs"
                     />
                   </div>
                 )}
@@ -332,7 +332,7 @@ export function TemplateEditor({
                         })
                       }
                       placeholder="e.g. lbs, inches"
-                      className="w-28 rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+                      className="w-28 rounded border border-zinc-300 px-2 py-1 text-xs"
                     />
                   </div>
                 )}
@@ -347,7 +347,7 @@ export function TemplateEditor({
                           required: e.target.checked,
                         })
                       }
-                      className="h-3.5 w-3.5 rounded border-zinc-300 dark:border-zinc-600"
+                      className="h-3.5 w-3.5 rounded border-zinc-300"
                     />
                     Required
                   </label>
@@ -373,13 +373,13 @@ export function TemplateEditor({
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
         >
           {error}
         </div>
       )}
       {saved && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
+        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           Template saved. Redirecting...
         </div>
       )}
@@ -389,7 +389,7 @@ export function TemplateEditor({
         type="button"
         onClick={handleSave}
         disabled={isPending}
-        className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+        className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
       >
         {isPending ? "Saving..." : templateId ? "Save Changes" : "Create Template"}
       </button>

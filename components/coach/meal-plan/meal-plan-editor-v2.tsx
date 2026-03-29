@@ -280,7 +280,7 @@ export function MealPlanEditorV2({
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{statusLabel}</h3>
           {effectivePlan.source === "published" && isUnsaved && (
-            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
               from published
             </span>
           )}
@@ -289,7 +289,7 @@ export function MealPlanEditorV2({
           <button
             type="button"
             onClick={() => setAiOpen(true)}
-            className="group flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-600 transition-all hover:bg-blue-100 hover:border-blue-400 hover:shadow-sm active:scale-[0.97] sm:px-3 dark:border-blue-500/30 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 dark:hover:border-blue-500/50"
+            className="group flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-600 transition-all hover:bg-blue-100 hover:border-blue-400 hover:shadow-sm active:scale-[0.97] sm:px-3"
             aria-label="Modify plan with AI"
           >
             <svg className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -310,7 +310,7 @@ export function MealPlanEditorV2({
             type="button"
             onClick={undo}
             disabled={!previousMeals}
-            className="rounded-lg px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-zinc-800"
+            className="rounded-lg px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="Undo last change"
           >
             Undo
@@ -320,12 +320,12 @@ export function MealPlanEditorV2({
 
       {/* ── Cardio Prescription Banner (above meals) ── */}
       {cardioPrescription && (cardioPrescription.modality || cardioPrescription.frequency || cardioPrescription.duration || cardioPrescription.intensity) && (
-        <div className="rounded-xl border border-green-500/20 bg-green-500/[0.06] p-4 dark:bg-green-950/30">
+        <div className="rounded-xl border border-green-500/20 bg-green-500/[0.06] p-4">
           <div className="flex items-center gap-2 mb-3">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-500/15 text-base">🏃</span>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-green-500/80">Cardio Prescription</p>
-              <p className="text-sm font-bold text-green-100 dark:text-green-200">Weekly Cardio Protocol</p>
+              <p className="text-sm font-bold text-green-100">Weekly Cardio Protocol</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-2">
@@ -367,7 +367,7 @@ export function MealPlanEditorV2({
             key={`${meal.mealName}-${i}`}
             className={`transition-all duration-700 ${
               highlightedMeals.has(meal.mealName)
-                ? "ring-2 ring-blue-400/50 rounded-lg shadow-md shadow-blue-500/10 dark:ring-blue-500/40"
+                ? "ring-2 ring-blue-400/50 rounded-lg shadow-md shadow-blue-500/10"
                 : ""
             }`}
           >
@@ -400,7 +400,7 @@ export function MealPlanEditorV2({
       </button>
 
       {/* Support Content (Guidelines, Extras, etc) */}
-      <div className="rounded-2xl border border-white/[0.04] bg-[#0a1224] p-6 shadow-xl shadow-black/40">
+      <div className="sf-glass-card p-6 shadow-xl shadow-black/40">
         <label htmlFor="supportContent" className="mb-3 block text-xs font-bold uppercase tracking-wider text-zinc-500">
           Support Content & Guidelines
         </label>

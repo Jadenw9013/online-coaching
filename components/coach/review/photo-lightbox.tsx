@@ -46,7 +46,7 @@ export function PhotoLightbox({ photos }: { photos: Photo[] }) {
           <button
             key={photo.id}
             onClick={() => setActiveIndex(i)}
-            className="group relative aspect-[3/4] overflow-hidden rounded-lg border border-zinc-200 transition-all hover:border-zinc-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-800 dark:hover:border-zinc-600"
+            className="group relative aspect-[3/4] overflow-hidden rounded-lg border border-zinc-200 transition-all hover:border-zinc-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label={`View photo ${i + 1}`}
           >
             <Image

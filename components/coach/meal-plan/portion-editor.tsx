@@ -62,7 +62,7 @@ export function PortionEditor({
           setEditing(true);
         }}
         aria-label={`Edit portion: ${quantity} ${unit}`}
-        className="rounded px-1.5 py-0.5 text-sm tabular-nums transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800"
+        className="rounded px-1.5 py-0.5 text-sm tabular-nums transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
       >
         {quantity}{unit}
       </button>
@@ -84,7 +84,7 @@ export function PortionEditor({
         }}
         onBlur={commit}
         aria-label="Quantity"
-        className="w-14 rounded border border-zinc-300 px-1.5 py-0.5 text-sm tabular-nums focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+        className="w-14 rounded border border-zinc-300 px-1.5 py-0.5 text-sm tabular-nums focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
       />
       <input
         type="text"
@@ -96,7 +96,7 @@ export function PortionEditor({
         }}
         onBlur={commit}
         aria-label="Unit"
-        className="w-14 rounded border border-zinc-300 px-1.5 py-0.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+        className="w-14 rounded border border-zinc-300 px-1.5 py-0.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
       />
       <div className="flex gap-0.5" role="group" aria-label="Quick adjust">
         {isNumeric ? (
@@ -126,7 +126,7 @@ function AdjustChip({
       type="button"
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="rounded border border-zinc-300 px-1.5 py-0.5 text-xs tabular-nums transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:hover:bg-zinc-800"
+      className="rounded border border-zinc-300 px-1.5 py-0.5 text-xs tabular-nums transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
     >
       {label}
     </button>

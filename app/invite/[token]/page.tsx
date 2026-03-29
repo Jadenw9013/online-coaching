@@ -35,7 +35,7 @@ export default async function InviteRedemptionPage({ params }: { params: Promise
         // If there was an error (wrong email, etc.) — show it
         return (
             <div className="flex min-h-screen items-center justify-center bg-[#020815] px-5">
-                <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-[#0a1224] p-8 text-center space-y-4">
+                <div className="w-full max-w-md sf-glass-card !border-red-500/20 p-8 text-center space-y-4">
                     <p className="text-lg font-semibold text-zinc-100">Invite Error</p>
                     <p className="text-sm text-red-400">{result.error}</p>
                     <Link href="/client" className="inline-block text-sm text-zinc-500 hover:text-zinc-300">
@@ -54,7 +54,7 @@ export default async function InviteRedemptionPage({ params }: { params: Promise
         <div className="flex min-h-screen items-center justify-center bg-[#020815] px-5">
             <div className="w-full max-w-md space-y-6">
                 {/* Card */}
-                <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-8 text-center space-y-5">
+                <div className="sf-glass-card p-8 text-center space-y-5">
                     {/* Icon */}
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/15">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">

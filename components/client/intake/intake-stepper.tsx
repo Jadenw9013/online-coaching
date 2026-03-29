@@ -271,7 +271,7 @@ export function IntakeStepper() {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-6 py-12 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="28"
@@ -282,7 +282,7 @@ export function IntakeStepper() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-emerald-600 dark:text-emerald-400"
+            className="text-emerald-600"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -291,13 +291,13 @@ export function IntakeStepper() {
           <h2 className="text-2xl font-semibold tracking-tight">
             All done!
           </h2>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 text-sm text-zinc-500">
             Your coach will review your responses and prepare your plan.
           </p>
         </div>
         <button
           onClick={() => router.push("/client")}
-          className="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+          className="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700"
         >
           Go to Dashboard
         </button>
@@ -318,9 +318,9 @@ export function IntakeStepper() {
           </span>
           <span className="text-xs font-medium text-zinc-400">{progress}%</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
           <div
-            className="h-full rounded-full bg-zinc-900 transition-all duration-300 dark:bg-blue-500"
+            className="h-full rounded-full bg-zinc-900 transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -328,7 +328,7 @@ export function IntakeStepper() {
 
       {/* Question */}
       <div className="min-h-[220px]">
-        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-3xl">
+        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-zinc-900 sm:text-3xl">
           {question.label}
         </h2>
         {question.hint && (
@@ -348,7 +348,7 @@ export function IntakeStepper() {
                 placeholder={question.placeholder}
                 min={question.min}
                 max={question.max}
-                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-4 text-xl font-semibold tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-4 text-xl font-semibold tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 autoFocus
               />
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-400">
@@ -366,8 +366,8 @@ export function IntakeStepper() {
                   onClick={() => saveAndAdvance(opt)}
                   className={`w-full rounded-xl border px-5 py-4 text-left text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 ${
                     inputValue === opt
-                      ? "border-zinc-900 bg-zinc-900 text-white dark:border-blue-500 dark:bg-blue-600 dark:text-white"
-                      : "border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
+                      ? "border-zinc-900 bg-zinc-900 text-white"
+                      : "border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50"
                   }`}
                 >
                   {opt}
@@ -383,7 +383,7 @@ export function IntakeStepper() {
               placeholder={question.placeholder}
               rows={4}
               maxLength={2000}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
               autoFocus
             />
           )}
@@ -391,7 +391,7 @@ export function IntakeStepper() {
 
         {/* Error */}
         {error && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+          <p className="mt-2 text-sm text-red-600" role="alert">
             {error}
           </p>
         )}
@@ -403,7 +403,7 @@ export function IntakeStepper() {
           type="button"
           onClick={() => { if (step > 0) goToStep(step - 1); }}
           disabled={step === 0}
-          className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 disabled:pointer-events-none disabled:opacity-30 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 disabled:pointer-events-none disabled:opacity-30"
           aria-label="Previous question"
         >
           &larr; Back
@@ -415,7 +415,7 @@ export function IntakeStepper() {
             <button
               type="button"
               onClick={() => saveAndAdvance("")}
-              className="text-xs font-medium text-zinc-400 underline underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-300"
+              className="text-xs font-medium text-zinc-400 underline underline-offset-2 hover:text-zinc-600"
             >
               Skip
             </button>
@@ -431,7 +431,7 @@ export function IntakeStepper() {
                 saveAndAdvance();
               }}
               disabled={submitting}
-              className="flex items-center gap-1.5 rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-500"
+              className="flex items-center gap-1.5 rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50"
             >
               {submitting
                 ? "Submitting…"

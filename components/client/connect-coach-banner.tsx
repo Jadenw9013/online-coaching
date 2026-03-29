@@ -7,9 +7,9 @@ import Link from "next/link";
  */
 export function ConnectCoachBanner() {
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-5 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+    <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-5">
       <h2 className="text-base font-semibold">Find a Coach</h2>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-1 text-sm text-zinc-600">
         Browse verified coaches, read reviews, and request coaching directly.
       </p>
       <Link

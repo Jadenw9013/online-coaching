@@ -102,7 +102,7 @@ export function FoodSearchDropdown({
       : undefined;
 
   return (
-    <div className="absolute left-0 top-full z-10 mt-1 w-64 rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="absolute left-0 top-full z-10 mt-1 w-64 rounded-lg border border-zinc-200 bg-white shadow-lg">
       <div className="p-2">
         <input
           ref={inputRef}
@@ -116,7 +116,7 @@ export function FoodSearchDropdown({
           aria-controls={listId}
           aria-activedescendant={activeDescendant}
           aria-autocomplete="list"
-          className="w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+          className="w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         />
       </div>
       <ul
@@ -137,8 +137,8 @@ export function FoodSearchDropdown({
               onClick={() => onSelect(food.name, food.defaultUnit)}
               className={`w-full rounded-md px-2.5 py-1.5 text-left text-sm transition-colors ${
                 i === activeIndex
-                  ? "bg-zinc-100 dark:bg-zinc-800"
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  ? "bg-zinc-100"
+                  : "hover:bg-zinc-100"
               }`}
             >
               {food.name}
@@ -157,10 +157,10 @@ export function FoodSearchDropdown({
             <button
               type="button"
               onClick={handleAddNew}
-              className={`w-full rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-blue-600 transition-colors dark:text-blue-400 ${
+              className={`w-full rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-blue-600 transition-colors ${
                 activeIndex === filtered.length
-                  ? "bg-blue-50 dark:bg-blue-950"
-                  : "hover:bg-blue-50 dark:hover:bg-blue-950"
+                  ? "bg-blue-50"
+                  : "hover:bg-blue-50"
               }`}
             >
               + Add &quot;{query.trim()}&quot;

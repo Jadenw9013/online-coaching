@@ -25,10 +25,10 @@ export default async function IntakePage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
           Getting started
         </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
           Intake Questionnaire
         </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-zinc-500">
           Help your coach understand your starting point. Takes about 2 minutes.
         </p>
       </div>

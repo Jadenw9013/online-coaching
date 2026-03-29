@@ -43,13 +43,13 @@ export default async function CoachingRequestPage({ params }: PageProps) {
     const isAccepting = profile.acceptingClients;
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-[#020815]">
+        <div className="min-h-screen bg-zinc-50">
             {/* ── Nav ── */}
-            <header className="sticky top-0 z-30 border-b border-zinc-200/60 bg-white/90 backdrop-blur-md dark:border-zinc-800/60 dark:bg-[#020815]/90">
+            <header className="sticky top-0 z-30 border-b border-zinc-200/60 bg-white/90 backdrop-blur-md">
                 <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-5 sm:px-8">
                     <Link
                         href={`/coaches/${profile.slug}`}
-                        className="flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                        className="flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
                     >
                         ← Back to Profile
                     </Link>
@@ -65,17 +65,17 @@ export default async function CoachingRequestPage({ params }: PageProps) {
                                 className="object-contain"
                             />
                         </div>
-                        <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Steadfast</span>
+                        <span className="font-semibold tracking-tight text-zinc-900">Steadfast</span>
                     </Link>
                 </div>
             </header>
 
             <main className="mx-auto max-w-2xl px-5 py-12 sm:px-8" id="main-content">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
                         {isAccepting ? "Request Coaching" : "Join Waitlist"}
                     </h1>
-                    <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+                    <p className="mt-2 text-zinc-600">
                         {isAccepting
                             ? `Submit your intake to coach ${profile.user.firstName} ${profile.user.lastName}.`
                             : `${profile.user.firstName} is currently full, but you can join the waitlist to be notified when a spot opens.`
@@ -83,7 +83,7 @@ export default async function CoachingRequestPage({ params }: PageProps) {
                     </p>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm sm:p-8">
                     {isAccepting ? (
                         <RequestForm coachProfileId={profile.id} />
                     ) : (

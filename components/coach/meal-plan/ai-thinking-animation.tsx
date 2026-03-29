@@ -31,7 +31,7 @@ export function AiThinkingAnimation() {
           <span className="relative text-lg">{stage.icon}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+          <p className="text-sm font-semibold text-zinc-800">
             {stage.text}
             <span className="ai-dots ml-0.5">
               <span className="ai-dot">.</span>
@@ -39,7 +39,7 @@ export function AiThinkingAnimation() {
               <span className="ai-dot">.</span>
             </span>
           </p>
-          <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[11px] text-zinc-400">
             This usually takes a few seconds
           </p>
         </div>
@@ -53,7 +53,7 @@ export function AiThinkingAnimation() {
             className={`h-1 flex-1 rounded-full transition-all duration-700 ${
               i <= stageIndex
                 ? "bg-gradient-to-r from-blue-500 to-purple-500"
-                : "bg-zinc-200 dark:bg-zinc-700"
+                : "bg-zinc-200"
             }`}
           />
         ))}
@@ -64,13 +64,13 @@ export function AiThinkingAnimation() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="ai-shimmer overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/50"
+            className="ai-shimmer overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50 p-3"
             style={{ animationDelay: `${i * 200}ms` }}
           >
             <div className="flex items-center gap-3">
-              <div className="h-3 w-16 rounded bg-zinc-200/80 dark:bg-zinc-700" />
-              <div className="h-3 w-24 rounded bg-zinc-200/60 dark:bg-zinc-700/60" />
-              <div className="ml-auto h-3 w-12 rounded bg-zinc-200/40 dark:bg-zinc-700/40" />
+              <div className="h-3 w-16 rounded bg-zinc-200/80" />
+              <div className="h-3 w-24 rounded bg-zinc-200/60" />
+              <div className="ml-auto h-3 w-12 rounded bg-zinc-200/40" />
             </div>
           </div>
         ))}

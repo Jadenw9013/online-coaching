@@ -49,7 +49,7 @@ export const MealCard = memo(function MealCard({
   );
 
   return (
-    <div className="group overflow-hidden rounded-2xl border bg-[#0a1224] border-white/[0.04] transition-all hover:shadow-lg hover:shadow-blue-500/[0.03] hover:border-white/[0.08]">
+    <div className="group overflow-hidden sf-glass-card transition-all hover:shadow-lg hover:shadow-blue-500/[0.03] hover:border-white/[0.08]">
       {/* Meal header */}
       <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-3.5">
         {editingName ? (
@@ -71,7 +71,7 @@ export const MealCard = memo(function MealCard({
                 setEditingName(false);
               }
             }}
-            className="rounded border border-zinc-300 px-2 py-0.5 text-sm font-semibold focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+            className="rounded border border-zinc-300 px-2 py-0.5 text-sm font-semibold focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-500"
           />
         ) : (
           <button

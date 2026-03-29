@@ -17,7 +17,7 @@ export default async function DocumentsPage() {
       <section className="animate-fade-in">
         <Link
           href="/coach/templates/onboarding"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700"
         >
           &larr; Onboarding
         </Link>
@@ -26,7 +26,7 @@ export default async function DocumentsPage() {
       </section>
 
       <section className="animate-fade-in" style={{ animationDelay: "80ms" }}>
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4 dark:border-white/[0.06] dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-4">
           <DocumentLibrary initialDocuments={coachDocuments} />
         </div>
       </section>

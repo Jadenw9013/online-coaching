@@ -230,7 +230,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
 
             {/* Dynamic answers display */}
             {answerSections.map((section) => (
-                <div key={section.sectionId} className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 space-y-4">
+                <div key={section.sectionId} className="sf-glass-card p-5 space-y-4">
                     <h2 className="text-lg font-bold text-zinc-200">{section.sectionTitle}</h2>
                     <div className="space-y-3">
                         {section.answers.map((a) => (
@@ -244,7 +244,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
             ))}
 
             {/* Agreement */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 space-y-4">
+            <div className="sf-glass-card p-5 space-y-4">
                 <h2 className="text-lg font-bold text-zinc-200">Agreement</h2>
                 <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-4">
                     <p className={`${textSize} text-zinc-300 leading-relaxed`}>
@@ -262,7 +262,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
             </div>
 
             {/* Signature */}
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 space-y-5">
+            <div className="sf-glass-card p-5 space-y-5">
                 <h2 className="text-lg font-bold text-zinc-200">Signature</h2>
 
                 {/* Tabs */}

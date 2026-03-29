@@ -47,17 +47,17 @@ export default async function WriteReviewPage({ params }: PageProps) {
     return (
         <div className="mx-auto max-w-xl px-5 py-12">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
                     {existing ? "Edit Your Review" : "Write a Review"}
                 </h1>
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="mt-2 text-sm text-zinc-500">
                     {existing
                         ? `Update your review for ${coachName}.`
                         : `Share your experience working with ${coachName}. Your review will be visible on their public profile.`}
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
+            <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm">
                 <TestimonialForm
                     coachId={coachId}
                     coachName={coachName}

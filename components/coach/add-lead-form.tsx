@@ -73,7 +73,7 @@ export function AddLeadForm({ onClose }: { onClose: () => void }) {
     const errorBorder = "border-red-500/50 focus:border-red-500/50";
 
     return (
-        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6 space-y-4 animate-fade-in">
+        <div className="sf-glass-card p-6 space-y-4 animate-fade-in">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Add Lead Manually</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

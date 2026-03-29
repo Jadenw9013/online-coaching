@@ -19,12 +19,12 @@ export function MacroToggle({
         <div
           className={`h-5 w-9 rounded-full transition-colors ${
             enabled
-              ? "bg-zinc-900 dark:bg-zinc-100"
-              : "bg-zinc-300 dark:bg-zinc-600"
+              ? "bg-zinc-900"
+              : "bg-zinc-300"
           }`}
         />
         <div
-          className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform dark:bg-zinc-900 ${
+          className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
             enabled ? "translate-x-4" : ""
           }`}
         />

@@ -114,7 +114,7 @@ export function ProfilePhotoUpload({
                         className="object-cover"
                     />
                 ) : (
-                    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-200 to-zinc-300 ${textSize} font-bold text-zinc-600 dark:from-zinc-700 dark:to-zinc-800 dark:text-zinc-300`}>
+                    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-800 ${textSize} font-bold text-zinc-300`}>
                         {initials}
                     </div>
                 )}
@@ -140,7 +140,7 @@ export function ProfilePhotoUpload({
                 <button
                     type="button"
                     onClick={handleRemove}
-                    className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-zinc-100 text-zinc-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:border-[#020815] dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-zinc-100 text-zinc-500 transition-colors hover:bg-red-50 hover:text-red-600"
                     aria-label="Remove profile photo"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -150,7 +150,7 @@ export function ProfilePhotoUpload({
             )}
 
             {error && (
-                <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>
+                <p className="mt-2 text-xs text-red-600">{error}</p>
             )}
         </div>
     );

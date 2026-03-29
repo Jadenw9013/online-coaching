@@ -165,8 +165,8 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
             {message && (
                 <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
                     message.type === "success"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-                        : "bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+                        ? "bg-emerald-500/10 text-emerald-600"
+                        : "bg-red-500/10 text-red-600"
                 }`}>
                     {message.text}
                 </div>
@@ -174,7 +174,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
 
             {/* Star Rating */}
             <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-2 block text-sm font-medium text-zinc-700">
                     Rating
                 </label>
                 <div className="flex gap-1">
@@ -199,7 +199,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                                 className={`transition-colors ${
                                     (hoverRating || rating) >= star
                                         ? "text-amber-400"
-                                        : "text-zinc-300 dark:text-zinc-600"
+                                        : "text-zinc-300"
                                 }`}
                             >
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -211,24 +211,24 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
 
             {/* Review Text — optional */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700">
                     Your Review <span className="font-normal text-zinc-400">(optional)</span>
                 </label>
                 <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     rows={5}
-                    className="block w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-[#020815] dark:text-zinc-100"
+                    className="block w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                     placeholder={`Share your experience working with ${coachName}... (leave blank to submit a star-only rating)`}
                     maxLength={2000}
                 />
-                <p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                <p className="mt-1.5 text-xs text-zinc-400">
                     {reviewText.length}/2000 characters
                 </p>
             </div>
 
             {/* Anonymous toggle */}
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-800/50">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 transition-colors hover:border-zinc-300">
                 <div className="relative mt-0.5 shrink-0">
                     <input
                         type="checkbox"
@@ -237,7 +237,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                         onChange={(e) => setAnonymous(e.target.checked)}
                         id="anonymous-toggle"
                     />
-                    <div className="h-5 w-5 rounded border-2 border-zinc-300 bg-white transition-colors peer-checked:border-blue-500 peer-checked:bg-blue-500 dark:border-zinc-600 dark:bg-zinc-700">
+                    <div className="h-5 w-5 rounded border-2 border-zinc-300 bg-white transition-colors peer-checked:border-blue-500 peer-checked:bg-blue-500">
                         {anonymous && (
                             <svg className="ml-0.5 mt-0.5 h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
@@ -246,14 +246,14 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                     </div>
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Submit anonymously</p>
-                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Your name won&apos;t appear on the coach&apos;s public profile. Your review is still verified.</p>
+                    <p className="text-sm font-medium text-zinc-700">Submit anonymously</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">Your name won&apos;t appear on the coach&apos;s public profile. Your review is still verified.</p>
                 </div>
             </label>
 
             {/* Image Upload */}
             <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-2 block text-sm font-medium text-zinc-700">
                     Photos <span className="font-normal text-zinc-400">(optional, up to 4)</span>
                 </label>
 
@@ -261,7 +261,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                 {images.length > 0 && (
                     <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {images.map((img, i) => (
-                            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
+                            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
                                 {img.previewUrl ? (
                                     <Image
                                         src={img.previewUrl}
@@ -300,8 +300,8 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                         />
                         <label
                             htmlFor="testimonial-images"
-                            className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 px-4 py-3 text-sm font-medium transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:bg-zinc-800/50 ${
-                                isUploading ? "opacity-50 pointer-events-none" : "text-zinc-500 dark:text-zinc-400"
+                            className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 px-4 py-3 text-sm font-medium transition-colors hover:border-zinc-400 hover:bg-zinc-50 ${
+                                isUploading ? "opacity-50 pointer-events-none" : "text-zinc-500"
                             }`}
                         >
                             {isUploading ? (
@@ -316,7 +316,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                                 </>
                             )}
                         </label>
-                        <p className="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                        <p className="mt-1.5 text-[11px] text-zinc-400">
                             JPEG, PNG, or WebP · Max 5MB each
                         </p>
                     </div>
@@ -324,18 +324,18 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
             </div>
 
             {/* Submit */}
-            <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-5 dark:border-zinc-800">
+            <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-5">
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                    className="rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={isSubmitting || rating === 0}
-                    className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                    className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
                 >
                     {isSubmitting ? "Submitting..." : isEditing ? "Update Review" : "Submit Review"}
                 </button>

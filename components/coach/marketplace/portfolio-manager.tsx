@@ -223,7 +223,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
         return (
             <div className="px-5 py-4">
                 {error && (
-                    <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                    <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
                         {error}
                     </div>
                 )}
@@ -241,7 +241,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                     }}
                     placeholder="What do you want to share?"
                     rows={1}
-                    className="w-full resize-none border-0 bg-transparent text-[15px] leading-relaxed text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-0 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                    className="w-full resize-none border-0 bg-transparent text-[15px] leading-relaxed text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-0"
                     style={{ minHeight: "44px" }}
                 />
 
@@ -257,7 +257,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                         }}
                         placeholder="Add more detail..."
                         rows={1}
-                        className="mt-1 w-full resize-none border-0 bg-transparent text-sm leading-relaxed text-zinc-500 placeholder:text-zinc-400 focus:outline-none focus:ring-0 dark:text-zinc-400 dark:placeholder:text-zinc-600"
+                        className="mt-1 w-full resize-none border-0 bg-transparent text-sm leading-relaxed text-zinc-500 placeholder:text-zinc-400 focus:outline-none focus:ring-0"
                         style={{ minHeight: "32px" }}
                     />
                 )}
@@ -296,12 +296,12 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                 {/* Tag pill */}
                 {form.category && (
                     <div className="mt-3 flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-600">
                             #{form.category}
                             <button
                                 type="button"
                                 onClick={() => setForm((f) => ({ ...f, category: "" }))}
-                                className="ml-0.5 text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-300"
+                                className="ml-0.5 text-blue-400 hover:text-blue-600"
                                 aria-label="Remove tag"
                             >
                                 ×
@@ -311,14 +311,14 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                 )}
 
                 {/* ── Bottom toolbar ── */}
-                <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3">
                     <div className="flex items-center gap-1">
                         {/* Image button */}
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploading}
-                            className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-50 dark:hover:bg-blue-500/10 dark:hover:text-blue-400"
+                            className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-50"
                             aria-label="Add image"
                         >
                             {uploading ? (
@@ -337,8 +337,8 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                 type="button"
                                 onClick={() => setShowTagPicker(!showTagPicker)}
                                 className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${showTagPicker
-                                    ? "bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400"
-                                    : "text-zinc-400 hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-blue-500/10 dark:hover:text-blue-400"
+                                    ? "bg-blue-50 text-blue-500"
+                                    : "text-zinc-400 hover:bg-blue-50 hover:text-blue-500"
                                     }`}
                                 aria-label="Add tag"
                             >
@@ -346,7 +346,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                             </button>
 
                             {showTagPicker && (
-                                <div className="absolute left-0 top-full z-10 mt-1 flex flex-wrap gap-1.5 rounded-xl border border-zinc-200/80 bg-white p-2.5 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+                                <div className="absolute left-0 top-full z-10 mt-1 flex flex-wrap gap-1.5 rounded-xl border border-zinc-200/80 bg-white p-2.5 shadow-lg">
                                     {TAG_SUGGESTIONS.map((tag) => (
                                         <button
                                             key={tag}
@@ -355,7 +355,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                                 setForm((f) => ({ ...f, category: tag }));
                                                 setShowTagPicker(false);
                                             }}
-                                            className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-blue-100 hover:text-blue-600 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-blue-500/20 dark:hover:text-blue-400"
+                                            className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-blue-100 hover:text-blue-600"
                                         >
                                             {tag}
                                         </button>
@@ -363,7 +363,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                     <input
                                         type="text"
                                         placeholder="Custom..."
-                                        className="w-20 rounded-full border-0 bg-transparent px-2.5 py-1 text-xs text-zinc-600 placeholder:text-zinc-400 focus:outline-none dark:text-zinc-300"
+                                        className="w-20 rounded-full border-0 bg-transparent px-2.5 py-1 text-xs text-zinc-600 placeholder:text-zinc-400 focus:outline-none"
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter" && e.currentTarget.value.trim()) {
                                                 setForm((f) => ({ ...f, category: e.currentTarget.value.trim() }));
@@ -381,7 +381,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                         {charCount > 0 && (
                             <div className="relative h-6 w-6">
                                 <svg className="h-6 w-6 -rotate-90" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-200 dark:text-zinc-700" />
+                                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-200" />
                                     <circle
                                         cx="12" cy="12" r="10" fill="none"
                                         stroke="currentColor" strokeWidth="2"
@@ -396,7 +396,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                         <button
                             type="button"
                             onClick={cancelCompose}
-                            className="text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+                            className="text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-600"
                         >
                             Cancel
                         </button>
@@ -405,7 +405,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                             type="button"
                             onClick={handlePost}
                             disabled={saving || !form.title.trim() || charCount > MAX_CHARS}
-                            className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-bold text-white transition-all hover:bg-zinc-700 disabled:opacity-40 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+                            className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-bold text-white transition-all hover:bg-zinc-700 disabled:opacity-40"
                         >
                             {saving ? "Posting..." : editingId ? "Update" : "Post"}
                         </button>
@@ -416,15 +416,15 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
     }
 
     return (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-zinc-800/80 dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Posts</h3>
+                <h3 className="text-sm font-semibold text-zinc-900">Posts</h3>
                 {!showCompose && items.length > 0 && (
                     <button
                         type="button"
                         onClick={openCompose}
-                        className="rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-zinc-700 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+                        className="rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-zinc-700"
                     >
                         Post
                     </button>
@@ -433,14 +433,14 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
 
             {/* Compose area */}
             {showCompose && !editingId && (
-                <div className="border-b border-zinc-100 dark:border-zinc-800">
+                <div className="border-b border-zinc-100">
                     {renderCompose()}
                 </div>
             )}
 
             {/* Post feed */}
             {items.length > 0 ? (
-                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                <div className="divide-y divide-zinc-100">
                     {items.map((item) => (
                         <div key={item.id}>
                             {editingId === item.id ? (
@@ -452,11 +452,11 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                         <div className="flex-1 min-w-0">
                                             {/* Header row */}
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-100">
+                                                <span className="text-[13px] font-semibold text-zinc-900">
                                                     {item.title}
                                                 </span>
                                                 {item.category && (
-                                                    <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                                    <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600">
                                                         #{item.category}
                                                     </span>
                                                 )}
@@ -469,7 +469,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                                     <button
                                                         type="button"
                                                         onClick={() => startEdit(item)}
-                                                        className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                                                        className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
                                                         aria-label="Edit"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
@@ -478,7 +478,7 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                                                         type="button"
                                                         onClick={() => handleDelete(item.id)}
                                                         disabled={saving}
-                                                        className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 disabled:opacity-50"
+                                                        className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
                                                         aria-label="Delete"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
@@ -488,14 +488,14 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
 
                                             {/* Body text */}
                                             {item.description && (
-                                                <p className="mt-1 text-[13px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                                                <p className="mt-1 text-[13px] leading-relaxed text-zinc-600">
                                                     {item.description}
                                                 </p>
                                             )}
 
                                             {/* Post media */}
                                             {item.mediaUrl && (
-                                                <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-200/60 dark:border-zinc-700/60">
+                                                <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-200/60">
                                                     {item.mediaType === "video" ? (
                                                         <video
                                                             src={item.mediaUrl}
@@ -528,13 +528,13 @@ export function PortfolioManager({ items: initialItems }: { items: PortfolioItem
                     <button
                         type="button"
                         onClick={openCompose}
-                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-zinc-50"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                            <p className="text-sm font-medium text-zinc-500">
                                 Share a transformation, tip, or milestone...
                             </p>
                         </div>

@@ -89,8 +89,8 @@ export function CoachScheduleSettings({
                                 key={day.index}
                                 onClick={() => toggleDay(day.index)}
                                 className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${isActive
-                                        ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                                        ? "bg-zinc-900 text-white"
+                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                                     }`}
                                 aria-pressed={isActive}
                                 type="button"
@@ -117,7 +117,7 @@ export function CoachScheduleSettings({
                         setTimezone(e.target.value);
                         setFeedback(null);
                     }}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm transition-colors focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm transition-colors focus:border-zinc-400 focus:outline-none"
                 >
                     {COMMON_TIMEZONES.map((tz) => (
                         <option key={tz} value={tz}>
@@ -132,7 +132,7 @@ export function CoachScheduleSettings({
                 <button
                     onClick={handleSave}
                     disabled={saving || !hasChanges}
-                    className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-zinc-700 disabled:opacity-50 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+                    className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-zinc-700 disabled:opacity-50"
                 >
                     {saving ? "Saving..." : "Save Schedule"}
                 </button>
@@ -140,8 +140,8 @@ export function CoachScheduleSettings({
                 {feedback && (
                     <p
                         className={`text-xs font-medium ${feedback.success
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-red-600 dark:text-red-400"
+                                ? "text-emerald-600"
+                                : "text-red-600"
                             }`}
                     >
                         {feedback.message}

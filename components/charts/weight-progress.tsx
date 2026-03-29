@@ -77,8 +77,8 @@ export function WeightProgress({
               onClick={() => handleRangeChange(r.key)}
               className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                 range === r.key
-                  ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
-                  : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:bg-zinc-100"
               }`}
             >
               {r.label}

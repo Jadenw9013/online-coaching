@@ -13,9 +13,9 @@ type ExerciseProgressResult = {
 export function ExerciseProgress({ results }: { results: ExerciseProgressResult[] }) {
   if (results.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center dark:border-zinc-700 dark:bg-[#0a1224]">
+      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center">
         <p className="text-sm font-medium text-zinc-500">No exercise results yet</p>
-        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+        <p className="mt-1 text-xs text-zinc-400">
           Results will appear here once the client logs their workouts.
         </p>
       </div>
@@ -43,11 +43,11 @@ export function ExerciseProgress({ results }: { results: ExerciseProgressResult[
       {Array.from(grouped.values()).map((group) => (
         <div
           key={`${group.programDay}::${group.exerciseName}`}
-          className="rounded-xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-[#0a1224]"
+          className="rounded-xl border border-zinc-200 bg-white px-4 py-3"
         >
           <div className="mb-2">
             <span className="text-sm font-semibold">{group.exerciseName}</span>
-            <span className="ml-2 text-[11px] text-zinc-400 dark:text-zinc-500">{group.programDay}</span>
+            <span className="ml-2 text-[11px] text-zinc-400">{group.programDay}</span>
           </div>
           <div className="space-y-1">
             {group.entries.map((entry) => {
@@ -60,10 +60,10 @@ export function ExerciseProgress({ results }: { results: ExerciseProgressResult[
                   key={entry.weekOf.toISOString()}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="text-xs text-zinc-400">
                     Week of {weekLabel}
                   </span>
-                  <span className="font-medium tabular-nums text-zinc-700 dark:text-zinc-300">
+                  <span className="font-medium tabular-nums text-zinc-700">
                     {entry.weight} × {entry.reps}
                   </span>
                 </div>

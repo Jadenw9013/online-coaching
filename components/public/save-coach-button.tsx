@@ -38,8 +38,8 @@ export function SaveCoachButton({ coachProfileId, initialSaved, size = "sm" }: S
                     : "h-8 w-8"
             } ${
                 saved
-                    ? "bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
-                    : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200 hover:text-red-500 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-red-400"
+                    ? "bg-red-50 text-red-500 hover:bg-red-100"
+                    : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200 hover:text-red-500"
             }`}
         >
             <svg

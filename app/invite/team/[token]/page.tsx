@@ -65,7 +65,7 @@ function ErrorCard({
 }) {
   return (
     <PageShell>
-      <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-8 text-center space-y-3">
+      <div className="sf-glass-card p-8 text-center space-y-3">
         <ErrorIcon />
         <h1 className="font-display text-xl font-bold text-zinc-100">{headline}</h1>
         <p className="text-sm text-zinc-400 leading-relaxed">{body}</p>
@@ -150,7 +150,7 @@ export default async function TeamInvitePage({
   if (!dbUser) {
     return (
       <PageShell>
-        <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-8 text-center space-y-5">
+        <div className="sf-glass-card p-8 text-center space-y-5">
           <TeamIcon />
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">You&apos;re invited to join</p>
@@ -197,7 +197,7 @@ export default async function TeamInvitePage({
   // ── Valid — show join CTA ──
   return (
     <PageShell>
-      <div className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-8 text-center space-y-6">
+      <div className="sf-glass-card p-8 text-center space-y-6">
         {/* Team logo / badge */}
         <div className="space-y-4">
           <TeamIcon />

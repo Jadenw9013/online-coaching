@@ -31,18 +31,18 @@ export function DismissibleIntakeBanner({ clientId }: { clientId: string }) {
   if (!hydrated || dismissed) return null;
 
   return (
-    <div className="relative rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8 dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="relative rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8">
       <button
         type="button"
         onClick={handleDismiss}
-        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
         aria-label="Dismiss"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6 6 18" /><path d="m6 6 12 12" />
         </svg>
       </button>
-      <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+      <p className="text-sm font-semibold text-zinc-700">
         No starting data yet
       </p>
       <p className="mt-1 text-sm text-zinc-500">

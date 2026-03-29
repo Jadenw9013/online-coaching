@@ -96,29 +96,29 @@ export default async function CoachMarketplaceProfilePage() {
                     {displayName}
                 </h1>
                 {profile?.headline && (
-                    <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">
+                    <p className="mt-1 text-base text-zinc-500">
                         {profile.headline}
                     </p>
                 )}
 
                 {/* Inline trust signals */}
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-zinc-500 dark:text-zinc-400 sm:justify-start">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-zinc-500 sm:justify-start">
                     {/* Status badges */}
                     {profile?.isPublished ? (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Live
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-zinc-400 dark:text-zinc-500">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-zinc-400">
                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
                             Draft
                         </span>
                     )}
                     {profile?.isPublished && (
                         <span className={`inline-flex items-center gap-1.5 font-medium ${profile.acceptingClients
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-amber-600 dark:text-amber-400"
+                            ? "text-blue-600"
+                            : "text-amber-600"
                             }`}>
                             {profile.acceptingClients ? "Accepting Clients" : "Currently Full"}
                         </span>
@@ -128,7 +128,7 @@ export default async function CoachMarketplaceProfilePage() {
                     {stats && stats.reviews.count > 0 && (
                         <span className="inline-flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{stats.reviews.averageRating.toFixed(1)}</span>
+                            <span className="font-semibold text-zinc-900">{stats.reviews.averageRating.toFixed(1)}</span>
                             <span>({stats.reviews.count})</span>
                         </span>
                     )}
@@ -199,15 +199,15 @@ export default async function CoachMarketplaceProfilePage() {
                     <h2 className="text-lg font-bold text-white">About</h2>
 
                     {profile.bio && (
-                        <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                        <p className="mt-3 text-sm leading-relaxed text-zinc-600 whitespace-pre-wrap">
                             {profile.bio}
                         </p>
                     )}
 
                     {profile.experience && (
                         <div className="mt-5">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Experience</p>
-                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Experience</p>
+                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 whitespace-pre-wrap">
                                 {profile.experience}
                             </p>
                         </div>
@@ -215,8 +215,8 @@ export default async function CoachMarketplaceProfilePage() {
 
                     {profile.certifications && (
                         <div className="mt-5">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Certifications</p>
-                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Certifications</p>
+                            <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 whitespace-pre-wrap">
                                 {profile.certifications}
                             </p>
                         </div>

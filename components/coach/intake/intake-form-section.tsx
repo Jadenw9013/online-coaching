@@ -129,7 +129,7 @@ function SortableSectionCard({
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="rounded-2xl border border-white/[0.06] bg-[#0a1224] p-5 space-y-4">
+        <div ref={setNodeRef} style={style} className="sf-glass-card p-5 space-y-4">
             <div className="flex items-start gap-3">
                 <button {...attributes} {...listeners} className="mt-1 cursor-grab text-zinc-600 hover:text-zinc-400 min-h-[48px] min-w-[24px] flex items-center" aria-label="Drag to reorder section" type="button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5" /><circle cx="15" cy="6" r="1.5" /><circle cx="9" cy="12" r="1.5" /><circle cx="15" cy="12" r="1.5" /><circle cx="9" cy="18" r="1.5" /><circle cx="15" cy="18" r="1.5" /></svg>

@@ -11,10 +11,10 @@ function ConfidenceBadge({ value }: { value?: number }) {
   const pct = Math.round(value * 100);
   const color =
     pct >= 80
-      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+      ? "bg-emerald-500/10 text-emerald-600"
       : pct >= 50
-        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-        : "bg-red-500/10 text-red-600 dark:text-red-400";
+        ? "bg-amber-500/10 text-amber-600"
+        : "bg-red-500/10 text-red-600";
   return (
     <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${color}`}>
       {pct}% confident
@@ -42,10 +42,10 @@ function ReviewSection({
 
   return (
     <div
-      className={`rounded-xl border bg-white dark:bg-zinc-900 ${
+      className={`rounded-xl border bg-white ${
         isLowConfidence
-          ? "border-amber-300 dark:border-amber-700"
-          : "border-zinc-200 dark:border-zinc-800"
+          ? "border-amber-300"
+          : "border-zinc-200"
       }`}
     >
       <button
@@ -60,22 +60,22 @@ function ReviewSection({
         >
           ▶
         </span>
-        <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
           {title}
         </span>
         {count != null && (
-          <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold text-zinc-500 dark:bg-zinc-800">
+          <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold text-zinc-500">
             {count}
           </span>
         )}
         <ConfidenceBadge value={confidence} />
         {isLowConfidence && (
-          <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+          <span className="text-[10px] font-medium text-amber-600">
             Needs review
           </span>
         )}
       </button>
-      {open && <div className="border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">{children}</div>}
+      {open && <div className="border-t border-zinc-100 px-4 py-3">{children}</div>}
     </div>
   );
 }
@@ -269,7 +269,7 @@ export function DraftReview({
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100"
         >
           Back
         </button>
@@ -289,16 +289,16 @@ export function DraftReview({
 
       {/* Extraction summary */}
       <div className="flex flex-wrap gap-2">
-        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${plan.meals.length > 0 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800'}`}>
+        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${plan.meals.length > 0 ? 'bg-emerald-500/10 text-emerald-700' : 'bg-zinc-100 text-zinc-400'}`}>
           {plan.meals.length} meal{plan.meals.length !== 1 ? 's' : ''}
         </span>
         {!!plan.supportContent && (
-          <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:text-purple-400">
+          <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-700">
             Guidance Included
           </span>
         )}
         {(plan.dayOverrides?.length ?? 0) > 0 && (
-          <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400">
+          <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-700">
             {plan.dayOverrides!.length} override{plan.dayOverrides!.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -306,7 +306,7 @@ export function DraftReview({
 
       {/* No-meals info banner */}
       {plan.meals.length === 0 && hasExtrasContent && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400">
+        <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 text-sm text-blue-700">
           <p className="font-medium">No meals detected</p>
           <p className="mt-0.5 text-xs opacity-80">
             This document appears to contain supplements, rules, or instructions only. You can still import it — the extras will be attached to the meal plan.
@@ -319,7 +319,7 @@ export function DraftReview({
         <button
           type="button"
           onClick={() => setShowExtracted(!showExtracted)}
-          className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:text-zinc-300"
+          className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           aria-expanded={showExtracted}
         >
           <span className="inline-block transition-transform" style={{ transform: showExtracted ? "rotate(90deg)" : "rotate(0deg)" }}>
@@ -328,7 +328,7 @@ export function DraftReview({
           {showExtracted ? "Hide" : "Show"} extracted text
         </button>
         {showExtracted && (
-          <pre className="mt-2 max-h-60 overflow-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-xs leading-relaxed text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <pre className="mt-2 max-h-60 overflow-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-xs leading-relaxed text-zinc-600">
             {extractedText || "No extracted text"}
           </pre>
         )}
@@ -344,7 +344,7 @@ export function DraftReview({
           type="text"
           value={plan.title}
           onChange={(e) => setPlan({ ...plan, title: e.target.value })}
-          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
         />
       </div>
 
@@ -359,7 +359,7 @@ export function DraftReview({
                   type="text"
                   value={plan.metadata.phase}
                   onChange={(e) => setPlan({ ...plan, metadata: { ...plan.metadata, phase: e.target.value } })}
-                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm"
                 />
               </div>
             )}
@@ -370,7 +370,7 @@ export function DraftReview({
                   type="text"
                   value={plan.metadata.bodyweight}
                   onChange={(e) => setPlan({ ...plan, metadata: { ...plan.metadata, bodyweight: e.target.value } })}
-                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm"
                 />
               </div>
             )}
@@ -381,14 +381,14 @@ export function DraftReview({
                   value={plan.metadata.coachNotes}
                   onChange={(e) => setPlan({ ...plan, metadata: { ...plan.metadata, coachNotes: e.target.value } })}
                   rows={2}
-                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                  className="mt-0.5 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm"
                 />
               </div>
             )}
             {plan.metadata.highlightedChanges && (
               <div className="sm:col-span-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Highlighted Changes</span>
-                <p className="mt-0.5 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                <p className="mt-0.5 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-700">
                   {plan.metadata.highlightedChanges}
                 </p>
               </div>
@@ -407,9 +407,9 @@ export function DraftReview({
           {plan.meals.map((meal, mealIdx) => (
             <div
               key={mealIdx}
-              className="rounded-lg border border-zinc-100 dark:border-zinc-800"
+              className="rounded-lg border border-zinc-100"
             >
-              <div className="flex items-center gap-2 border-b border-zinc-100 px-3 py-2 dark:border-zinc-800">
+              <div className="flex items-center gap-2 border-b border-zinc-100 px-3 py-2">
                 <input
                   type="text"
                   value={meal.name}
@@ -420,14 +420,14 @@ export function DraftReview({
                 <button
                   type="button"
                   onClick={() => removeMeal(mealIdx)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500"
                   aria-label={`Remove ${meal.name}`}
                 >
                   &times;
                 </button>
               </div>
 
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <div className="divide-y divide-zinc-100">
                 {meal.items.map((item, itemIdx) => (
                   <div key={itemIdx} className="flex items-start gap-2 px-3 py-2">
                     <div className="flex flex-1 flex-col gap-1.5 sm:flex-row sm:gap-2">
@@ -436,7 +436,7 @@ export function DraftReview({
                         value={item.food}
                         onChange={(e) => updateItem(mealIdx, itemIdx, "food", e.target.value)}
                         placeholder="Food name"
-                        className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800"
+                        className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                         aria-label={`Food name, meal ${mealIdx + 1}, item ${itemIdx + 1}`}
                       />
                       <input
@@ -446,8 +446,8 @@ export function DraftReview({
                         placeholder="Portion not detected"
                         className={`w-full rounded-lg border px-2.5 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 sm:w-40 ${
                           !item.portion.trim()
-                            ? "border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/30"
-                            : "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800"
+                            ? "border-amber-300 bg-amber-50/50"
+                            : "border-zinc-200 bg-zinc-50"
                         }`}
                         aria-label={`Portion, meal ${mealIdx + 1}, item ${itemIdx + 1}`}
                       />
@@ -455,7 +455,7 @@ export function DraftReview({
                     <button
                       type="button"
                       onClick={() => removeItem(mealIdx, itemIdx)}
-                      className="mt-1.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-zinc-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
+                      className="mt-1.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-zinc-300 transition-colors hover:bg-red-50 hover:text-red-500"
                       aria-label={`Remove ${item.food || "item"}`}
                     >
                       &times;
@@ -464,11 +464,11 @@ export function DraftReview({
                 ))}
               </div>
 
-              <div className="border-t border-zinc-100 px-3 py-1.5 dark:border-zinc-800">
+              <div className="border-t border-zinc-100 px-3 py-1.5">
                 <button
                   type="button"
                   onClick={() => addItem(mealIdx)}
-                  className="w-full rounded-lg py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-50 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                  className="w-full rounded-lg py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-50 hover:text-zinc-600"
                 >
                   + Add Item
                 </button>
@@ -480,7 +480,7 @@ export function DraftReview({
         <button
           type="button"
           onClick={addMeal}
-          className="mt-3 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600 dark:border-zinc-700 dark:hover:border-zinc-600 dark:hover:text-zinc-300"
+          className="mt-3 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600"
         >
           + Add Meal
         </button>
@@ -495,19 +495,19 @@ export function DraftReview({
         >
           <div className="space-y-2">
             {plan.dayOverrides.map((override, idx) => (
-              <div key={idx} className="flex items-start gap-2 rounded-lg bg-zinc-50 p-2.5 dark:bg-zinc-800/50">
+              <div key={idx} className="flex items-start gap-2 rounded-lg bg-zinc-50 p-2.5">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-sm font-semibold">{override.label}</span>
                     {override.weekdays?.map((day) => (
-                      <span key={day} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                      <span key={day} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600">
                         {day}
                       </span>
                     ))}
                   </div>
                   {override.notes && <p className="mt-1 text-xs text-zinc-500">{override.notes}</p>}
                   {override.items?.map((item, i) => (
-                    <div key={i} className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    <div key={i} className="mt-1 text-xs text-zinc-600">
                       {item.food} {item.portion && `— ${item.portion}`}
                       {item.replaces && <span className="text-zinc-400"> (replaces {item.replaces})</span>}
                     </div>
@@ -516,7 +516,7 @@ export function DraftReview({
                 <button
                   type="button"
                   onClick={() => removeOverride(idx)}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-red-50 hover:text-red-500"
                   aria-label="Remove override"
                 >
                   &times;
@@ -538,7 +538,7 @@ export function DraftReview({
               value={plan.supportContent}
               onChange={(e) => setPlan({ ...plan, supportContent: e.target.value })}
               rows={8}
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
         </ReviewSection>
@@ -546,14 +546,14 @@ export function DraftReview({
 
       {/* Notes */}
       {plan.notes && (
-        <div className="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800/50">
+        <div className="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
           <span className="font-medium">Notes:</span> {plan.notes}
         </div>
       )}
 
       {/* Extended sections summary */}
       {hasExtrasContent && plan.meals.length > 0 && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 text-xs text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400">
+        <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 text-xs text-blue-700">
           Extended sections detected (overrides, supplements, allowances, rules). These will be preserved when imported.
         </div>
       )}
@@ -562,19 +562,19 @@ export function DraftReview({
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {error}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      <div className="flex items-center justify-between gap-3 border-t border-zinc-200 pt-4">
         <button
           type="button"
           onClick={onBack}
           disabled={importing}
-          className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
         >
           Back
         </button>
@@ -582,7 +582,7 @@ export function DraftReview({
           type="button"
           onClick={handleImport}
           disabled={importing || (plan.meals.length === 0 && !hasExtrasContent)}
-          className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {importing ? "Importing..." : "Import Meal Plan"}
         </button>

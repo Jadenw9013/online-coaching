@@ -11,7 +11,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8">
             <h1 className="text-3xl font-semibold tracking-tight">About Steadfast</h1>
 
-            <div className="mt-10 space-y-6 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <div className="mt-10 space-y-6 text-sm leading-relaxed text-zinc-600">
                 <p>
                     Steadfast is an online coaching platform built to help fitness coaches and their clients stay connected, organized, and accountable — week after week.
                 </p>
@@ -20,7 +20,7 @@ export default function AboutPage() {
                     We believe that consistency beats intensity. Great results come from showing up every week, tracking progress honestly, and getting guidance from someone who knows your goals. Steadfast gives coaches and clients the tools to make that happen without the friction.
                 </p>
 
-                <h2 className="pt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">What Steadfast Does</h2>
+                <h2 className="pt-4 text-lg font-semibold text-zinc-900">What Steadfast Does</h2>
 
                 <ul className="list-disc space-y-2 pl-5">
                     <li>
@@ -40,7 +40,7 @@ export default function AboutPage() {
                     </li>
                 </ul>
 
-                <h2 className="pt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Who It&apos;s For</h2>
+                <h2 className="pt-4 text-lg font-semibold text-zinc-900">Who It&apos;s For</h2>
 
                 <p>
                     Steadfast is designed for independent fitness coaches who manage clients remotely and want a clean, reliable system to replace spreadsheets, email chains, and scattered DMs.
@@ -49,7 +49,7 @@ export default function AboutPage() {
                 <div className="pt-6">
                     <Link
                         href="/sign-up"
-                        className="inline-block rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                        className="inline-block rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
                     >
                         Get Started
                     </Link>

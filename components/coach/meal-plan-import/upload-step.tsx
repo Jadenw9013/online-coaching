@@ -258,8 +258,8 @@ export function UploadStep({
         aria-label="Drop file here or click to browse"
         className={`relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${
           dragOver
-            ? "border-zinc-500 bg-zinc-100 dark:bg-zinc-800"
-            : "border-zinc-300 bg-white hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600"
+            ? "border-zinc-500 bg-zinc-100"
+            : "border-zinc-300 bg-white hover:border-zinc-400"
         } ${isProcessing ? "pointer-events-none opacity-60" : ""}`}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -294,8 +294,8 @@ export function UploadStep({
               <span
                 className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
                   isPdf
-                    ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                    : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-blue-100 text-blue-700"
                 }`}
               >
                 {fileExtLabel(file)}
@@ -321,7 +321,7 @@ export function UploadStep({
                   e.stopPropagation();
                   clearFile();
                 }}
-                className="mt-1 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                className="mt-1 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 Choose a different file
               </button>
@@ -329,7 +329,7 @@ export function UploadStep({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 px-4 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl dark:bg-zinc-800">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl">
               &#128196;
             </div>
             <p className="text-sm font-medium">
@@ -346,9 +346,9 @@ export function UploadStep({
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm dark:border-red-900 dark:bg-red-950/50"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm"
         >
-          <p className="font-medium text-red-700 dark:text-red-400">
+          <p className="font-medium text-red-700">
             {error.includes("bucket") || error.includes("Bucket") || error.includes("storage")
               ? "Storage is not configured."
               : error.includes("No text detected")
@@ -357,7 +357,7 @@ export function UploadStep({
                   ? "OCR service is not configured."
                   : "Processing failed"}
           </p>
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400/80">
+          <p className="mt-1 text-xs text-red-600">
             {error}
           </p>
         </div>
@@ -374,7 +374,7 @@ export function UploadStep({
           <button
             type="button"
             onClick={handleRetry}
-            className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
           >
             Retry Processing
           </button>
@@ -384,7 +384,7 @@ export function UploadStep({
           type="button"
           onClick={handleUploadAndProcess}
           disabled={!file || isProcessing}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+          className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isProcessing ? "Processing..." : "Upload & Process"}
         </button>

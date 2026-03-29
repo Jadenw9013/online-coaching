@@ -28,7 +28,7 @@ function StepIndicator({ current }: { current: Step }) {
               {i > 0 && (
                 <div
                   className={`h-px w-6 sm:w-10 ${
-                    isComplete ? "bg-zinc-900 dark:bg-zinc-100" : "bg-zinc-200 dark:bg-zinc-800"
+                    isComplete ? "bg-zinc-900" : "bg-zinc-200"
                   }`}
                   aria-hidden="true"
                 />
@@ -37,10 +37,10 @@ function StepIndicator({ current }: { current: Step }) {
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                     isComplete
-                      ? "bg-zinc-900 text-white dark:bg-blue-600 dark:text-white"
+                      ? "bg-zinc-900 text-white"
                       : isCurrent
-                        ? "bg-zinc-900 text-white ring-2 ring-zinc-900/20 dark:bg-blue-600 dark:text-white dark:ring-zinc-100/20"
-                        : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
+                        ? "bg-zinc-900 text-white ring-2 ring-zinc-900/20"
+                        : "bg-zinc-100 text-zinc-400"
                   }`}
                   aria-current={isCurrent ? "step" : undefined}
                 >
@@ -49,10 +49,10 @@ function StepIndicator({ current }: { current: Step }) {
                 <span
                   className={`hidden text-xs font-medium sm:inline ${
                     isCurrent
-                      ? "text-zinc-900 dark:text-zinc-100"
+                      ? "text-zinc-900"
                       : isComplete
-                        ? "text-zinc-600 dark:text-zinc-400"
-                        : "text-zinc-400 dark:text-zinc-500"
+                        ? "text-zinc-600"
+                        : "text-zinc-400"
                   }`}
                 >
                   {step.label}
@@ -77,7 +77,7 @@ function InputModeToggle({
 }) {
   return (
     <div
-      className={`mb-6 inline-flex rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800 ${
+      className={`mb-6 inline-flex rounded-lg bg-zinc-100 p-1 ${
         disabled ? "pointer-events-none opacity-60" : ""
       }`}
       role="radiogroup"
@@ -90,8 +90,8 @@ function InputModeToggle({
         onClick={() => onChange("upload")}
         className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
           mode === "upload"
-            ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
-            : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+            ? "bg-white text-zinc-900 shadow-sm"
+            : "text-zinc-500 hover:text-zinc-700"
         }`}
       >
         Upload File
@@ -103,8 +103,8 @@ function InputModeToggle({
         onClick={() => onChange("paste")}
         className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
           mode === "paste"
-            ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
-            : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+            ? "bg-white text-zinc-900 shadow-sm"
+            : "text-zinc-500 hover:text-zinc-700"
         }`}
       >
         Paste Text

@@ -20,7 +20,7 @@ export const FoodRow = memo(function FoodRow({
   const [replacing, setReplacing] = useState(false);
 
   return (
-    <div className="group flex flex-col gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-zinc-50 sm:flex-row sm:items-center sm:gap-2 dark:hover:bg-zinc-800/50">
+    <div className="group flex flex-col gap-1 rounded-md px-2 py-1.5 transition-colors hover:bg-zinc-50 sm:flex-row sm:items-center sm:gap-2">
       {/* Food name — shown first on mobile for visibility */}
       <div className="min-w-0 flex-1 order-1 sm:order-2">
         <div className="relative flex items-center gap-2">
@@ -63,7 +63,7 @@ export const FoodRow = memo(function FoodRow({
             }
             placeholder='portion size'
             aria-label={`Portion for ${item.foodName}`}
-            className="w-full rounded border border-zinc-300 px-2 py-1 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+            className="w-full rounded border border-zinc-300 px-2 py-1 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           />
         </div>
 
@@ -72,14 +72,14 @@ export const FoodRow = memo(function FoodRow({
           <button
             type="button"
             onClick={() => setReplacing(true)}
-            className="rounded px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+            className="rounded px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             Replace
           </button>
           <button
             type="button"
             onClick={onRemove}
-            className="rounded px-2 py-1.5 text-xs text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
+            className="rounded px-2 py-1.5 text-xs text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             Remove
           </button>

@@ -47,7 +47,7 @@ export default function RootLayout({
       <html lang="en" className="dark" suppressHydrationWarning>
       
         <body
-          className={`${sora.variable} ${chakraPetch.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-200`}
+          className={`${sora.variable} ${chakraPetch.variable} ${geistMono.variable} antialiased bg-gray-950 text-gray-100`}
         >
           <ThemeProvider>
             <a

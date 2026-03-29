@@ -72,21 +72,21 @@ export function TodayAdherence({ date, planMeals, existingMeals, workoutComplete
   return (
     <section
       aria-labelledby="today-adherence-heading"
-      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm dark:border-white/[0.06] dark:bg-[#0a1224] dark:shadow-none"
+      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
         <h2 id="today-adherence-heading" className="text-sm font-semibold tracking-tight">
           Today
         </h2>
         {hasMeals && (
-          <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">
+          <span className="text-xs font-medium text-gray-400">
             {completedCount}/{meals.length} meals
           </span>
         )}
       </div>
 
-      <ul role="list" className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+      <ul role="list" className="divide-y divide-gray-100">
         {/* Meal rows */}
         {hasMeals ? (
           meals.map((meal) => (
@@ -99,7 +99,7 @@ export function TodayAdherence({ date, planMeals, existingMeals, workoutComplete
           ))
         ) : (
           <li className="px-5 py-4">
-            <p className="text-sm text-gray-400 dark:text-zinc-500">
+            <p className="text-sm text-gray-400">
               No active meal plan to track today
             </p>
           </li>
@@ -131,13 +131,13 @@ function MealRow({
         aria-label={`${meal.mealNameSnapshot} — ${meal.completed ? "Mark incomplete" : "Mark done"}`}
         className={`flex min-h-[44px] w-full items-center justify-between gap-4 px-5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 disabled:opacity-60 ${
           meal.completed
-            ? "bg-emerald-50/60 dark:bg-emerald-950/20"
-            : "hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+            ? "bg-emerald-50/60"
+            : "hover:bg-gray-50"
         }`}
       >
         <span
           className={`text-sm font-medium ${
-            meal.completed ? "text-emerald-700 dark:text-emerald-400" : "text-gray-700 dark:text-zinc-200"
+            meal.completed ? "text-emerald-700" : "text-gray-700"
           }`}
         >
           {meal.mealNameSnapshot}
@@ -167,13 +167,13 @@ function WorkoutRow({
         aria-label={`Workout — ${workout.completed ? "Mark incomplete" : "Mark complete"}`}
         className={`flex min-h-[44px] w-full items-center justify-between gap-4 px-5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 disabled:opacity-60 ${
           workout.completed
-            ? "bg-emerald-50/60 dark:bg-emerald-950/20"
-            : "hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+            ? "bg-emerald-50/60"
+            : "hover:bg-gray-50"
         }`}
       >
         <span
           className={`text-sm font-medium ${
-            workout.completed ? "text-emerald-700 dark:text-emerald-400" : "text-gray-700 dark:text-zinc-200"
+            workout.completed ? "text-emerald-700" : "text-gray-700"
           }`}
         >
           Workout
@@ -187,7 +187,7 @@ function WorkoutRow({
 function CompletionBadge({ completed }: { completed: boolean }) {
   if (completed) {
     return (
-      <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-emerald-600">
         {/* Checkmark icon */}
         <svg
           aria-hidden="true"
@@ -208,7 +208,7 @@ function CompletionBadge({ completed }: { completed: boolean }) {
     );
   }
   return (
-    <span className="shrink-0 text-xs font-medium text-gray-400 dark:text-zinc-500">
+    <span className="shrink-0 text-xs font-medium text-gray-400">
       Mark done
     </span>
   );

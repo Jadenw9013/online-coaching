@@ -19,7 +19,7 @@ export function RatingSummary({ averageRating, totalReviews }: RatingSummaryProp
                         fill={averageRating >= star ? "currentColor" : averageRating >= star - 0.5 ? "url(#half)" : "none"}
                         stroke="currentColor"
                         strokeWidth="1.5"
-                        className={averageRating >= star - 0.5 ? "text-amber-400" : "text-zinc-300 dark:text-zinc-600"}
+                        className={averageRating >= star - 0.5 ? "text-amber-400" : "text-zinc-300"}
                     >
                         <defs>
                             <linearGradient id="half">
@@ -31,10 +31,10 @@ export function RatingSummary({ averageRating, totalReviews }: RatingSummaryProp
                     </svg>
                 ))}
             </div>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <span className="text-sm font-semibold text-zinc-900">
                 {averageRating.toFixed(1)}
             </span>
-            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="text-sm text-zinc-500">
                 ({totalReviews} {totalReviews === 1 ? "review" : "reviews"})
             </span>
         </div>

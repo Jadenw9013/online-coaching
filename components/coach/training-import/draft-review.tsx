@@ -134,7 +134,7 @@ export function WorkoutDraftReview({
   // ── Loading ───────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white px-6 py-8 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white px-6 py-8">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
         <p className="text-sm text-zinc-500">Loading parsed workout…</p>
       </div>
@@ -146,15 +146,15 @@ export function WorkoutDraftReview({
       <div className="space-y-4">
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-4 dark:border-red-900 dark:bg-red-950/50"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-4"
         >
-          <p className="font-medium text-red-700 dark:text-red-400">Failed to load parsed workout</p>
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400/80">{fetchError}</p>
+          <p className="font-medium text-red-700">Failed to load parsed workout</p>
+          <p className="mt-1 text-sm text-red-600">{fetchError}</p>
         </div>
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
           &larr; Back
         </button>
@@ -170,7 +170,7 @@ export function WorkoutDraftReview({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           aria-label="Back"
         >
           &larr;
@@ -184,7 +184,7 @@ export function WorkoutDraftReview({
       </div>
 
       {/* Program name + notes */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+      <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="import-name" className="text-xs font-semibold text-zinc-500">
@@ -196,7 +196,7 @@ export function WorkoutDraftReview({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 4-Week Hypertrophy Block"
-              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700"
+              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -210,15 +210,15 @@ export function WorkoutDraftReview({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="General notes, coaching context, or instructions…"
               rows={3}
-              className="w-full resize-y rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm leading-relaxed placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:border-zinc-700"
+              className="w-full resize-y rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm leading-relaxed placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             />
           </div>
         </div>
       </div>
 
       {/* Training days */}
-      <div className="rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-[#0a1224]">
-        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3 dark:border-zinc-800">
+      <div className="rounded-2xl border border-zinc-200/80 bg-white">
+        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Training Days
             <span className="ml-2 font-normal normal-case text-zinc-400">
@@ -228,20 +228,20 @@ export function WorkoutDraftReview({
           <button
             type="button"
             onClick={addDay}
-            className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             + Add Day
           </button>
         </div>
 
-        <div className="divide-y divide-zinc-100/80 dark:divide-zinc-800/60">
+        <div className="divide-y divide-zinc-100/80">
           {days.length === 0 ? (
             <div className="px-5 py-12 text-center">
               <p className="text-sm text-zinc-400">No training days parsed.</p>
               <button
                 type="button"
                 onClick={addDay}
-                className="mt-3 text-sm font-semibold text-zinc-900 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:text-zinc-100"
+                className="mt-3 text-sm font-semibold text-zinc-900 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 Add a day manually
               </button>
@@ -262,7 +262,7 @@ export function WorkoutDraftReview({
 
       {/* Destination */}
       {clientId && (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 dark:border-zinc-800/80 dark:bg-[#0a1224]">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white px-5 py-4">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Save as
           </p>
@@ -272,8 +272,8 @@ export function WorkoutDraftReview({
               onClick={() => setDestination("template")}
               className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
                 destination === "template"
-                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-blue-600 dark:text-white"
-                  : "border-zinc-200 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               }`}
             >
               Reusable Template
@@ -283,8 +283,8 @@ export function WorkoutDraftReview({
               onClick={() => setDestination("client")}
               className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${
                 destination === "client"
-                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-blue-600 dark:text-white"
-                  : "border-zinc-200 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               }`}
             >
               Client Draft
@@ -307,10 +307,10 @@ export function WorkoutDraftReview({
       {saveError && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm dark:border-red-900 dark:bg-red-950/50"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm"
         >
-          <p className="font-medium text-red-700 dark:text-red-400">Save failed</p>
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400/80">{saveError}</p>
+          <p className="font-medium text-red-700">Save failed</p>
+          <p className="mt-1 text-xs text-red-600">{saveError}</p>
         </div>
       )}
 
@@ -325,7 +325,7 @@ export function WorkoutDraftReview({
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="shrink-0 rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:text-white dark:shadow-lg dark:shadow-blue-500/20 dark:hover:brightness-110"
+          className="shrink-0 rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
           {saving
             ? "Saving…"

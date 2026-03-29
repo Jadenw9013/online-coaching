@@ -38,8 +38,8 @@ export function AdherenceToggle({ clientId, initialEnabled }: Props) {
           onClick={handleToggle}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-60 ${
             enabled
-              ? "bg-emerald-500 dark:bg-emerald-600"
-              : "bg-zinc-300 dark:bg-zinc-600"
+              ? "bg-emerald-500"
+              : "bg-zinc-300"
           }`}
         >
           <span
@@ -49,14 +49,14 @@ export function AdherenceToggle({ clientId, initialEnabled }: Props) {
             }`}
           />
         </button>
-        <span className="text-sm font-medium text-gray-700 dark:text-zinc-200">
+        <span className="text-sm font-medium text-gray-700">
           Daily adherence tracking
         </span>
         {pending && (
-          <span className="text-xs text-gray-400 dark:text-zinc-500">Saving…</span>
+          <span className="text-xs text-gray-400">Saving…</span>
         )}
       </div>
-      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }

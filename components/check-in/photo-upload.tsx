@@ -65,14 +65,14 @@ export function PhotoUpload({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">
-        Progress pics <span className="text-gray-400 dark:text-zinc-500">({files.length}/{maxFiles})</span>
+      <label className="block text-sm font-medium text-gray-700">
+        Progress pics <span className="text-gray-400">({files.length}/{maxFiles})</span>
       </label>
 
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600"
         >
           {error}
         </div>
@@ -87,12 +87,12 @@ export function PhotoUpload({
               <img
                 src={URL.createObjectURL(file)}
                 alt={`Preview ${i + 1}`}
-                className="aspect-square w-full rounded-xl border border-zinc-200 object-cover dark:border-zinc-700"
+                className="aspect-square w-full rounded-xl border border-zinc-200 object-cover"
               />
               <button
                 type="button"
                 onClick={() => removeFile(i)}
-                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-xs font-bold text-white shadow-md transition-all hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-blue-600 dark:text-white dark:hover:bg-red-500 dark:hover:text-white"
+                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-xs font-bold text-white shadow-md transition-all hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                 aria-label={`Remove photo ${i + 1}`}
               >
                 &times;
@@ -119,8 +119,8 @@ export function PhotoUpload({
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${dragOver
-              ? "border-zinc-500 bg-zinc-100 dark:bg-zinc-800"
-              : "border-zinc-300 hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600"
+              ? "border-zinc-500 bg-zinc-100"
+              : "border-zinc-300 hover:border-zinc-400"
             }`}
           aria-label="Drop photos here or click to browse"
         >

@@ -119,14 +119,14 @@ export default async function ReviewWorkspacePage({
         <div className="flex items-center gap-3">
           <Link
             href="/coach/dashboard"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label="Back to inbox"
           >
             &larr;
           </Link>
           <Link
             href={`/coach/clients/${clientId}`}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label="View client profile"
           >
             {client.firstName?.[0] ?? "?"}
@@ -154,7 +154,7 @@ export default async function ReviewWorkspacePage({
         </div>
 
         {/* Right column: plans (toggle between Meal Plan / Training Plan) */}
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0a1224]">
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
           <PlanTabs
             mealPlan={{
               clientId,

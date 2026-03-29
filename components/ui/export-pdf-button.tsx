@@ -63,7 +63,7 @@ export function ExportPdfButton({
           type="button"
           onClick={handleExport}
           disabled={loading}
-          className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50 dark:text-zinc-500 dark:hover:text-zinc-300"
+          className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
           aria-label={label}
         >
           {loading ? "Exporting\u2026" : "Export PDF"}
@@ -81,7 +81,7 @@ export function ExportPdfButton({
         type="button"
         onClick={handleExport}
         disabled={loading}
-        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50"
         aria-label={label}
       >
         {loading ? "Exporting\u2026" : "Export PDF"}

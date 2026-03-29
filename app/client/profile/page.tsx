@@ -39,7 +39,7 @@ export default async function ClientProfilePage() {
                         {displayName}
                     </h1>
                     {user.fitnessGoal && (
-                        <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">
+                        <p className="mt-1 text-base text-zinc-500">
                             {user.fitnessGoal}
                         </p>
                     )}
