@@ -50,6 +50,16 @@ type ResolvedItem = MealPlanItem & {
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 type Weekday = typeof WEEKDAYS[number];
 
+/** Flow palette for meal card atmospheric tinting (mirrors iOS sfFlowPalette) */
+const MEAL_FLOW = [
+  { highlight: "rgba(139, 92, 246, 0.10)" },   // purple
+  { highlight: "rgba(99, 102, 241, 0.10)" },    // indigo
+  { highlight: "rgba(59, 130, 246, 0.10)" },     // blue
+  { highlight: "rgba(8, 145, 178, 0.10)" },      // cyan
+  { highlight: "rgba(16, 185, 129, 0.10)" },     // emerald
+  { highlight: "rgba(245, 158, 11, 0.10)" },     // amber
+] as const;
+
 function getCurrentWeekday(): Weekday {
   const jsDay = new Date().getDay();
   const mapped = jsDay === 0 ? 6 : jsDay - 1;
@@ -280,7 +290,7 @@ function MetadataSection({ extras }: { extras: PlanExtras }) {
   ].filter(Boolean) as { label: string; value: string }[];
   if (!items.length && !m.coachNotes && !m.highlightedChanges) return null;
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+    <div className="sf-glass-card p-5">
       <h3 className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-zinc-500">Plan Overview</h3>
       {items.length > 0 && (
         <div className="flex flex-wrap gap-2.5 mb-3">
@@ -322,24 +332,33 @@ function MacroSummary({ items }: { items: ResolvedItem[] }) {
 
   return (
     <div className="grid grid-cols-4 gap-2">
-      <MacroPill label="Calories" value={`${totals.calories}`} color="blue" />
-      <MacroPill label="Protein" value={`${totals.protein}g`} color="emerald" />
-      <MacroPill label="Carbs" value={`${totals.carbs}g`} color="amber" />
-      <MacroPill label="Fats" value={`${totals.fats}g`} color="rose" />
+      <MacroPill label="Calories" value={`${totals.calories}`} flowIndex={0} />
+      <MacroPill label="Protein" value={`${totals.protein}g`} flowIndex={1} />
+      <MacroPill label="Carbs" value={`${totals.carbs}g`} flowIndex={2} />
+      <MacroPill label="Fats" value={`${totals.fats}g`} flowIndex={3} />
     </div>
   );
 }
 
-function MacroPill({ label, value, color }: { label: string; value: string; color: string }) {
-  const styles: Record<string, { bg: string; border: string; text: string }> = {
-    blue: { bg: "bg-blue-500/[0.08]", border: "border-blue-500/[0.15]", text: "text-blue-400" },
-    emerald: { bg: "bg-emerald-500/[0.08]", border: "border-emerald-500/[0.15]", text: "text-emerald-400" },
-    amber: { bg: "bg-amber-500/[0.08]", border: "border-amber-500/[0.15]", text: "text-amber-400" },
-    rose: { bg: "bg-rose-500/[0.08]", border: "border-rose-500/[0.15]", text: "text-rose-400" },
-  };
-  const s = styles[color] ?? styles.blue;
+function MacroPill({ label, value, flowIndex }: { label: string; value: string; flowIndex: number }) {
+  // Flow palette per macro — gives each pill a unique atmospheric vibe
+  const PILL_PALETTE = [
+    { bg: "rgba(59, 130, 246, 0.08)", border: "rgba(59, 130, 246, 0.18)", text: "text-blue-400" },
+    { bg: "rgba(16, 185, 129, 0.08)", border: "rgba(16, 185, 129, 0.18)", text: "text-emerald-400" },
+    { bg: "rgba(245, 158, 11, 0.08)", border: "rgba(245, 158, 11, 0.18)", text: "text-amber-400" },
+    { bg: "rgba(244, 63, 94, 0.08)", border: "rgba(244, 63, 94, 0.18)", text: "text-rose-400" },
+  ];
+  const s = PILL_PALETTE[flowIndex] ?? PILL_PALETTE[0];
   return (
-    <div className={`flex flex-col items-center gap-1 rounded-2xl border ${s.border} ${s.bg} py-3`}>
+    <div
+      className="flex flex-col items-center gap-1 rounded-2xl py-3 backdrop-blur-sm"
+      style={{
+        background: s.bg,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: s.border,
+      }}
+    >
       <span className="text-base font-bold text-white">{value}</span>
       <span className={`text-[10px] font-semibold uppercase tracking-wider ${s.text} opacity-80`}>{label}</span>
     </div>
@@ -384,7 +403,7 @@ function DaySelector({
   overridesByDay: Map<string, DayOverride[]>;
 }) {
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
+    <div className="sf-glass-card flex items-center gap-1.5 overflow-x-auto p-1.5">
       {WEEKDAYS.map((day) => {
         const isSelected = day === selectedDay;
         const dayOverrides = overridesByDay.get(day.toLowerCase());
@@ -397,7 +416,7 @@ function DaySelector({
             onClick={() => onSelect(day)}
             className={`relative flex min-w-[44px] flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-xs font-bold tracking-wide transition-all cursor-pointer ${
               isSelected
-                ? "bg-white/[0.1] text-white shadow-sm"
+                ? "bg-white/[0.12] text-white shadow-sm backdrop-blur-sm"
                 : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
             }`}
           >
@@ -451,7 +470,7 @@ function ActiveOverrideBanner({ overrides }: { overrides: DayOverride[] }) {
 function SupportContentSection({ content }: { content?: string | null }) {
   if (!content) return null;
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+    <div className="sf-glass-card p-5">
       <h3 className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-zinc-500">Guidance & Support</h3>
       <div className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300/90">
         {content}
@@ -552,7 +571,7 @@ export function SimpleMealPlan({
 
       {/* Meal progress bar — only visible when viewing today's tab */}
       {adherence && isViewingToday && progressTotal > 0 && (
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-5 py-3.5">
+        <div className="sf-glass-card px-5 py-3.5">
           <div className="mb-2.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-400">
               Today&rsquo;s meals
@@ -594,8 +613,11 @@ export function SimpleMealPlan({
             className={`group overflow-hidden rounded-2xl border transition-all ${
               isMealDone
                 ? "border-emerald-900/40 bg-emerald-950/[0.06]"
-                : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.1]"
+                : "sf-glass-card hover:border-white/[0.14]"
             }`}
+            style={!isMealDone ? {
+              "--sf-card-highlight": MEAL_FLOW[mealIndex % MEAL_FLOW.length].highlight,
+            } as React.CSSProperties : undefined}
           >
             {/* Meal header */}
             <div className={`flex items-center border-b border-white/[0.04] ${isViewingToday ? "pl-1 pr-5 py-3" : "px-5 py-4"}`}>
@@ -695,7 +717,7 @@ export function SimpleMealPlan({
 
       {/* Day overrides reference (collapsed) */}
       {extras?.dayOverrides && extras.dayOverrides.length > 0 && (
-        <details className="group rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+        <details className="group sf-glass-card">
           <summary className="cursor-pointer px-5 py-3 text-xs font-bold uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-300">
             Day Override Reference
           </summary>

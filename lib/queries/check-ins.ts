@@ -28,6 +28,8 @@ export async function getClientCheckInsLight(clientId: string) {
       createdAt: true,
       submittedAt: true,
       localDate: true,
+      dietCompliance: true,
+      energyLevel: true,
       _count: { select: { photos: true } },
     },
   });

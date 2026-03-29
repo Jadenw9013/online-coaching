@@ -998,6 +998,182 @@ a,
   margin-top: 12px;
 }
 
+/* ─── Steadfast Design Tokens (iOS Parity) ─── */
+
+:root.dark {
+  /* Spacing tokens (match iOS Spacing enum) */
+  --sf-spacing-xs: 4px;
+  --sf-spacing-sm: 8px;
+  --sf-spacing-md: 16px;
+  --sf-spacing-lg: 24px;
+  --sf-spacing-xl: 32px;
+  --sf-spacing-2xl: 48px;
+  --sf-card-padding: 20px;
+  --sf-section-gap: 24px;
+
+  /* Radius tokens (match iOS Radius enum) */
+  --sf-radius-card: 16px;
+  --sf-radius-card-lg: 26px;
+  --sf-radius-button: 12px;
+  --sf-radius-input: 12px;
+  --sf-radius-icon: 8px;
+  --sf-radius-chip: 6px;
+
+  /* Accent (iOS sfAccent system) */
+  --sf-accent: #3B5BDB;
+  --sf-accent-light: #5B7CFA;
+  --sf-accent-lighter: #90A7FF;
+
+  /* Status: Locked In */
+  --sf-locked-glow: #5FA7FF;
+  --sf-locked-badge: #89D0FF;
+  --sf-locked-ring: #9DE4FF;
+  --sf-locked-atmosphere: #192A43;
+
+  /* Status: On Track */
+  --sf-ontrack-glow: #4E7DFF;
+  --sf-ontrack-badge: #80B6FF;
+  --sf-ontrack-ring: #8DC5FF;
+  --sf-ontrack-atmosphere: #1B223C;
+
+  /* Status: Needs Focus */
+  --sf-focus-glow: #5C8AF2;
+  --sf-focus-badge: #94B8FF;
+  --sf-focus-ring: #AAC7FF;
+  --sf-focus-atmosphere: #20253E;
+
+  /* Status: Off Plan */
+  --sf-offplan-glow: #6074A6;
+  --sf-offplan-badge: #9DB3D8;
+  --sf-offplan-ring: #AEB7CF;
+  --sf-offplan-atmosphere: #23263A;
+
+  /* Status: Overdue */
+  --sf-overdue-glow: #6EA4FF;
+  --sf-overdue-badge: #AED2FF;
+  --sf-overdue-ring: #C0DDFF;
+  --sf-overdue-atmosphere: #1E2740;
+
+  /* Glass system */
+  --sf-glass-bg: rgba(255, 255, 255, 0.07);
+  --sf-glass-scrim: rgba(0, 0, 0, 0.18);
+  --sf-glass-border: rgba(255, 255, 255, 0.12);
+  --sf-glass-sheen: rgba(255, 255, 255, 0.055);
+  --sf-glass-hover: rgba(255, 255, 255, 0.10);
+}
+
+/* ─── Glass Card (mirrors iOS GlassCardChrome) ─── */
+
+.sf-glass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sf-radius-card);
+  border: 1px solid var(--sf-glass-border);
+  background:
+    linear-gradient(180deg, var(--sf-glass-sheen) 0%, transparent 50%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.06) 100%),
+    var(--sf-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Top-edge gradient sheen (iOS: leading→trailing white stroke mask) */
+.sf-glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.24), rgba(255,255,255,0.10), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sf-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Accent-tinted glass card */
+.sf-glass-card[data-tint="accent"] {
+  background:
+    linear-gradient(180deg, var(--sf-glass-sheen) 0%, transparent 50%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.06) 100%),
+    rgba(59, 91, 219, 0.06);
+  border-color: rgba(59, 91, 219, 0.20);
+}
+
+/* ─── Surface Card (mirrors iOS sfSurfaceCard / planSurfaceCard) ─── */
+
+.sf-surface-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sf-radius-card-lg);
+  border: 1px solid var(--sf-glass-border);
+  background: var(--sf-card-atmosphere, #111114);
+  padding: var(--sf-card-padding);
+}
+
+/* Atmospheric radial glow at top-left */
+.sf-surface-card::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: -20%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, var(--sf-card-highlight, rgba(59, 91, 219, 0.12)) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Inner overlay gradient (dark edges) */
+.sf-surface-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.15) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Top-edge accent stroke */
+.sf-surface-card > .sf-surface-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sf-card-highlight, rgba(91, 124, 250, 0.32)), transparent);
+  z-index: 1;
+}
+
+.sf-surface-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Section Label (iOS tileLabel) ─── */
+
+.sf-section-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  padding: 5px 10px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 /* ── Reduced Motion ─── */
 
 @media (prefers-reduced-motion: reduce) {

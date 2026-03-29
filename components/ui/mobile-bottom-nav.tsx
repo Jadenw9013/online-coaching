@@ -122,8 +122,8 @@ export function MobileBottomNav({
             aria-label="Mobile navigation"
             style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-            {/* Glass bar */}
-            <div className="relative border-t border-white/[0.06] bg-[#020815]/90 backdrop-blur-xl">
+            {/* Glass bar — iOS ultra-thin material */}
+            <div className="relative border-t border-white/[0.08] bg-[#0a0f1e]/85 backdrop-blur-2xl" style={{ backdropFilter: "blur(40px) saturate(180%)", WebkitBackdropFilter: "blur(40px) saturate(180%)" }}>
                 <div className="flex items-stretch justify-around">
                     {items.map((item) => {
                         const active = isActive(item.href);

@@ -42,7 +42,7 @@ export default async function ClientTrainingPage() {
         </Link>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight">Your Training Program</h1>
+            <h1 className="text-2xl font-black tracking-tight text-white">Training Program</h1>
             {program && program.days.length > 0 && (
               <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
                 {program.days.length} {program.days.length === 1 ? "day" : "days"}
@@ -65,7 +65,7 @@ export default async function ClientTrainingPage() {
           Training program
         </h2>
         {!program || program.days.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-700/60 bg-[#0a1224] px-8 py-16 text-center">
+          <div className="sf-surface-card flex flex-col items-center gap-3 px-8 py-16 text-center" style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}>
             <p className="text-sm font-semibold text-zinc-300">No training program yet</p>
             <p className="text-sm text-zinc-400">
               Your coach hasn&apos;t published a training program yet.

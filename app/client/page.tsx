@@ -7,7 +7,6 @@ import { getMyIntake } from "@/lib/queries/client-intake";
 import { parseCadenceConfig, getEffectiveCadence, getClientCadenceStatus, cadenceFromLegacyDays, getCadencePreview } from "@/lib/scheduling/cadence";
 import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
 import { getAdherenceEnabled, getTodayAdherence, getTodayMealNames } from "@/lib/queries/adherence";
-import { parsePlanExtras } from "@/types/meal-plan-extras";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,8 +16,7 @@ import { getMyCoachingRequests } from "@/lib/queries/my-requests";
 import { TestimonialPrompt } from "@/components/client/testimonial-prompt";
 import { getTestimonialEligibility } from "@/lib/queries/testimonial-eligibility";
 import { BecomeCoachForm } from "@/components/client/become-coach-form";
-import { CheckInStatus } from "@/components/client/check-in-status";
-import { CheckInScheduleBanner } from "@/components/client/check-in-schedule-banner";
+import { StatusCard, deriveStatusState, type StatusCardData } from "@/components/client/status-card";
 import { TodayAdherence } from "@/components/client/today-adherence";
 import { DeleteCheckInButton } from "@/components/client/delete-check-in-button";
 import { WeightProgress } from "@/components/charts/weight-progress";
@@ -92,19 +90,12 @@ export default async function ClientDashboard() {
     )
     : null;
 
-  const weekStatus: "none" | "submitted" | "reviewed" = !latestCheckIn
-    ? "none"
-    : latestCheckIn.status === "REVIEWED"
-      ? "reviewed"
-      : "submitted";
 
   const todayLabel = dayjs(new Date()).tz(tz).format("MMM D, YYYY");
   const cadencePreview = effectiveCadence ? getCadencePreview(effectiveCadence) : null;
-  const statusLabel = cadenceResult?.label;
   const nextDueLabel = cadencePreview ?? undefined;
 
-  // ── Legacy overrides check using PlanExtras ────────────────────────────────
-  const planExtras = parsePlanExtras(mealPlan?.planExtras);
+
 
   const latestWeight = checkIns.find((c) => c.weight != null);
   const prevWeight = latestWeight
@@ -124,20 +115,67 @@ export default async function ClientDashboard() {
   }
   const coachInitial = coachAssignment?.coach.firstName?.[0] ?? "C";
 
+  // ── iOS-style status derivation ─────────────────────────────────────────
+  const weeklyAdherenceScore = (() => {
+    if (!latestCheckIn) return null;
+    const diet = (latestCheckIn.dietCompliance ?? 0) * 10;
+    const energy = (latestCheckIn.energyLevel ?? 0) * 10;
+    if (latestCheckIn.dietCompliance != null && latestCheckIn.energyLevel != null) {
+      return Math.round(diet * 0.75 + energy * 0.25);
+    }
+    if (latestCheckIn.dietCompliance != null) return diet;
+    if (latestCheckIn.energyLevel != null) return energy;
+    return null;
+  })();
+
+  const statusState = coachAssignment
+    ? deriveStatusState({
+      cadenceStatus: cadenceResult?.status ?? null,
+      weeklyScore: weeklyAdherenceScore,
+      liveScore: null, // live adherence not yet computed server-side
+    })
+    : null;
+
+  // Streak: count consecutive on-track or locked-in check-ins
+  const streakWeeks = (() => {
+    if (statusState === "overdue") return 0;
+    let streak = 0;
+    for (const ci of checkIns) {
+      const d = (ci.dietCompliance ?? 0) * 10;
+      const e = (ci.energyLevel ?? 0) * 10;
+      let score = 70;
+      if (ci.dietCompliance != null && ci.energyLevel != null) {
+        score = Math.round(d * 0.75 + e * 0.25);
+      } else if (ci.dietCompliance != null) {
+        score = d;
+      } else if (ci.energyLevel != null) {
+        score = e;
+      }
+      if (score >= 65) streak++;
+      else break;
+    }
+    return streak;
+  })();
+
+  const statusCardData: StatusCardData | null = statusState
+    ? {
+      state: statusState,
+      streakWeeks,
+      opensCheckIn: cadenceResult?.status === "due" || cadenceResult?.status === "overdue",
+    }
+    : null;
+
   return (
     <div className="space-y-6">
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      {/* ── Masthead (iOS-style) ────────────────────────────────────────────── */}
       <section className="animate-fade-in">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
-              {user.firstName ? `Hey ${user.firstName}` : "Your Week"}
-            </h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
+              STEADFAST
+            </p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
               {todayLabel}
-              {cadencePreview && (
-                <span className="ml-2 text-zinc-600">&middot; {cadencePreview}</span>
-              )}
             </p>
           </div>
 
@@ -145,19 +183,23 @@ export default async function ClientDashboard() {
             const slug = coachAssignment.coach.coachProfile?.slug;
             const isPublished = coachAssignment.coach.coachProfile?.isPublished;
             const badge = (
-              <div className={`flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-zinc-800/80 px-3.5 py-1.5 ${slug && isPublished ? "transition-colors hover:border-white/[0.14] hover:bg-zinc-700/80" : ""}`}>
-                <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-zinc-700">
+              <div className={`sf-glass-card flex items-center gap-2.5 px-3 py-2 ${slug && isPublished ? "transition-colors hover:border-white/[0.16]" : ""}`}>
+                <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full border border-white/[0.12] bg-zinc-800">
                   {coachAvatarUrl ? (
-                    <Image src={coachAvatarUrl} alt="" width={24} height={24} className="h-full w-full object-cover" />
+                    <Image src={coachAvatarUrl} alt="" width={28} height={28} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-zinc-300">
                       {coachInitial}
                     </div>
                   )}
                 </div>
-                <span className="text-xs font-medium text-zinc-400">
-                  {coachAssignment.coach.firstName ? `coached by ${coachAssignment.coach.firstName}` : "Your Coach"}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-semibold text-white leading-tight">
+                    {coachAssignment.coach.firstName ? coachAssignment.coach.firstName.toLowerCase() : "Your Coach"}
+                  </span>
+                  <span className="text-[11px] font-medium text-zinc-400">Coach</span>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 ml-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
               </div>
             );
             return slug && isPublished ? (
@@ -220,33 +262,10 @@ export default async function ClientDashboard() {
         );
       })()}
 
-      {/* Check-in CTA — overdue banner first (most urgent) */}
-      {coachAssignment && cadenceResult && (cadenceResult.status === "due" || cadenceResult.status === "overdue") && (
+      {/* Primary Status Card (iOS-style atmospheric card) */}
+      {statusCardData && (
         <div className="animate-fade-in" style={{ animationDelay: "80ms" }}>
-          <CheckInScheduleBanner
-            cadenceStatus={cadenceResult.status}
-            statusLabel={cadenceResult.label}
-            nextDueLabel={nextDueLabel}
-            latestReviewedCheckInId={latestCheckIn?.status === "REVIEWED" ? latestCheckIn.id : undefined}
-          />
-        </div>
-      )}
-
-      {/* Check-in status (submitted / reviewed / none — suppressed when overdue already shown) */}
-      {cadenceResult?.status !== "overdue" && (
-        <div className="animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <CheckInStatus
-            status={weekStatus}
-            weekLabel={todayLabel}
-            statusLabel={statusLabel}
-            nextDueLabel={nextDueLabel}
-            checkInDate={
-              latestCheckIn
-                ? latestCheckIn.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-                : undefined
-            }
-            checkInId={latestCheckIn?.id}
-          />
+          <StatusCard data={statusCardData} />
         </div>
       )}
 
@@ -367,40 +386,47 @@ export default async function ClientDashboard() {
         </div>
       )}
 
-      {/* Weight */}
+      {/* Weight (Surface card — iOS-style) */}
       {latestWeight?.weight && (
         <section
-          className="animate-fade-in overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1224] p-6"
-          style={{ animationDelay: "180ms" }}
+          className="animate-fade-in sf-surface-card"
+          style={{
+            animationDelay: "180ms",
+            "--sf-card-highlight": "rgba(59, 91, 219, 0.12)",
+            "--sf-card-atmosphere": "#141C2B",
+          } as React.CSSProperties}
           aria-label="Weight overview"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            Current Weight
-          </p>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <p className="font-mono text-4xl font-bold tabular-nums tracking-tight text-zinc-100">
-              {latestWeight.weight}
+          <div className="sf-surface-edge" aria-hidden="true" />
+          <div className="relative z-[1]">
+            <p className="text-[13px] font-bold text-white">
+              Weight Progress
             </p>
-            <span className="text-sm font-medium text-zinc-400">lbs</span>
-            {weightDelta != null && weightDelta !== 0 && (
-              <span
-                className={`ml-2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${weightDelta < 0
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-amber-500/20 text-amber-400"
-                  }`}
-              >
-                {weightDelta < 0 ? "\u2193" : "\u2191"} {Math.abs(weightDelta)} lbs
-              </span>
-            )}
+            <p className="mt-1 text-xs font-semibold text-zinc-400">
+              as of {latestWeight.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </p>
+            <div className="mt-3 flex items-baseline gap-1">
+              <p className="text-[44px] font-black tabular-nums tracking-tight text-white" style={{ fontVariantNumeric: "tabular-nums" }}>
+                {Number(latestWeight.weight).toFixed(1)}
+              </p>
+              <span className="text-sm font-bold text-white/60">LBS</span>
+              {weightDelta != null && weightDelta !== 0 && (
+                <span
+                  className={`ml-3 rounded-full px-2.5 py-0.5 text-xs font-semibold ${weightDelta < 0
+                    ? "bg-emerald-500/20 text-emerald-400"
+                    : "bg-amber-500/20 text-amber-400"
+                    }`}
+                >
+                  {weightDelta < 0 ? "\u2193" : "\u2191"} {Math.abs(weightDelta)} lbs
+                </span>
+              )}
+            </div>
+            <WeightProgress
+              data={weightHistory}
+              clientId={user.id}
+              className="mt-4"
+            />
           </div>
-          <p className="mt-1.5 text-xs text-zinc-500">
-            as of {latestWeight.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-          </p>
-          <WeightProgress
-            data={weightHistory}
-            clientId={user.id}
-            className="mt-5"
-          />
         </section>
       )}
 
