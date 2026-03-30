@@ -112,6 +112,8 @@ export function MessageThread({
       }
     };
 
+    // Poll immediately on mount, then every 4s
+    poll();
     const interval = setInterval(poll, 4000);
     return () => clearInterval(interval);
   }, [expanded, alwaysExpanded, clientId, weekStartDate, removedIds, currentUserId]);
