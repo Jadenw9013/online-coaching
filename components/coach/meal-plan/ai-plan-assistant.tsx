@@ -82,13 +82,13 @@ function mealsToApiFormat(meals: MealGroup[]) {
 function ChangeIcon({ type }: { type: ChangeEntry["type"] }) {
   switch (type) {
     case "added":
-      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-[10px] text-emerald-600">+</span>;
+      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold text-emerald-400">+</span>;
     case "removed":
-      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/15 text-[10px] text-red-500">−</span>;
+      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20 text-[10px] font-bold text-red-400">−</span>;
     case "modified":
-      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/15 text-[10px] text-blue-600">~</span>;
+      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-[10px] font-bold text-blue-400">~</span>;
     case "info":
-      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15 text-[10px] text-amber-600">i</span>;
+      return <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400">i</span>;
   }
 }
 
@@ -137,7 +137,7 @@ export function AiPlanAssistant({
           currentPlan: {
             title: "Meal Plan",
             meals: mealsToApiFormat(currentMeals),
-            extras: currentExtras, // this is legacy, we can keep it here
+            extras: currentExtras,
           },
           instruction: trimmed,
         }),
@@ -151,12 +151,10 @@ export function AiPlanAssistant({
       const data = await response.json();
       const plan = data.plan as ParsedMealPlan;
 
-      // Convert to MealGroups
       const newMeals = parsedPlanToMealGroups(plan);
       const newExtras = extractPlanExtras(plan) as PlanExtras | null;
       const newSupportContent = plan.supportContent ?? null;
 
-      // Diff
       const changes = diffMealPlans(currentMeals, newMeals, currentExtras, newExtras, newSupportContent);
 
       const summary =
@@ -184,11 +182,7 @@ export function AiPlanAssistant({
 
   function handleQuickAction(prompt: string) {
     setInstruction(prompt);
-    if (prompt === "") {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    setTimeout(() => inputRef.current?.focus(), 50);
   }
 
   function resetToIdle() {
@@ -201,30 +195,33 @@ export function AiPlanAssistant({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-md transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Drawer panel */}
+      {/* Drawer panel — dark glass */}
       <div
         ref={panelRef}
-        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl transition-transform duration-300 sm:w-[420px] sm:rounded-l-2xl"
+        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] bg-[#0a0e18]/95 shadow-2xl shadow-black/40 backdrop-blur-2xl transition-transform duration-300 sm:w-[440px] sm:rounded-l-2xl"
+        style={{ WebkitBackdropFilter: "blur(40px) saturate(180%)", backdropFilter: "blur(40px) saturate(180%)" }}
         role="dialog"
         aria-modal="true"
         aria-label="AI Plan Assistant"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-sm text-white shadow-lg shadow-blue-500/25">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {/* Pulse ring */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 opacity-40 animate-ping" style={{ animationDuration: "3s" }} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-900">
+              <h2 className="text-sm font-bold text-zinc-100">
                 AI Plan Editor
               </h2>
-              <p className="text-[11px] text-zinc-400">
+              <p className="text-[11px] text-zinc-500">
                 Modify your plan with natural language
               </p>
             </div>
@@ -232,33 +229,33 @@ export function AiPlanAssistant({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300"
             aria-label="Close AI assistant"
           >
-            ✕
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+        {/* ── Body ── */}
+        <div className="flex-1 overflow-y-auto px-5 py-5">
           {/* ── Idle: Quick actions + input ── */}
           {aiState.phase === "idle" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {/* Quick actions */}
               <div>
-                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                   Quick Actions
                 </p>
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-2">
                   {QUICK_ACTIONS.map((action) => (
                     <button
                       key={action.label}
                       type="button"
                       onClick={() => handleQuickAction(action.prompt)}
-                      className="flex flex-col items-center gap-1 rounded-xl border border-zinc-100 bg-zinc-50/50 px-2 py-2.5 text-center transition-all hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-sm active:scale-[0.97]"
+                      className="group flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-2 py-3 text-center transition-all duration-200 hover:border-blue-500/30 hover:bg-blue-500/[0.08] hover:shadow-lg hover:shadow-blue-500/5 active:scale-[0.96]"
                     >
-          <span className="text-sm">{action.icon}</span>
-                      <span className="text-[11px] font-medium leading-tight text-zinc-600">
+                      <span className="text-zinc-400 transition-colors group-hover:text-blue-400">{action.icon}</span>
+                      <span className="text-[10px] font-medium leading-tight text-zinc-400 transition-colors group-hover:text-zinc-200">
                         {action.label}
                       </span>
                     </button>
@@ -270,7 +267,7 @@ export function AiPlanAssistant({
               <div>
                 <label
                   htmlFor="ai-instruction"
-                  className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-zinc-400"
+                  className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500"
                 >
                   Instruction
                 </label>
@@ -287,9 +284,9 @@ export function AiPlanAssistant({
                   }}
                   placeholder="e.g., Add a bagel to meal 2 on Mondays and Fridays"
                   rows={3}
-                  className="block w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-3 text-base leading-relaxed text-zinc-800 placeholder:text-zinc-400 transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 sm:px-4 sm:text-sm"
+                  className="block w-full resize-none rounded-xl border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 transition-all focus:border-blue-500/40 focus:bg-white/[0.06] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
-                <p className="mt-1.5 text-[11px] text-zinc-400">
+                <p className="mt-2 text-[11px] text-zinc-600">
                   Press Enter to submit · Shift+Enter for new line
                 </p>
               </div>
@@ -301,35 +298,43 @@ export function AiPlanAssistant({
 
           {/* ── Preview ── */}
           {aiState.phase === "preview" && (
-            <div className="space-y-4">
-              {/* Summary */}
-              <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3">
-                <p className="text-xs font-bold text-blue-700">
-                  {aiState.summary}
-                </p>
-                <p className="mt-0.5 text-[11px] text-blue-600/70">
-                  Review the changes below before applying
-                </p>
+            <div className="space-y-5">
+              {/* Summary banner */}
+              <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-300">
+                      {aiState.summary}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-blue-400/60">
+                      Review the changes below before applying
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Change list */}
               {aiState.changes.length > 0 ? (
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Changes ({aiState.changes.length})
                   </p>
                   {aiState.changes.map((change, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-2.5 rounded-lg border border-zinc-100 bg-white px-3 py-2.5"
+                      className="flex items-start gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3 transition-colors hover:bg-white/[0.05]"
+                      style={{ animationDelay: `${i * 50}ms` }}
                     >
                       <ChangeIcon type={change.type} />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-zinc-700">
+                        <p className="text-sm font-medium text-zinc-200">
                           {change.label}
                         </p>
                         {change.detail && (
-                          <p className="mt-0.5 text-xs text-zinc-400">
+                          <p className="mt-0.5 text-xs text-zinc-500">
                             {change.detail}
                           </p>
                         )}
@@ -338,11 +343,11 @@ export function AiPlanAssistant({
                   ))}
                 </div>
               ) : (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                  <p className="text-sm font-medium text-amber-700">
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+                  <p className="text-sm font-medium text-amber-300">
                     No changes detected
                   </p>
-                  <p className="mt-0.5 text-xs text-amber-600/70">
+                  <p className="mt-0.5 text-xs text-amber-400/60">
                     Try a more specific instruction
                   </p>
                 </div>
@@ -350,14 +355,14 @@ export function AiPlanAssistant({
 
               {/* Edit instruction */}
               <div>
-                <p className="mb-1.5 text-[11px] text-zinc-400">
+                <p className="mb-1.5 text-[11px] text-zinc-500">
                   Not right? Update your instruction:
                 </p>
                 <textarea
                   value={instruction}
                   onChange={(e) => setInstruction(e.target.value)}
                   rows={2}
-                  className="block w-full resize-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                  className="block w-full resize-none rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-sm text-zinc-200 transition-all focus:border-blue-500/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -365,35 +370,43 @@ export function AiPlanAssistant({
 
           {/* ── Error ── */}
           {aiState.phase === "error" && (
-            <div className="space-y-4">
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                <p className="text-sm font-bold text-red-700">
-                  Something went wrong
-                </p>
-                <p className="mt-1 text-xs text-red-600/80">
-                  {aiState.message}
-                </p>
+            <div className="space-y-5">
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-red-500/20 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-red-300">
+                      Something went wrong
+                    </p>
+                    <p className="mt-1 text-xs text-red-400/80">
+                      {aiState.message}
+                    </p>
+                  </div>
+                </div>
               </div>
               <textarea
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
                 rows={2}
-                className="block w-full resize-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                className="block w-full resize-none rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-sm text-zinc-200 transition-all focus:border-blue-500/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           )}
         </div>
 
-        {/* Footer actions */}
-        <div className="border-t border-zinc-100 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-4">
+        {/* ── Footer actions ── */}
+        <div className="border-t border-white/[0.08] px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {aiState.phase === "idle" && (
             <button
               type="button"
               onClick={handleSubmit}
               disabled={!instruction.trim()}
-              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none disabled:hover:brightness-100"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-30 disabled:shadow-none disabled:hover:brightness-100"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Apply AI Edit
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Apply AI Edit
             </button>
           )}
 
@@ -401,7 +414,7 @@ export function AiPlanAssistant({
             <button
               type="button"
               onClick={() => setAiState({ phase: "idle" })}
-              className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-50"
+              className="w-full rounded-xl border border-white/[0.10] px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200"
             >
               Cancel
             </button>
@@ -412,23 +425,25 @@ export function AiPlanAssistant({
               <button
                 type="button"
                 onClick={resetToIdle}
-                className="rounded-xl border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 sm:flex-1"
+                className="rounded-xl border border-white/[0.10] px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200 sm:flex-1"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="rounded-xl border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 sm:flex-1"
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.10] px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200 sm:flex-1"
               >
-                ↻ Retry
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                Retry
               </button>
               <button
                 type="button"
                 onClick={handleApply}
                 disabled={aiState.changes.length === 0}
-                className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-emerald-500/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none sm:flex-[2]"
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-emerald-500/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-30 disabled:shadow-none sm:flex-[2]"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 Apply Changes
               </button>
             </div>
@@ -439,16 +454,17 @@ export function AiPlanAssistant({
               <button
                 type="button"
                 onClick={resetToIdle}
-                className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+                className="flex-1 rounded-xl border border-white/[0.10] px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="flex-[2] rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 hover:brightness-110 active:scale-[0.98]"
+                className="flex flex-[2] items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 hover:brightness-110 active:scale-[0.98]"
               >
-                ↻ Try Again
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                Try Again
               </button>
             </div>
           )}

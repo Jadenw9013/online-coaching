@@ -21,17 +21,17 @@ export function AiThinkingAnimation() {
   const stage = STAGES[stageIndex];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Glowing header */}
       <div className="flex items-center gap-3">
         <div className="relative flex h-10 w-10 items-center justify-center">
           {/* Pulsing glow ring */}
-          <div className="absolute inset-0 animate-ping rounded-full bg-blue-500/20" />
-          <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30" />
+          <div className="absolute inset-0 animate-ping rounded-full bg-blue-500/15" style={{ animationDuration: "2s" }} />
+          <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20" />
           <span className="relative text-lg">{stage.icon}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-zinc-800">
+          <p className="text-sm font-semibold text-zinc-200">
             {stage.text}
             <span className="ai-dots ml-0.5">
               <span className="ai-dot">.</span>
@@ -39,21 +39,21 @@ export function AiThinkingAnimation() {
               <span className="ai-dot">.</span>
             </span>
           </p>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[11px] text-zinc-500">
             This usually takes a few seconds
           </p>
         </div>
       </div>
 
       {/* Progress steps */}
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {STAGES.map((s, i) => (
           <div
             key={s.text}
-            className={`h-1 flex-1 rounded-full transition-all duration-700 ${
+            className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
               i <= stageIndex
-                ? "bg-gradient-to-r from-blue-500 to-purple-500"
-                : "bg-zinc-200"
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm shadow-blue-500/20"
+                : "bg-white/[0.06]"
             }`}
           />
         ))}
@@ -64,13 +64,13 @@ export function AiThinkingAnimation() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="ai-shimmer overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50 p-3"
+            className="ai-shimmer overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03] p-3.5"
             style={{ animationDelay: `${i * 200}ms` }}
           >
             <div className="flex items-center gap-3">
-              <div className="h-3 w-16 rounded bg-zinc-200/80" />
-              <div className="h-3 w-24 rounded bg-zinc-200/60" />
-              <div className="ml-auto h-3 w-12 rounded bg-zinc-200/40" />
+              <div className="h-3 w-16 rounded bg-white/[0.08]" />
+              <div className="h-3 w-24 rounded bg-white/[0.06]" />
+              <div className="ml-auto h-3 w-12 rounded bg-white/[0.04]" />
             </div>
           </div>
         ))}
@@ -108,7 +108,7 @@ export function AiThinkingAnimation() {
           background: linear-gradient(
             90deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.04) 50%,
             transparent 100%
           );
           animation: ai-shimmer-sweep 2s infinite;
@@ -119,16 +119,6 @@ export function AiThinkingAnimation() {
           }
           100% {
             transform: translateX(100%);
-          }
-        }
-        @media (prefers-color-scheme: dark) {
-          .ai-shimmer::after {
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(255, 255, 255, 0.04) 50%,
-              transparent 100%
-            );
           }
         }
       `}</style>
