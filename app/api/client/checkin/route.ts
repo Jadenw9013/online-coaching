@@ -114,6 +114,15 @@ export async function POST(req: NextRequest) {
         }),
       ]);
       checkIn = updated;
+
+      // Auto-post check-in message in DM thread
+      try {
+        const checkinDate = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const msgBody = `[CHECKIN:${updated.id}:${checkinDate}]${notes || "Check-in submitted"}`;
+        await db.message.create({
+          data: { clientId: user.id, weekOf: weekDate, senderId: user.id, body: msgBody },
+        });
+      } catch { /* message creation must not break check-in */ }
     } else {
       // New check-in
       checkIn = await db.checkIn.create({
@@ -153,6 +162,17 @@ export async function POST(req: NextRequest) {
           } catch { /* ignore */ }
         }).catch(console.error);
       }
+    }
+
+    // Auto-post check-in message in DM thread (for new check-ins)
+    if (!existingToday || overwriteToday !== true) {
+      try {
+        const checkinDate = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const msgBody = `[CHECKIN:${checkIn.id}:${checkinDate}]${notes || "Check-in submitted"}`;
+        await db.message.create({
+          data: { clientId: user.id, weekOf: weekDate, senderId: user.id, body: msgBody },
+        });
+      } catch { /* message creation must not break check-in */ }
     }
 
     return NextResponse.json({ checkIn: { id: checkIn.id } }, { status: 201 });

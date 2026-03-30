@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { sendMessage } from "@/app/actions/messages";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Message = {
   id: string;
@@ -29,6 +30,74 @@ function Avatar({ name, isCoach }: { name: string; isCoach: boolean }) {
     >
       {initial}
     </div>
+  );
+}
+
+// ── Check-in message parsing ────────────────────────────────────────────────
+
+const CHECKIN_REGEX = /^\[CHECKIN:([a-zA-Z0-9_-]+):([^\]]+)\]([\s\S]*)$/;
+
+function parseCheckInMessage(body: string): { checkInId: string; date: string; notes: string } | null {
+  const match = body.match(CHECKIN_REGEX);
+  if (!match) return null;
+  return { checkInId: match[1], date: match[2], notes: match[3].trim() };
+}
+
+function CheckInCard({
+  checkInId,
+  date,
+  notes,
+  clientId,
+  isCoach,
+}: {
+  checkInId: string;
+  date: string;
+  notes: string;
+  clientId: string;
+  isCoach: boolean;
+}) {
+  const href = isCoach
+    ? `/coach/clients/${clientId}/check-ins/${checkInId}`
+    : `/check-in/new`;
+
+  return (
+    <Link
+      href={href}
+      className="group/checkin block w-full max-w-[320px] rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-blue-500/5 p-3.5 transition-all hover:border-indigo-500/30 hover:from-indigo-500/15 hover:to-blue-500/10 hover:shadow-lg hover:shadow-indigo-500/5"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wide text-indigo-300">
+            Check-In Notes
+          </span>
+          <span className="text-[10px] text-indigo-400/60">· {date}</span>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60 transition-transform group-hover/checkin:translate-x-0.5">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </div>
+
+      {/* Notes body */}
+      {notes && notes !== "Check-in submitted" && (
+        <p className="mt-2.5 line-clamp-3 text-sm leading-relaxed text-zinc-200">
+          {notes}
+        </p>
+      )}
+
+      {/* CTA */}
+      <p className="mt-2.5 text-right text-xs font-medium text-indigo-400 transition-colors group-hover/checkin:text-indigo-300">
+        Tap to review check-in →
+      </p>
+    </Link>
   );
 }
 
@@ -437,18 +506,34 @@ export function MessageThread({
 
                           {/* Bubble + unsend wrapper */}
                           <div className="group/bubble relative">
-                            <div
-                              className={`relative px-3.5 py-2.5 text-sm leading-relaxed ${
-                                isOwn
-                                  ? "rounded-2xl rounded-br-sm bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                                  : "rounded-2xl rounded-bl-sm bg-white/[0.07] backdrop-blur-md text-zinc-100 shadow-sm border border-white/[0.08]"
-                              } ${isOptimistic ? "opacity-70" : ""}`}
-                            >
-                              <p className="whitespace-pre-wrap">{msg.body}</p>
-                            </div>
+                            {(() => {
+                              const checkIn = parseCheckInMessage(msg.body);
+                              if (checkIn) {
+                                return (
+                                  <CheckInCard
+                                    checkInId={checkIn.checkInId}
+                                    date={checkIn.date}
+                                    notes={checkIn.notes}
+                                    clientId={clientId}
+                                    isCoach={currentUserId !== clientId}
+                                  />
+                                );
+                              }
+                              return (
+                                <div
+                                  className={`relative px-3.5 py-2.5 text-sm leading-relaxed ${
+                                    isOwn
+                                      ? "rounded-2xl rounded-br-sm bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                                      : "rounded-2xl rounded-bl-sm bg-white/[0.07] backdrop-blur-md text-zinc-100 shadow-sm border border-white/[0.08]"
+                                  } ${isOptimistic ? "opacity-70" : ""}`}
+                                >
+                                  <p className="whitespace-pre-wrap">{msg.body}</p>
+                                </div>
+                              );
+                            })()}
 
-                            {/* Unsend button — only for own messages, on hover */}
-                            {isOwn && !isOptimistic && (
+                            {/* Unsend button — only for own messages, on hover (not for check-in cards) */}
+                            {isOwn && !isOptimistic && !parseCheckInMessage(msg.body) && (
                               <button
                                 type="button"
                                 onClick={() => handleUnsend(msg.id)}
