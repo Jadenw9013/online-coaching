@@ -168,12 +168,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 }
 
-// ── PUT — update lead status ──────────────────────────────────────────────────
+// ── PUT — update lead status and/or consultation stage ────────────────────────
+
+const VALID_CONSULTATION_STAGES = [
+  "PENDING",
+  "CONSULTATION_SCHEDULED",
+  "CONSULTATION_DONE",
+  "INTAKE_SENT",
+  "INTAKE_SUBMITTED",
+  "FORMS_SENT",
+  "FORMS_SIGNED",
+  "DECLINED",
+] as const;
 
 const updateLeadSchema = z.object({
   status: z
     .enum(["PENDING", "CONTACTED", "CALL_SCHEDULED", "ACCEPTED", "DECLINED", "WAITLISTED"])
     .optional(),
+  stage: z.enum(VALID_CONSULTATION_STAGES).optional(),
+  consultationStage: z.enum(VALID_CONSULTATION_STAGES).optional(),
 });
 
 export async function PUT(req: NextRequest, { params }: Params) {
@@ -199,16 +212,26 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { status } = parsed.data;
+    const { status, stage, consultationStage } = parsed.data;
+    // Accept stage from either "stage" or "consultationStage" field
+    const newStage = stage ?? consultationStage;
 
     const updated = await db.coachingRequest.update({
       where: { id: leadId },
-      data: { ...(status !== undefined && { status }) },
-      select: { id: true, status: true, updatedAt: true },
+      data: {
+        ...(status !== undefined && { status }),
+        ...(newStage !== undefined && { consultationStage: newStage }),
+      },
+      select: { id: true, status: true, consultationStage: true, updatedAt: true },
     });
 
     return NextResponse.json({
-      lead: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt.toISOString() },
+      lead: {
+        id: updated.id,
+        status: updated.status,
+        consultationStage: updated.consultationStage,
+        updatedAt: updated.updatedAt.toISOString(),
+      },
     });
   } catch (err) {
     console.error("[PUT /api/coach/leads/[leadId]]", err);

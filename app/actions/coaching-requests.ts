@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { ConsultationStage } from "@/app/generated/prisma/enums";
 import { sendEmail } from "@/lib/email/sendEmail";
 import {
     requestReceivedEmail,
@@ -828,6 +829,41 @@ const addLeadSchema = z.object({
     goals: z.string().optional(),
     source: z.enum(["REFERRAL", "SOCIAL_MEDIA", "IN_PERSON", "OTHER"]),
 });
+
+const PREVIOUS_STAGE: Record<string, string> = {
+    CONSULTATION_SCHEDULED: "PENDING",
+    CONSULTATION_DONE: "CONSULTATION_SCHEDULED",
+    INTAKE_SENT: "CONSULTATION_DONE",
+    INTAKE_SUBMITTED: "INTAKE_SENT",
+    FORMS_SENT: "INTAKE_SUBMITTED",
+    FORMS_SIGNED: "FORMS_SENT",
+};
+
+export async function goBackStage(requestId: string) {
+    const { getCurrentDbUser } = await import("@/lib/auth/roles");
+    const user = await getCurrentDbUser();
+    if (!user.isCoach) throw new Error("Unauthorized");
+
+    const request = await db.coachingRequest.findUnique({
+        where: { id: requestId },
+        include: { coachProfile: true },
+    });
+    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+
+    const prev = PREVIOUS_STAGE[request.consultationStage];
+    if (!prev) {
+        throw new Error(`Cannot go back from ${request.consultationStage}`);
+    }
+
+    await db.coachingRequest.update({
+        where: { id: requestId },
+        data: { consultationStage: prev as ConsultationStage },
+    });
+
+    revalidatePath("/coach/leads");
+    revalidatePath(`/coach/leads/${requestId}`);
+    return { success: true, stage: prev };
+}
 
 export async function addLeadManually(input: z.input<typeof addLeadSchema>) {
     const { getCurrentDbUser } = await import("@/lib/auth/roles");

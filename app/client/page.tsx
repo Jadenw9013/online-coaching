@@ -54,6 +54,81 @@ export default async function ClientDashboard() {
 
   const tz = user.timezone || "America/Los_Angeles";
   const todayDate = getLocalDate(new Date(), tz);
+  const todayLabel = dayjs(new Date()).tz(tz).format("MMM D, YYYY");
+
+  // ── No-coach state: early return with focused layout ──────────────────────
+  if (!coachAssignment) {
+    const [myRequests, checkIns] = await Promise.all([
+      getMyCoachingRequests(),
+      getClientCheckInsLight(user.id),
+    ]);
+    return (
+      <div className="space-y-6">
+        <section className="animate-fade-in">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/80">STEADFAST</p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-zinc-500">{todayLabel}</p>
+          </div>
+        </section>
+
+        {myRequests.length > 0 && <MyRequestsCard requests={myRequests} />}
+
+        <section className="animate-fade-in" style={{ animationDelay: "60ms" }}>
+          <div className="flex flex-col items-center gap-5 rounded-2xl border border-blue-500/20 bg-blue-500/[0.05] px-6 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-500/10">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-bold text-white">Find Your Coach</h2>
+              <p className="text-sm text-zinc-400">Browse coaches, send a request, and get started on your fitness journey.</p>
+            </div>
+            <Link
+              href="/coaches"
+              className="sf-button-primary block w-full text-center"
+              style={{ minHeight: "48px" }}
+            >
+              Browse Coaches
+            </Link>
+          </div>
+        </section>
+
+        {checkIns.length > 0 && (
+          <section className="animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <p className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">Your Previous Data</p>
+            <div className="space-y-2">
+              {checkIns.slice(0, 5).map((checkIn) => {
+                const dateLabel = checkIn.submittedAt.toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", year: "numeric",
+                });
+                return (
+                  <Link
+                    key={checkIn.id}
+                    href={`/client/check-ins/${checkIn.id}`}
+                    className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
+                    style={{ minHeight: "52px" }}
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-zinc-200">{dateLabel}</p>
+                      {checkIn.weight && (
+                        <p className="text-xs text-zinc-500">{Number(checkIn.weight).toFixed(1)} lbs</p>
+                      )}
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {!user.isCoach && (
+          <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
+            <BecomeCoachForm />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const [checkIns, mealPlan, latestCoachMessage, weightHistory, trainingProgram, pendingIntake, adherenceEnabled, todayAdherence, planMeals] = await Promise.all([
     getClientCheckInsLight(user.id),
@@ -92,7 +167,6 @@ export default async function ClientDashboard() {
     : null;
 
 
-  const todayLabel = dayjs(new Date()).tz(tz).format("MMM D, YYYY");
   const cadencePreview = effectiveCadence ? getCadencePreview(effectiveCadence) : null;
   const nextDueLabel = cadencePreview ?? undefined;
 
@@ -210,16 +284,6 @@ export default async function ClientDashboard() {
         </div>
       </section>
 
-      {/* Coach connection (only if no coach) */}
-      {!coachAssignment && (
-        <>
-          {await (async () => {
-            const myRequests = await getMyCoachingRequests();
-            return myRequests.length > 0 ? <MyRequestsCard requests={myRequests} /> : null;
-          })()}
-          <ConnectCoachBanner />
-        </>
-      )}
 
       {/* Intake questionnaire banner */}
       {pendingIntake && (pendingIntake.status === "PENDING" || pendingIntake.status === "IN_PROGRESS") && (

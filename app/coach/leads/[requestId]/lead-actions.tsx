@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { markContacted, scheduleConsultation, acceptClient, declineRequest, resendInvite, updateConsultationStage, bypassPipelineAndActivate, activateClient } from "@/app/actions/coaching-requests";
-import { sendIntakePacket } from "@/app/actions/intake";
+import { useState, useTransition, useRef } from "react";
+import { markContacted, scheduleConsultation, acceptClient, declineRequest, resendInvite, updateConsultationStage, bypassPipelineAndActivate, activateClient, goBackStage } from "@/app/actions/coaching-requests";
+import { sendIntakePacket, sendFormsForSignature } from "@/app/actions/intake";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -18,9 +18,10 @@ type LeadActionsProps = {
     existingMeeting?: { meetingLink: string | null; scheduledTime: Date | null; notes: string | null } | null;
     activeDocuments?: { id: string; title: string; type: string }[];
     intakePacketSentAt?: string | null;
+    coachNotes?: string | null;
 };
 
-export function LeadActions({ requestId, status, prospectId, prospectName, consultationStage, consultationDate, formsSignedAt, prospectEmailAddr, existingMeeting, activeDocuments, intakePacketSentAt }: LeadActionsProps) {
+export function LeadActions({ requestId, status, prospectId, prospectName, consultationStage, consultationDate, formsSignedAt, prospectEmailAddr, existingMeeting, activeDocuments, intakePacketSentAt, coachNotes }: LeadActionsProps) {
     const [pending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -33,6 +34,38 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
     );
     const [notes, setNotes] = useState(existingMeeting?.notes ?? "");
     const router = useRouter();
+
+    // ── Coach notes auto-save ─────────────────────────────────────────────────
+    const [localNotes, setLocalNotes] = useState(coachNotes ?? "");
+    const [notesSaveState, setNotesSaveState] = useState<"idle" | "saving" | "saved">("idle");
+    const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    function handleNotesBlur() {
+        if (localNotes === (coachNotes ?? "")) return;
+        setNotesSaveState("saving");
+        if (notesTimerRef.current) clearTimeout(notesTimerRef.current);
+        fetch(`/api/coach/leads/${requestId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ coachNotes: localNotes }),
+        }).then(() => {
+            setNotesSaveState("saved");
+            notesTimerRef.current = setTimeout(() => setNotesSaveState("idle"), 2500);
+        }).catch(() => {
+            setNotesSaveState("idle");
+        });
+    }
+
+    // ── Stage-based primary CTA ───────────────────────────────────────────────
+    const PREV_STAGE: Record<string, string> = {
+        CONSULTATION_SCHEDULED: "PENDING",
+        CONSULTATION_DONE: "CONSULTATION_SCHEDULED",
+        INTAKE_SENT: "CONSULTATION_DONE",
+        INTAKE_SUBMITTED: "INTAKE_SENT",
+        FORMS_SENT: "INTAKE_SUBMITTED",
+        FORMS_SIGNED: "FORMS_SENT",
+    };
+    const canGoBack = !!PREV_STAGE[consultationStage];
 
     function run(action: () => Promise<unknown>) {
         setError(null);
@@ -57,10 +90,109 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
     const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(consultationStage);
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {error && (
                 <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>
             )}
+
+            {/* ── Coach Notes (private) ── */}
+            <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                    <label htmlFor="coachNotesTA" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                        Coach Notes <span className="font-normal normal-case tracking-normal text-zinc-600">(private)</span>
+                    </label>
+                    {notesSaveState === "saving" && <span className="text-xs text-zinc-500">Saving…</span>}
+                    {notesSaveState === "saved" && <span className="text-xs text-emerald-400">Saved</span>}
+                </div>
+                <textarea
+                    id="coachNotesTA"
+                    rows={3}
+                    value={localNotes}
+                    onChange={(e) => setLocalNotes(e.target.value)}
+                    onBlur={handleNotesBlur}
+                    placeholder="Internal notes about this prospect…"
+                    className="sf-textarea w-full"
+                    style={{ fontSize: "max(1rem, 16px)" }}
+                />
+            </div>
+
+            {/* ── Stage-based primary CTA ── */}
+            {consultationStage !== "ACTIVE" && consultationStage !== "DECLINED" && (
+                <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Next Step</p>
+
+                    {consultationStage === "PENDING" && (
+                        <button
+                            disabled={pending}
+                            onClick={() => run(() => markContacted(requestId))}
+                            className="sf-button-secondary w-full disabled:opacity-50"
+                            style={{ minHeight: "48px" }}
+                        >
+                            Mark as Contacted
+                        </button>
+                    )}
+
+                    {consultationStage === "CONSULTATION_SCHEDULED" && (
+                        <button
+                            disabled={pending}
+                            onClick={() => run(() => updateConsultationStage({ requestId, stage: "CONSULTATION_DONE" }))}
+                            className="sf-button-secondary w-full disabled:opacity-50"
+                            style={{ minHeight: "48px" }}
+                        >
+                            Mark Consultation Done
+                        </button>
+                    )}
+
+                    {consultationStage === "CONSULTATION_DONE" && (
+                        <SendIntakePacketSection
+                            requestId={requestId}
+                            activeDocuments={activeDocuments ?? []}
+                        />
+                    )}
+
+                    {consultationStage === "INTAKE_SUBMITTED" && (
+                        <button
+                            disabled={pending}
+                            onClick={() => run(() => sendFormsForSignature({ requestId }))}
+                            className="sf-button-secondary w-full disabled:opacity-50"
+                            style={{ minHeight: "48px" }}
+                        >
+                            Send Documents for Signature
+                        </button>
+                    )}
+
+                    {consultationStage === "FORMS_SIGNED" && (
+                        <ActivateSection
+                            requestId={requestId}
+                            prospectName={prospectName}
+                            prospectEmailAddr={prospectEmailAddr}
+                            formsSignedAt={formsSignedAt}
+                        />
+                    )}
+                </div>
+            )}
+
+            {consultationStage === "ACTIVE" && (
+                <p className="flex items-center gap-2 text-sm text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Active client
+                </p>
+            )}
+
+            {/* ── Go Back a Step ── */}
+            {canGoBack && (
+                <div className="border-t border-white/[0.06] pt-3">
+                    <button
+                        disabled={pending}
+                        onClick={() => run(() => goBackStage(requestId))}
+                        className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300 disabled:opacity-50"
+                    >
+                        ← Go Back a Step
+                    </button>
+                </div>
+            )}
+
+            <div className="border-t border-white/[0.06] pt-3 space-y-3">
 
             {!isTerminal && (
                 <div className="flex flex-wrap gap-2">
@@ -362,6 +494,7 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     )}
                 </div>
             )}
+            </div>{/* end: old actions wrapper */}
         </div>
     );
 }

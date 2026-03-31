@@ -23,6 +23,8 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
     const lead = await db.coachingRequest.findUnique({
         where: { id: requestId },
         include: { consultationMeeting: true },
+        // Note: uses include (not select) because consultationMeeting needs relation.
+        // coachNotes is a scalar field — safe to access directly.
     });
 
     if (!lead || lead.coachProfileId !== profile.id) notFound();
@@ -161,6 +163,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     } : null}
                     activeDocuments={activeDocuments}
                     intakePacketSentAt={intakePacket?.sentAt?.toISOString() ?? null}
+                    coachNotes={lead.coachNotes ?? null}
                 />
             </div>
         </div>

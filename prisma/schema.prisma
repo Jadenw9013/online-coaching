@@ -749,6 +749,8 @@ model CoachingRequest {
   inviteLastSentAt DateTime?     // Last time invite/sign-up email was sent
   inviteSendCount  Int      @default(0) // Total invite sends (initial approval + resends)
 
+  coachNotes          String?  @db.Text
+
   formsToken          String?  @unique
   formsTokenExpiresAt DateTime?
   formsSentAt         DateTime?
