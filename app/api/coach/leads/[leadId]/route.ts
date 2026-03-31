@@ -129,15 +129,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 // ── PATCH — update coach notes, intake answers, and/or stage ──────────────────
 
-const intakeAnswersSchema = z.object({
-  goals: z.string().optional(),
-  experience: z.string().optional(),
-  injuries: z.string().optional(),
-}).optional();
-
+// intakeAnswers accepts any JSON shape:
+//   Legacy:      { goals, experience, injuries }
+//   Structured:  { sections: [{ sectionId, sectionTitle, answers: [{ questionId, questionLabel, value }] }] }
 const patchSchema = z.object({
   coachNotes: z.string().max(5000).optional(),
-  intakeAnswers: intakeAnswersSchema,
+  intakeAnswers: z.record(z.string(), z.unknown()).optional(),
   consultationStage: z.string().optional(),
 });
 
