@@ -5,20 +5,176 @@ import { db } from "@/lib/db";
 
 type Params = { params: Promise<{ leadId: string }> };
 
-const updateLeadSchema = z.object({
-  status: z
-    .enum([
-      "PENDING",
-      "CONTACTED",
-      "CALL_SCHEDULED",
-      "ACCEPTED",
-      "DECLINED",
-      "WAITLISTED",
-    ])
-    .optional(),
+async function verifyOwnership(user: Awaited<ReturnType<typeof getCurrentDbUser>>, leadId: string) {
+  const profile = await db.coachProfile.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  if (!profile) return null;
+
+  const lead = await db.coachingRequest.findUnique({
+    where: { id: leadId },
+    select: { coachProfileId: true },
+  });
+  if (!lead || lead.coachProfileId !== profile.id) return null;
+  return profile;
+}
+
+// ── GET — full lead detail ────────────────────────────────────────────────────
+
+export async function GET(_req: NextRequest, { params }: Params) {
+  let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
+  try {
+    user = await getCurrentDbUser();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.isCoach) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  try {
+    const { leadId } = await params;
+
+    const profile = await db.coachProfile.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+    if (!profile) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const lead = await db.coachingRequest.findUnique({
+      where: { id: leadId },
+      select: {
+        id: true,
+        prospectName: true,
+        prospectEmail: true,
+        prospectEmailAddr: true,
+        prospectPhone: true,
+        status: true,
+        consultationStage: true,
+        source: true,
+        sourceDetail: true,
+        coachNotes: true,
+        intakeAnswers: true,
+        createdAt: true,
+        updatedAt: true,
+        formsSentAt: true,
+        formsSignedAt: true,
+        prospectId: true,
+        coachProfileId: true,
+        intakePacket: {
+          select: { id: true, sentAt: true, submittedAt: true, formAnswers: true },
+        },
+        formSubmission: {
+          select: { status: true, completedAt: true },
+        },
+        signature: {
+          select: { signedAt: true },
+        },
+      },
+    });
+
+    if (!lead || lead.coachProfileId !== profile.id) {
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    }
+
+    const intakeStatus = lead.intakePacket
+      ? lead.intakePacket.submittedAt
+        ? "SUBMITTED"
+        : "SENT"
+      : "NOT_SENT";
+
+    const documentsStatus = lead.formsSignedAt
+      ? "SIGNED"
+      : lead.formsSentAt
+      ? "SENT"
+      : "NOT_SENT";
+
+    return NextResponse.json({
+      lead: {
+        id: lead.id,
+        prospectName: lead.prospectName,
+        prospectEmail: lead.prospectEmail,
+        prospectEmailAddr: lead.prospectEmailAddr,
+        prospectPhone: lead.prospectPhone,
+        status: lead.status,
+        consultationStage: lead.consultationStage,
+        source: lead.source,
+        sourceDetail: lead.sourceDetail,
+        coachNotes: lead.coachNotes,
+        intakeAnswers: lead.intakeAnswers,
+        createdAt: lead.createdAt.toISOString(),
+        updatedAt: lead.updatedAt.toISOString(),
+        formsSentAt: lead.formsSentAt?.toISOString() ?? null,
+        formsSignedAt: lead.formsSignedAt?.toISOString() ?? null,
+        prospectId: lead.prospectId,
+        intakeStatus,
+        documentsStatus,
+        intakePacket: lead.intakePacket
+          ? {
+              id: lead.intakePacket.id,
+              sentAt: lead.intakePacket.sentAt.toISOString(),
+              submittedAt: lead.intakePacket.submittedAt?.toISOString() ?? null,
+            }
+          : null,
+        formSubmission: lead.formSubmission
+          ? { status: lead.formSubmission.status, completedAt: lead.formSubmission.completedAt?.toISOString() ?? null }
+          : null,
+        signature: lead.signature ? { signedAt: lead.signature.signedAt.toISOString() } : null,
+      },
+    });
+  } catch (err) {
+    console.error("[GET /api/coach/leads/[leadId]]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// ── PATCH — update coach notes ────────────────────────────────────────────────
+
+const patchSchema = z.object({
+  coachNotes: z.string().max(5000),
 });
 
-// ── PUT — update lead stage / status ─────────────────────────────────────────
+export async function PATCH(req: NextRequest, { params }: Params) {
+  let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
+  try {
+    user = await getCurrentDbUser();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.isCoach) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  try {
+    const { leadId } = await params;
+    const profile = await verifyOwnership(user, leadId);
+    if (!profile) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+
+    const body = await req.json();
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 422 });
+    }
+
+    const updated = await db.coachingRequest.update({
+      where: { id: leadId },
+      data: { coachNotes: parsed.data.coachNotes },
+      select: { id: true, coachNotes: true, updatedAt: true },
+    });
+
+    return NextResponse.json({
+      lead: { id: updated.id, coachNotes: updated.coachNotes, updatedAt: updated.updatedAt.toISOString() },
+    });
+  } catch (err) {
+    console.error("[PATCH /api/coach/leads/[leadId]]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// ── PUT — update lead status ──────────────────────────────────────────────────
+
+const updateLeadSchema = z.object({
+  status: z
+    .enum(["PENDING", "CONTACTED", "CALL_SCHEDULED", "ACCEPTED", "DECLINED", "WAITLISTED"])
+    .optional(),
+});
 
 export async function PUT(req: NextRequest, { params }: Params) {
   let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
@@ -27,33 +183,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  if (!user.isCoach) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!user.isCoach) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
     const { leadId } = await params;
-
-    // Verify ownership via coachProfile
-    const profile = await db.coachProfile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-    if (!profile) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const lead = await db.coachingRequest.findUnique({
-      where: { id: leadId },
-      select: { coachProfileId: true },
-    });
-    if (!lead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
-    if (lead.coachProfileId !== profile.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const profile = await verifyOwnership(user, leadId);
+    if (!profile) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
     const body = await req.json();
     const parsed = updateLeadSchema.safeParse(body);
@@ -68,28 +203,15 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const updated = await db.coachingRequest.update({
       where: { id: leadId },
-      data: {
-        ...(status !== undefined && { status }),
-      },
-      select: {
-        id: true,
-        status: true,
-        updatedAt: true,
-      },
+      data: { ...(status !== undefined && { status }) },
+      select: { id: true, status: true, updatedAt: true },
     });
 
     return NextResponse.json({
-      lead: {
-        id: updated.id,
-        status: updated.status,
-        updatedAt: updated.updatedAt.toISOString(),
-      },
+      lead: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt.toISOString() },
     });
   } catch (err) {
     console.error("[PUT /api/coach/leads/[leadId]]", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
