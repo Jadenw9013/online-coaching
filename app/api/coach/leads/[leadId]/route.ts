@@ -127,10 +127,18 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 }
 
-// ── PATCH — update coach notes ────────────────────────────────────────────────
+// ── PATCH — update coach notes, intake answers, and/or stage ──────────────────
+
+const intakeAnswersSchema = z.object({
+  goals: z.string().optional(),
+  experience: z.string().optional(),
+  injuries: z.string().optional(),
+}).optional();
 
 const patchSchema = z.object({
-  coachNotes: z.string().max(5000),
+  coachNotes: z.string().max(5000).optional(),
+  intakeAnswers: intakeAnswersSchema,
+  consultationStage: z.string().optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: Params) {
@@ -153,14 +161,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Invalid input" }, { status: 422 });
     }
 
+    const data: Record<string, unknown> = {};
+    if (parsed.data.coachNotes !== undefined) data.coachNotes = parsed.data.coachNotes;
+    if (parsed.data.intakeAnswers !== undefined) data.intakeAnswers = parsed.data.intakeAnswers;
+    if (parsed.data.consultationStage !== undefined) data.consultationStage = parsed.data.consultationStage;
+
     const updated = await db.coachingRequest.update({
       where: { id: leadId },
-      data: { coachNotes: parsed.data.coachNotes },
-      select: { id: true, coachNotes: true, updatedAt: true },
+      data,
+      select: { id: true, coachNotes: true, intakeAnswers: true, consultationStage: true, updatedAt: true },
     });
 
     return NextResponse.json({
-      lead: { id: updated.id, coachNotes: updated.coachNotes, updatedAt: updated.updatedAt.toISOString() },
+      lead: {
+        id: updated.id,
+        coachNotes: updated.coachNotes,
+        intakeAnswers: updated.intakeAnswers,
+        consultationStage: updated.consultationStage,
+        updatedAt: updated.updatedAt.toISOString(),
+      },
     });
   } catch (err) {
     console.error("[PATCH /api/coach/leads/[leadId]]", err);
