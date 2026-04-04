@@ -26,7 +26,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         prospectPhone: string | null; prospectEmailAddr: string | null; prospectId: string | null;
         intakeAnswers: unknown; status: string; consultationStage: string;
         consultationDate: string | null; formsSignedAt: string | null;
-        source: string | null; coachNotes: string | null; createdAt: string; updatedAt: string;
+        source: string | null; createdAt: string; updatedAt: string;
     };
 
     let lead: LeadRow | null = null;
@@ -35,7 +35,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         const leadRows = await db.$queryRawUnsafe<LeadRow[]>(
             `SELECT "id","coachProfileId","prospectName","prospectEmail","prospectPhone",
                     "prospectEmailAddr","prospectId","intakeAnswers","status","consultationStage",
-                    "consultationDate","formsSignedAt","source","coachNotes","createdAt","updatedAt"
+                    "consultationDate","formsSignedAt","source","createdAt","updatedAt"
              FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
         );
         lead = leadRows[0] ?? null;
@@ -296,7 +296,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     } : null}
                     activeDocuments={activeDocuments}
                     intakePacketSentAt={intakePacketSentAt}
-                    coachNotes={lead.coachNotes ?? null}
+                    coachNotes={null}
                 />
             </div>
         </div>
