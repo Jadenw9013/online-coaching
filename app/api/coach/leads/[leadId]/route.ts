@@ -121,9 +121,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
         signature: lead.signature ? { signedAt: lead.signature.signedAt.toISOString() } : null,
       },
     });
-  } catch (err) {
-    console.error("[GET /api/coach/leads/[leadId]]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[GET /api/coach/leads/[leadId]]", msg, err);
+    return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 });
   }
 }
 

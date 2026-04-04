@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
-import { sendEmail } from "@/lib/email/sendEmail";
 
 type Params = { params: Promise<{ leadId: string }> };
 
@@ -20,24 +18,24 @@ export async function POST(_req: NextRequest, { params }: Params) {
   try {
     const { leadId } = await params;
 
+    // 1. Get coach profile
     const profile = await db.coachProfile.findUnique({
       where: { userId: user.id },
       select: { id: true },
     });
     if (!profile) return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
 
+    // 2. Fetch the lead (read-only — safe with adapter-pg)
     const request = await db.coachingRequest.findUnique({
       where: { id: leadId },
       select: {
         id: true,
         coachProfileId: true,
-        status: true,
         consultationStage: true,
         prospectName: true,
         prospectEmail: true,
         prospectPhone: true,
         prospectEmailAddr: true,
-        prospectId: true,
       },
     });
 
@@ -52,7 +50,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ success: false, message: "This lead was declined." }, { status: 409 });
     }
 
-    // Find the prospect's User account
+    // 3. Find the prospect's User account
     const email = request.prospectEmailAddr ?? null;
     const phone = (request.prospectPhone ?? request.prospectEmail ?? "").replace(/\D/g, "");
     let existingUser = email
@@ -71,14 +69,16 @@ export async function POST(_req: NextRequest, { params }: Params) {
       }, { status: 422 });
     }
 
-    // Idempotent CoachClient creation (raw SQL to avoid adapter-pg issues)
+    // 4. Create CoachClient link (idempotent — ON CONFLICT DO NOTHING)
+    //    CoachClient table has: id, coachId, clientId, coachNotes, checkInDaysOfWeekOverride,
+    //    cadenceConfig, adherenceEnabled, sortOrder, createdAt (NO updatedAt)
     await db.$executeRaw`
-      INSERT INTO "CoachClient" ("id", "coachId", "clientId", "coachNotes", "createdAt", "updatedAt")
-      VALUES (gen_random_uuid()::text, ${user.id}, ${existingUser.id}, 'Activated via pipeline bypass.', NOW(), NOW())
+      INSERT INTO "CoachClient" ("id", "coachId", "clientId", "coachNotes", "createdAt")
+      VALUES (gen_random_uuid()::text, ${user.id}, ${existingUser.id}, 'Activated via pipeline bypass.', NOW())
       ON CONFLICT ("coachId", "clientId") DO NOTHING
     `;
 
-    // Update the coaching request to ACTIVE
+    // 5. Update the coaching request to ACTIVE
     await db.$executeRaw`
       UPDATE "CoachingRequest"
       SET "consultationStage" = 'ACTIVE'::"ConsultationStage",
@@ -88,19 +88,20 @@ export async function POST(_req: NextRequest, { params }: Params) {
       WHERE "id" = ${leadId}
     `;
 
-    // Send welcome email (fire-and-forget)
+    // 6. Send welcome email (fire-and-forget — never blocks)
     try {
+      const { sendEmail } = await import("@/lib/email/sendEmail");
       const { coachConnectedEmail } = await import("@/lib/email/templates");
       const emailContent = coachConnectedEmail(
         existingUser.firstName || request.prospectName,
         user.firstName || "Your coach"
       );
-      sendEmail({ to: existingUser.email, ...emailContent }).catch(console.error);
+      sendEmail({ to: existingUser.email, ...emailContent }).catch(() => {});
     } catch { /* email failure must not block */ }
 
-    // Revalidate cache (may throw in edge/API contexts — non-blocking)
-    try { revalidatePath("/coach/leads"); } catch {}
-    try { revalidatePath("/coach/dashboard"); } catch {}
+    // 7. Revalidate cache (non-blocking — may throw in edge contexts)
+    try { const { revalidatePath } = await import("next/cache"); revalidatePath("/coach/leads"); } catch {}
+    try { const { revalidatePath } = await import("next/cache"); revalidatePath("/coach/dashboard"); } catch {}
 
     return NextResponse.json({
       success: true,
