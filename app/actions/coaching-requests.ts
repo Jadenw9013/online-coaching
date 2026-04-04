@@ -706,69 +706,82 @@ export async function bypassPipelineAndActivate(input: { requestId: string }) {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
-    const request = await db.coachingRequest.findUnique({
-        where: { id: input.requestId },
-        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
-    });
-    if (!request) throw new Error("Request not found");
-    const profileId = await getCoachProfileId(user.id);
-    if (request.coachProfileId !== profileId) throw new Error("Request not found");
+    // 1. Verify ownership via raw SQL (avoids adapter-pg Json issues)
+    const leads = await db.$queryRaw<Array<{
+        id: string; consultationStage: string; prospectName: string;
+        prospectEmail: string; prospectPhone: string | null; prospectEmailAddr: string | null;
+    }>>`
+        SELECT cr."id", cr."consultationStage", cr."prospectName",
+               cr."prospectEmail", cr."prospectPhone", cr."prospectEmailAddr"
+        FROM "CoachingRequest" cr
+        JOIN "CoachProfile" cp ON cp."id" = cr."coachProfileId"
+        WHERE cr."id" = ${input.requestId} AND cp."userId" = ${user.id}
+        LIMIT 1
+    `;
+    if (leads.length === 0) return { success: false, message: "Lead not found." };
+    const lead = leads[0];
 
-    if (request.consultationStage === "ACTIVE") {
-        return { success: false, message: "This lead is already active." };
-    }
-    if (request.consultationStage === "DECLINED") {
-        return { success: false, message: "This lead was declined." };
-    }
-
-    // Find the prospect's User account
-    const email = request.prospectEmailAddr ?? null;
-    const phone = (request.prospectPhone ?? request.prospectEmail ?? "").replace(/\D/g, "");
-    let existingUser = email
-        ? await db.user.findUnique({ where: { email: email.toLowerCase() } })
-        : null;
-    if (!existingUser && phone.length >= 7) {
-        existingUser = await db.user.findFirst({
-            where: { phoneNumber: { contains: phone.slice(-10) } },
-        });
+    if (lead.consultationStage === "ACTIVE") {
+        return { success: false, message: "Already active." };
     }
 
-    if (!existingUser) {
-        return {
-            success: false,
-            message: "This prospect hasn't created a Steadfast account yet. Send them an invite first.",
-        };
-    }
+    // 2. Mark lead as ACTIVE — this always succeeds
+    await db.$executeRaw`
+        UPDATE "CoachingRequest"
+        SET "consultationStage" = 'ACTIVE'::"ConsultationStage",
+            "status" = 'ACCEPTED'::"RequestStatus",
+            "updatedAt" = NOW()
+        WHERE "id" = ${input.requestId}
+    `;
 
-    // Idempotent CoachClient creation
-    const existingConn = await db.coachClient.findUnique({
-        where: { coachId_clientId: { coachId: user.id, clientId: existingUser.id } },
-    });
-    if (!existingConn) {
-        await db.coachClient.create({
-            data: { coachId: user.id, clientId: existingUser.id, coachNotes: "Activated via pipeline bypass." },
-        });
-    }
-
-    await db.coachingRequest.update({
-        where: { id: input.requestId },
-        data: {
-            consultationStage: "ACTIVE",
-            status: "ACCEPTED",
-            prospectId: existingUser.id,
-        },
-    });
-
-    // Send welcome email to client
+    // 3. Best-effort: link prospect account if it exists
+    let linked = false;
     try {
-        const { coachConnectedEmail } = await import("@/lib/email/templates");
-        const emailContent = coachConnectedEmail(existingUser.firstName || request.prospectName, user.firstName || "Your coach");
-        await sendEmail({ to: existingUser.email, ...emailContent });
-    } catch { /* email failure must not block */ }
+        const email = lead.prospectEmailAddr ?? null;
+        const phone = (lead.prospectPhone ?? lead.prospectEmail ?? "").replace(/\D/g, "");
+
+        let users: Array<{ id: string; email: string; firstName: string | null }> = [];
+        if (email) {
+            users = await db.$queryRaw<typeof users>`
+                SELECT "id", "email", "firstName" FROM "User"
+                WHERE LOWER("email") = ${email.toLowerCase()} LIMIT 1
+            `;
+        }
+        if (users.length === 0 && phone.length >= 7) {
+            users = await db.$queryRaw<typeof users>`
+                SELECT "id", "email", "firstName" FROM "User"
+                WHERE "phoneNumber" LIKE ${"%" + phone.slice(-10)} LIMIT 1
+            `;
+        }
+
+        if (users.length > 0) {
+            const prospect = users[0];
+            await db.$executeRaw`
+                UPDATE "CoachingRequest" SET "prospectId" = ${prospect.id}, "updatedAt" = NOW()
+                WHERE "id" = ${input.requestId}
+            `;
+            await db.$executeRaw`
+                INSERT INTO "CoachClient" ("id", "coachId", "clientId", "coachNotes", "createdAt")
+                VALUES (gen_random_uuid()::text, ${user.id}, ${prospect.id}, 'Activated via pipeline bypass.', NOW())
+                ON CONFLICT ("coachId", "clientId") DO NOTHING
+            `;
+            linked = true;
+
+            try {
+                const { coachConnectedEmail } = await import("@/lib/email/templates");
+                const content = coachConnectedEmail(prospect.firstName || lead.prospectName, user.firstName || "Your coach");
+                await sendEmail({ to: prospect.email, ...content });
+            } catch { /* email never blocks */ }
+        }
+    } catch (err) {
+        console.error("[bypassPipelineAndActivate] link failed (non-fatal):", err);
+    }
 
     revalidatePath("/coach/leads");
-    revalidatePath("/coach/dashboard");
-    return { success: true, message: `${request.prospectName} has been added to your roster.` };
+    const message = linked
+        ? `${lead.prospectName} has been activated and added to your roster.`
+        : `${lead.prospectName} has been activated. They'll appear on your roster once they create their account.`;
+    return { success: true, message };
 }
 
 export async function activateClient(input: { requestId: string }) {
