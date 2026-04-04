@@ -113,9 +113,10 @@ export function LeadActions({
 
     const stage = consultationStage;
     const canGoBack = !!PREV_STAGE[stage];
-    const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(stage);
     const isActive = stage === "ACTIVE";
     const isDeclined = stage === "DECLINED" || status === "DECLINED" || status === "REJECTED";
+    // Bypass is available from any non-terminal stage — the whole point is to skip remaining steps
+    const bypassEligible = !isActive && !isDeclined;
 
     return (
         <div className="space-y-4">
