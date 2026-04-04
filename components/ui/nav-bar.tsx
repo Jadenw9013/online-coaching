@@ -35,7 +35,6 @@ export function NavBar({
       : [
         ...(!hasCoach ? [
           { href: "/coaches", label: "Find a Coach" },
-          { href: "/client/saved-coaches", label: "Saved" },
         ] : []),
         { href: "/client/plan", label: "Plan" },
         { href: "/client/messages", label: "Messages" },

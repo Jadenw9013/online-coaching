@@ -12,6 +12,13 @@ import {
     waitlistConfirmationEmail,
 } from "@/lib/email/templates";
 
+/** Resolve the current coach's CoachProfile.id (cached per request via Prisma). */
+async function getCoachProfileId(userId: string): Promise<string> {
+    const profile = await db.coachProfile.findUnique({ where: { userId }, select: { id: true } });
+    if (!profile) throw new Error("Coach profile not found");
+    return profile.id;
+}
+
 const coachingRequestSchema = z.object({
     coachProfileId: z.string().cuid(),
     prospectName: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -202,10 +209,12 @@ export async function approveCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
 
-    if (!request || request.coachProfile.userId !== user.id) {
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) {
         throw new Error("Request not found");
     }
 
@@ -216,12 +225,13 @@ export async function approveCoachingRequest(requestId: string) {
     const updated = await db.coachingRequest.update({
         where: { id: requestId },
         data: { status: "APPROVED" },
+        select: { id: true, status: true },
     });
 
     console.info(JSON.stringify({
         event: "marketplace.request.approved",
         requestId: requestId,
-        coachProfileId: request.coachProfile.id,
+        coachProfileId: request.coachProfileId,
         status: "APPROVED",
         timestamp: new Date().toISOString(),
     }));
@@ -302,10 +312,12 @@ export async function rejectCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
 
-    if (!request || request.coachProfile.userId !== user.id) {
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) {
         throw new Error("Request not found");
     }
 
@@ -316,12 +328,13 @@ export async function rejectCoachingRequest(requestId: string) {
     const updated = await db.coachingRequest.update({
         where: { id: requestId },
         data: { status: "REJECTED" },
+        select: { id: true, status: true },
     });
 
     console.info(JSON.stringify({
         event: "marketplace.request.rejected",
         requestId: requestId,
-        coachProfileId: request.coachProfile.id,
+        coachProfileId: request.coachProfileId,
         status: "REJECTED",
         timestamp: new Date().toISOString(),
     }));
@@ -345,7 +358,7 @@ export async function cancelCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
 
     if (!request) throw new Error("Request not found");
@@ -364,12 +377,13 @@ export async function cancelCoachingRequest(requestId: string) {
     const updated = await db.coachingRequest.update({
         where: { id: requestId },
         data: { status: "REJECTED" }, // reuse REJECTED enum (no CANCELED enum exists)
+        select: { id: true, status: true },
     });
 
     console.info(JSON.stringify({
         event: "marketplace.request.canceled",
         requestId: requestId,
-        coachProfileId: request.coachProfile.id,
+        coachProfileId: request.coachProfileId,
         timestamp: new Date().toISOString(),
     }));
 
@@ -385,10 +399,12 @@ export async function resendInvite(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
 
-    if (!request || request.coachProfile.userId !== user.id) {
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) {
         throw new Error("Request not found");
     }
 
@@ -462,8 +478,8 @@ export async function resendInvite(requestId: string) {
     console.info(JSON.stringify({
         event: "marketplace.invite.resent",
         requestId,
-        coachProfileId: request.coachProfile.id,
-        sendCount: (request.inviteSendCount || 0) + 1,
+        coachProfileId: request.coachProfileId,
+        sendCount: 1,
         timestamp: new Date().toISOString(),
     }));
 
@@ -480,16 +496,19 @@ export async function markContacted(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
-    const updated = await db.coachingRequest.update({
+    await db.coachingRequest.update({
         where: { id: requestId },
-        data: { status: "CONTACTED" },
+        data: { status: "CONTACTED", consultationStage: "CONSULTATION_SCHEDULED" },
+        select: { id: true, status: true },
     });
     revalidatePath("/coach/leads");
-    return updated;
+    return { success: true };
 }
 
 const scheduleConsultationSchema = z.object({
@@ -511,9 +530,11 @@ export async function scheduleConsultation(input: unknown) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     await db.consultationMeeting.upsert({
         where: { requestId },
@@ -548,9 +569,11 @@ export async function acceptClient(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     if (request.status === "ACCEPTED" || request.status === "APPROVED") {
         throw new Error("Client already accepted.");
@@ -606,9 +629,11 @@ export async function declineRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     await db.coachingRequest.update({
         where: { id: requestId },
@@ -647,9 +672,11 @@ export async function updateConsultationStage(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } }, consultationMeeting: true },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, consultationDate: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     const allowed = VALID_STAGE_TRANSITIONS[request.consultationStage];
     if (!allowed || !allowed.includes(input.stage)) {
@@ -659,8 +686,10 @@ export async function updateConsultationStage(input: {
     const data: Record<string, unknown> = { consultationStage: input.stage };
     if (input.consultationDate) {
         data.consultationDate = new Date(input.consultationDate);
-    } else if (input.stage === "CONSULTATION_SCHEDULED" && !request.consultationDate && request.consultationMeeting?.scheduledTime) {
-        data.consultationDate = request.consultationMeeting.scheduledTime;
+    } else if (input.stage === "CONSULTATION_SCHEDULED" && !request.consultationDate) {
+        // Fall back to consultationMeeting.scheduledTime if available
+        const meeting = await db.consultationMeeting.findUnique({ where: { requestId: input.requestId }, select: { scheduledTime: true } });
+        if (meeting?.scheduledTime) data.consultationDate = meeting.scheduledTime;
     }
 
     await db.coachingRequest.update({
@@ -679,9 +708,11 @@ export async function bypassPipelineAndActivate(input: { requestId: string }) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     if (request.consultationStage === "ACTIVE") {
         return { success: false, message: "This lead is already active." };
@@ -747,9 +778,11 @@ export async function activateClient(input: { requestId: string }) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     if (request.consultationStage === "ACTIVE") {
         return { success: true, path: "already_active" as const };
@@ -868,9 +901,11 @@ export async function goBackStage(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, status: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     const prev = PREVIOUS_STAGE[request.consultationStage];
     if (!prev) {

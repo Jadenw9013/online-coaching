@@ -14,21 +14,32 @@ export async function getIntakeSubmission(requestId: string) {
  * Verifies request exists and belongs to the coach.
  */
 export async function getCoachingRequestForIntake(requestId: string, coachUserId: string) {
-    const request = await db.coachingRequest.findUnique({
-        where: { id: requestId },
-        select: {
-            id: true,
-            prospectName: true,
-            prospectEmailAddr: true,
-            consultationStage: true,
-            intakeAnswers: true,
-            coachProfile: { select: { userId: true } },
-            formSubmission: true,
-        },
+    // Use raw SQL to safely read CoachingRequest with Json columns (adapter-pg safe)
+    const rows = await db.$queryRawUnsafe<Array<{
+        id: string; prospectName: string; prospectEmailAddr: string | null;
+        consultationStage: string; intakeAnswers: Record<string, string>;
+        coachProfileId: string;
+    }>>(
+        `SELECT "id","prospectName","prospectEmailAddr","consultationStage","intakeAnswers","coachProfileId"
+         FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
+    );
+    const request = rows[0] ?? null;
+    if (!request) return null;
+
+    // Verify ownership
+    const profile = await db.coachProfile.findUnique({ where: { id: request.coachProfileId }, select: { userId: true } });
+    if (!profile || profile.userId !== coachUserId) return null;
+
+    // Fetch related formSubmission separately (safe — no Json on CoachingRequest)
+    const formSubmission = await db.clientFormSubmission.findUnique({
+        where: { coachingRequestId: requestId },
     });
 
-    if (!request || request.coachProfile.userId !== coachUserId) return null;
-    return request;
+    return {
+        ...request,
+        coachProfile: { userId: profile.userId },
+        formSubmission,
+    };
 }
 
 export async function getIntakePacketByToken(token: string) {

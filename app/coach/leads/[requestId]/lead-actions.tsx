@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { markContacted, scheduleConsultation, acceptClient, declineRequest, resendInvite, updateConsultationStage, bypassPipelineAndActivate, activateClient, goBackStage } from "@/app/actions/coaching-requests";
+import { markContacted, scheduleConsultation, updateConsultationStage, bypassPipelineAndActivate, activateClient, goBackStage, declineRequest } from "@/app/actions/coaching-requests";
 import { sendIntakePacket, sendFormsForSignature } from "@/app/actions/intake";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -21,24 +21,57 @@ type LeadActionsProps = {
     coachNotes?: string | null;
 };
 
-export function LeadActions({ requestId, status, prospectId, prospectName, consultationStage, consultationDate, formsSignedAt, prospectEmailAddr, existingMeeting, activeDocuments, intakePacketSentAt, coachNotes }: LeadActionsProps) {
+// ── Stage prev-step map (iOS match) ──────────────────────────────────────────
+const PREV_STAGE: Record<string, string> = {
+    CONSULTATION_SCHEDULED: "PENDING",
+    CONSULTATION_DONE: "PENDING",
+    INTAKE_SENT: "CONSULTATION_SCHEDULED",
+    INTAKE_SUBMITTED: "CONSULTATION_SCHEDULED",
+    FORMS_SENT: "INTAKE_SUBMITTED",
+    FORMS_SIGNED: "INTAKE_SUBMITTED",
+    ACTIVE: "INTAKE_SUBMITTED",
+};
+
+function stageName(stage: string): string {
+    const map: Record<string, string> = {
+        PENDING: "Pending",
+        CONSULTATION_SCHEDULED: "Contacted",
+        CONSULTATION_DONE: "Contacted",
+        INTAKE_SENT: "Contacted",
+        INTAKE_SUBMITTED: "Intake",
+        FORMS_SENT: "Intake",
+        FORMS_SIGNED: "Intake",
+        ACTIVE: "Active",
+    };
+    return map[stage] ?? stage.replace(/_/g, " ").toLowerCase().replace(/^\w/, c => c.toUpperCase());
+}
+
+export function LeadActions({
+    requestId, status, prospectId, prospectName, consultationStage,
+    consultationDate, formsSignedAt, prospectEmailAddr, existingMeeting,
+    activeDocuments, intakePacketSentAt, coachNotes,
+}: LeadActionsProps) {
     const [pending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
-    const [showSchedule, setShowSchedule] = useState(false);
-    const [meetingLink, setMeetingLink] = useState(existingMeeting?.meetingLink ?? "");
-    const [scheduledTime, setScheduledTime] = useState(
-        existingMeeting?.scheduledTime
-            ? new Date(existingMeeting.scheduledTime).toISOString().slice(0, 16)
-            : ""
-    );
-    const [notes, setNotes] = useState(existingMeeting?.notes ?? "");
     const router = useRouter();
 
-    // ── Coach notes auto-save ─────────────────────────────────────────────────
+    // Coach notes auto-save
     const [localNotes, setLocalNotes] = useState(coachNotes ?? "");
     const [notesSaveState, setNotesSaveState] = useState<"idle" | "saving" | "saved">("idle");
     const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Bypass pipeline
+    const [confirmBypass, setConfirmBypass] = useState(false);
+
+    // Mark contacted confirm (iOS sends intake optionally)
+    const [showContactedConfirm, setShowContactedConfirm] = useState(false);
+
+    // Decline confirm
+    const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
+
+    // Back step confirm
+    const [showBackConfirm, setShowBackConfirm] = useState(false);
 
     function handleNotesBlur() {
         if (localNotes === (coachNotes ?? "")) return;
@@ -51,27 +84,26 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
         }).then(() => {
             setNotesSaveState("saved");
             notesTimerRef.current = setTimeout(() => setNotesSaveState("idle"), 2500);
-        }).catch(() => {
-            setNotesSaveState("idle");
-        });
+        }).catch(() => setNotesSaveState("idle"));
     }
 
-    // ── Stage-based primary CTA ───────────────────────────────────────────────
-    const PREV_STAGE: Record<string, string> = {
-        CONSULTATION_SCHEDULED: "PENDING",
-        CONSULTATION_DONE: "CONSULTATION_SCHEDULED",
-        INTAKE_SENT: "CONSULTATION_DONE",
-        INTAKE_SUBMITTED: "INTAKE_SENT",
-        FORMS_SENT: "INTAKE_SUBMITTED",
-        FORMS_SIGNED: "FORMS_SENT",
-    };
-    const canGoBack = !!PREV_STAGE[consultationStage];
-
-    function run(action: () => Promise<unknown>) {
+    function run(action: () => Promise<unknown>, onSuccess?: string) {
         setError(null);
+        setSuccessMsg(null);
         startTransition(async () => {
             try {
-                await action();
+                const result = await action();
+                if (onSuccess) setSuccessMsg(onSuccess);
+                // Handle result.message for bypass
+                if (result && typeof result === "object" && "success" in result) {
+                    const r = result as { success: boolean; message?: string };
+                    if (r.success) {
+                        setSuccessMsg(r.message ?? onSuccess ?? "Done.");
+                    } else {
+                        setError(r.message ?? "Something went wrong.");
+                        return;
+                    }
+                }
                 router.refresh();
             } catch (e) {
                 setError(e instanceof Error ? e.message : "Something went wrong");
@@ -79,29 +111,42 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
         });
     }
 
-    const isAccepted = status === "ACCEPTED" || status === "APPROVED";
-    const isTerminal = isAccepted || status === "DECLINED" || status === "REJECTED";
-    const isAwaitingSignup = isAccepted && !prospectId;
-
-    // Consultation date picker state
-    const [consultDate, setConsultDate] = useState(consultationDate ? new Date(consultationDate).toISOString().slice(0, 16) : "");
-    const [confirmBypass, setConfirmBypass] = useState(false);
-
-    const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(consultationStage);
+    const stage = consultationStage;
+    const canGoBack = !!PREV_STAGE[stage];
+    const bypassEligible = ["PENDING", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(stage);
+    const isActive = stage === "ACTIVE";
+    const isDeclined = stage === "DECLINED" || status === "DECLINED" || status === "REJECTED";
 
     return (
         <div className="space-y-4">
+            {/* ── Error banner ── */}
             {error && (
-                <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>
+                <div className="flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400 shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                    <p className="text-sm text-red-300">{error}</p>
+                </div>
             )}
 
-            {/* ── Coach Notes (private) ── */}
+            {/* ── Success banner ── */}
+            {successMsg && (
+                <div className="flex items-start gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 shrink-0 mt-0.5"><path d="M20 6 9 17l-5-5"/></svg>
+                    <p className="text-sm text-emerald-300">{successMsg}</p>
+                </div>
+            )}
+
+            {/* ── Coach Notes (private, auto-save) ── */}
             <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                    <label htmlFor="coachNotesTA" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                        Coach Notes <span className="font-normal normal-case tracking-normal text-zinc-600">(private)</span>
+                    <label htmlFor="coachNotesTA" className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                        Coach Notes
                     </label>
-                    {notesSaveState === "saving" && <span className="text-xs text-zinc-500">Saving…</span>}
+                    {notesSaveState === "saving" && (
+                        <span className="flex items-center gap-1.5 text-xs text-zinc-400">
+                            <span className="inline-block h-3 w-3 animate-spin rounded-full border border-zinc-600 border-t-zinc-400" />
+                            Saving…
+                        </span>
+                    )}
                     {notesSaveState === "saved" && <span className="text-xs text-emerald-400">Saved</span>}
                 </div>
                 <textarea
@@ -110,350 +155,187 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     value={localNotes}
                     onChange={(e) => setLocalNotes(e.target.value)}
                     onBlur={handleNotesBlur}
-                    placeholder="Internal notes about this prospect…"
-                    className="sf-textarea w-full"
-                    style={{ fontSize: "max(1rem, 16px)" }}
+                    placeholder="Add private notes…"
+                    className="w-full rounded-lg border-0 bg-white/[0.04] px-3 py-2 text-sm text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 resize-none"
+                    style={{ fontSize: "max(1rem, 16px)", minHeight: "72px" }}
                 />
             </div>
 
-            {/* ── Stage-based primary CTA ── */}
-            {consultationStage !== "ACTIVE" && consultationStage !== "DECLINED" && (
-                <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Next Step</p>
+            {/* ── Primary CTA (stage-based, iOS match) ── */}
+            {stage === "PENDING" && !showContactedConfirm && (
+                <ActionButton
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.66a16 16 0 0 0 6 6l1.02-1.02a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>}
+                    label="Mark as Contacted"
+                    variant="secondary"
+                    loading={pending}
+                    onClick={() => setShowContactedConfirm(true)}
+                />
+            )}
 
-                    {consultationStage === "PENDING" && (
+            {/* Contacted confirm dialog (iOS match) */}
+            {stage === "PENDING" && showContactedConfirm && (
+                <div className="space-y-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.05] p-4">
+                    <p className="text-sm text-zinc-300">Send intake form to prospect?</p>
+                    <p className="text-sm text-zinc-400">Optionally send the intake form so the prospect can fill it out before your meeting.</p>
+                    <div className="flex flex-col gap-2">
                         <button
                             disabled={pending}
-                            onClick={() => run(() => markContacted(requestId))}
+                            onClick={() => {
+                                run(async () => {
+                                    await markContacted(requestId);
+                                    try { await sendIntakePacket({ requestId, documentIds: (activeDocuments ?? []).map(d => d.id) }); } catch {}
+                                }, "Marked as contacted. Intake form sent.");
+                                setShowContactedConfirm(false);
+                            }}
+                            className="sf-button-primary w-full disabled:opacity-50"
+                            style={{ minHeight: "48px" }}
+                        >
+                            Send Intake &amp; Mark Contacted
+                        </button>
+                        <button
+                            disabled={pending}
+                            onClick={() => {
+                                run(() => markContacted(requestId), "Marked as contacted.");
+                                setShowContactedConfirm(false);
+                            }}
                             className="sf-button-secondary w-full disabled:opacity-50"
                             style={{ minHeight: "48px" }}
                         >
-                            Mark as Contacted
+                            Just Mark Contacted
                         </button>
-                    )}
-
-                    {consultationStage === "CONSULTATION_SCHEDULED" && (
                         <button
-                            disabled={pending}
-                            onClick={() => run(() => updateConsultationStage({ requestId, stage: "CONSULTATION_DONE" }))}
-                            className="sf-button-secondary w-full disabled:opacity-50"
-                            style={{ minHeight: "48px" }}
+                            type="button"
+                            onClick={() => setShowContactedConfirm(false)}
+                            className="text-sm text-zinc-400 hover:text-zinc-300 transition-colors"
                         >
-                            Mark Consultation Done
-                        </button>
-                    )}
-
-                    {consultationStage === "CONSULTATION_DONE" && (
-                        <SendIntakePacketSection
-                            requestId={requestId}
-                            activeDocuments={activeDocuments ?? []}
-                        />
-                    )}
-
-                    {consultationStage === "INTAKE_SUBMITTED" && (
-                        <button
-                            disabled={pending}
-                            onClick={() => run(() => sendFormsForSignature({ requestId }))}
-                            className="sf-button-secondary w-full disabled:opacity-50"
-                            style={{ minHeight: "48px" }}
-                        >
-                            Send Documents for Signature
-                        </button>
-                    )}
-
-                    {consultationStage === "FORMS_SIGNED" && (
-                        <ActivateSection
-                            requestId={requestId}
-                            prospectName={prospectName}
-                            prospectEmailAddr={prospectEmailAddr}
-                            formsSignedAt={formsSignedAt}
-                        />
-                    )}
-                </div>
-            )}
-
-            {consultationStage === "ACTIVE" && (
-                <p className="flex items-center gap-2 text-sm text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    Active client
-                </p>
-            )}
-
-            {/* ── Go Back a Step ── */}
-            {canGoBack && (
-                <div className="border-t border-white/[0.06] pt-3">
-                    <button
-                        disabled={pending}
-                        onClick={() => run(() => goBackStage(requestId))}
-                        className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300 disabled:opacity-50"
-                    >
-                        ← Go Back a Step
-                    </button>
-                </div>
-            )}
-
-            <div className="border-t border-white/[0.06] pt-3 space-y-3">
-
-            {!isTerminal && (
-                <div className="flex flex-wrap gap-2">
-                    {status === "PENDING" && (
-                        <button
-                            disabled={pending}
-                            onClick={() => run(() => markContacted(requestId))}
-                            className="sf-button-secondary !border-violet-500/30 !bg-violet-500/10 text-violet-300 hover:!bg-violet-500/20 disabled:opacity-50"
-                        >
-                            Mark Contacted
-                        </button>
-                    )}
-
-                    {(status === "PENDING" || status === "CONTACTED") && (
-                        <button
-                            disabled={pending}
-                            onClick={() => setShowSchedule((v) => !v)}
-                            className="sf-button-secondary !border-amber-500/30 !bg-amber-500/10 text-amber-300 hover:!bg-amber-500/20 disabled:opacity-50"
-                        >
-                            {showSchedule ? "Hide" : "Schedule Consultation"}
-                        </button>
-                    )}
-
-                    <button
-                        disabled={pending}
-                        onClick={() => run(() => acceptClient(requestId))}
-                        className="sf-button-primary disabled:opacity-50"
-                    >
-                        Accept Client
-                    </button>
-
-                    <button
-                        disabled={pending}
-                        onClick={() => run(() => declineRequest(requestId))}
-                        className="sf-button-danger disabled:opacity-50"
-                    >
-                        Decline
-                    </button>
-                </div>
-            )}
-
-            {/* Schedule consultation form (pre-accept only) */}
-            {showSchedule && !isTerminal && (
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        run(() =>
-                            scheduleConsultation({ requestId, meetingLink, scheduledTime: scheduledTime || undefined, notes })
-                        );
-                        setShowSchedule(false);
-                    }}
-                    className="sf-glass-card p-5 space-y-4"
-                >
-                    <p className="text-sm font-semibold text-zinc-200">Schedule Consultation</p>
-                    <div className="space-y-3">
-                        <div>
-                            <label htmlFor="schedMeetingLink" className="mb-1.5 block text-xs font-medium text-zinc-400">Meeting Link</label>
-                            <input
-                                id="schedMeetingLink"
-                                type="url"
-                                placeholder="https://cal.com/..."
-                                value={meetingLink}
-                                onChange={(e) => setMeetingLink(e.target.value)}
-                                className="sf-input w-full"
-                                style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="schedDateTime" className="mb-1.5 block text-xs font-medium text-zinc-400">Date &amp; Time</label>
-                            <input
-                                id="schedDateTime"
-                                type="datetime-local"
-                                value={scheduledTime}
-                                onChange={(e) => setScheduledTime(e.target.value)}
-                                className="sf-input w-full"
-                                style={{ fontSize: "max(1rem, 16px)", minHeight: "48px" }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="schedNotes" className="mb-1.5 block text-xs font-medium text-zinc-400">Notes (optional)</label>
-                            <textarea
-                                id="schedNotes"
-                                rows={2}
-                                placeholder="Topics to cover, etc."
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                className="sf-textarea w-full"
-                                style={{ fontSize: "max(1rem, 16px)" }}
-                            />
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            disabled={pending}
-                            className="sf-button-primary disabled:opacity-50"
-                        >
-                            Save & Mark Scheduled
-                        </button>
-                        <button type="button" onClick={() => setShowSchedule(false)} className="sf-button-ghost">
                             Cancel
                         </button>
                     </div>
-                </form>
+                </div>
             )}
 
-            {isTerminal && !isAwaitingSignup && (
-                <p className="text-sm text-zinc-600">
-                    This lead is {isAccepted ? "accepted — client is on your roster" : "closed"}.
-                </p>
+            {/* Contacted/Consultation stage — open intake form */}
+            {(stage === "CONSULTATION_SCHEDULED" || stage === "CONSULTATION_DONE" || stage === "INTAKE_SENT") && (
+                <ActionButton
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>}
+                    label="Open Intake Form"
+                    variant="secondary"
+                    loading={pending}
+                    href={`/coach/leads/${requestId}/review`}
+                />
             )}
 
-            {/* ── Pipeline Stage Actions ── */}
-            {isAccepted && (
-                <div className="space-y-3 border-t border-white/[0.06] pt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Pipeline</p>
+            {/* Intake submitted — Activate */}
+            {(stage === "INTAKE_SUBMITTED" || stage === "FORMS_SENT" || stage === "FORMS_SIGNED") && (
+                <ActivateButton requestId={requestId} prospectName={prospectName} prospectEmailAddr={prospectEmailAddr} formsSignedAt={formsSignedAt} />
+            )}
 
-                    {consultationStage === "PENDING" && (
-                        <div className="flex flex-col gap-3">
-                            <div>
-                                <label htmlFor="consultDate" className="mb-1.5 block text-sm font-medium text-zinc-400">Consultation Date & Time</label>
-                                <input
-                                    id="consultDate"
-                                    type="datetime-local"
-                                    value={consultDate}
-                                    onChange={(e) => setConsultDate(e.target.value)}
-                                    className="sf-input w-full"
-                                />
+            {/* Active — info card */}
+            {isActive && (
+                <InfoCard
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}
+                    color="emerald"
+                    text="Client is active and on your roster."
+                />
+            )}
+
+            {/* Declined — info card */}
+            {isDeclined && (
+                <InfoCard
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>}
+                    color="zinc"
+                    text="This lead is closed."
+                />
+            )}
+
+            {/* ── Decline button (iOS match) ── */}
+            {!isDeclined && !isActive && (
+                <>
+                    {!showDeclineConfirm ? (
+                        <button
+                            disabled={pending}
+                            onClick={() => setShowDeclineConfirm(true)}
+                            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-semibold text-red-400/85 ring-1 ring-white/[0.08] transition-colors hover:bg-red-500/[0.06] disabled:opacity-50"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                            Decline
+                        </button>
+                    ) : (
+                        <div className="space-y-3 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-4">
+                            <p className="text-sm text-zinc-300">
+                                Decline <strong className="text-zinc-100">{prospectName}</strong>? This will mark the lead as inactive.
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    disabled={pending}
+                                    onClick={() => {
+                                        run(() => declineRequest(requestId), "Lead marked as inactive.");
+                                        setShowDeclineConfirm(false);
+                                    }}
+                                    className="sf-button-danger disabled:opacity-50"
+                                    style={{ minHeight: "44px" }}
+                                >
+                                    Decline Lead
+                                </button>
+                                <button type="button" onClick={() => setShowDeclineConfirm(false)} className="sf-button-ghost" style={{ minHeight: "44px" }}>
+                                    Cancel
+                                </button>
                             </div>
-                            <button
-                                disabled={pending || !consultDate}
-                                onClick={() => run(() => updateConsultationStage({ requestId, stage: "CONSULTATION_SCHEDULED", consultationDate: consultDate }))}
-                                className="sf-button-primary w-full disabled:opacity-50"
-                            >
-                                Schedule Consultation
-                            </button>
                         </div>
                     )}
-
-                    {consultationStage === "CONSULTATION_SCHEDULED" && (
-                        <div className="space-y-3">
-                            {consultationDate && (
-                                <p className="flex items-center gap-1.5 text-sm text-zinc-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500 shrink-0" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                                    Scheduled:{" "}
-                                    {new Date(consultationDate).toLocaleString("en-US", {
-                                        month: "short", day: "numeric", year: "numeric",
-                                        hour: "numeric", minute: "2-digit",
-                                    })}
-                                </p>
-                            )}
-                            <SendIntakePacketSection
-                                requestId={requestId}
-                                activeDocuments={activeDocuments ?? []}
-                            />
-                        </div>
-                    )}
-
-                    {consultationStage === "INTAKE_SENT" && (
-                        <div className="space-y-3">
-                            <p className="flex items-center gap-2 text-sm text-cyan-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
-                                Intake packet sent{intakePacketSentAt ? ` ${daysAgoText(intakePacketSentAt)}` : ""}
-                            </p>
-                            {prospectEmailAddr && (
-                                <p className="text-xs text-zinc-500">Sent to {prospectEmailAddr}</p>
-                            )}
-                            <p className="text-xs text-zinc-600">Waiting for prospect to fill out and submit.</p>
-                            <button
-                                disabled={pending}
-                                onClick={() => run(() => sendIntakePacket({ requestId, documentIds: [] }))}
-                                className="sf-button-secondary disabled:opacity-50"
-                                style={{ minHeight: "48px" }}
-                            >
-                                {pending ? "Resending..." : "Resend Intake Packet"}
-                            </button>
-                        </div>
-                    )}
-
-                    {consultationStage === "INTAKE_SUBMITTED" && (
-                        <div className="space-y-3">
-                            <p className="flex items-center gap-2 text-sm text-emerald-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                {prospectName} completed their intake{intakePacketSentAt ? ` on ${new Date(intakePacketSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}
-                            </p>
-                            <Link
-                                href={`/coach/leads/${requestId}/review`}
-                                className="sf-button-primary block w-full text-center"
-                                style={{ minHeight: "48px" }}
-                            >
-                                Review Intake →
-                            </Link>
-                        </div>
-                    )}
-
-                    {(consultationStage === "FORMS_SIGNED" || consultationStage === "FORMS_SENT") && (
-                        <ActivateSection
-                            requestId={requestId}
-                            prospectName={prospectName}
-                            prospectEmailAddr={prospectEmailAddr}
-                            formsSignedAt={formsSignedAt}
-                        />
-                    )}
-
-                    {consultationStage === "ACTIVE" && (
-                        <p className="flex items-center gap-2 text-sm text-emerald-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                            Active client
-                        </p>
-                    )}
-                </div>
+                </>
             )}
 
-            {isAwaitingSignup && (
-                <div className="space-y-3">
-                    <p className="flex items-center gap-1.5 text-sm text-amber-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        Accepted — waiting for client to sign up.
-                    </p>
-                    {successMsg && (
-                        <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-400">{successMsg}</p>
+            {/* ── Back a Step (iOS match) ── */}
+            {canGoBack && !isActive && (
+                <>
+                    {!showBackConfirm ? (
+                        <button
+                            disabled={pending}
+                            onClick={() => setShowBackConfirm(true)}
+                            className="block w-full text-center text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-300 disabled:opacity-50"
+                        >
+                            Back a Step
+                        </button>
+                    ) : (
+                        <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-4">
+                            <p className="text-sm text-zinc-300">
+                                Move back to <strong className="text-zinc-100">{stageName(PREV_STAGE[stage])}</strong>?
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    disabled={pending}
+                                    onClick={() => {
+                                        run(() => goBackStage(requestId), `Stage updated to ${stageName(PREV_STAGE[stage])}.`);
+                                        setShowBackConfirm(false);
+                                    }}
+                                    className="sf-button-secondary disabled:opacity-50"
+                                    style={{ minHeight: "44px" }}
+                                >
+                                    Move to {stageName(PREV_STAGE[stage])}
+                                </button>
+                                <button type="button" onClick={() => setShowBackConfirm(false)} className="sf-button-ghost" style={{ minHeight: "44px" }}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     )}
-                    <button
-                        disabled={pending}
-                        onClick={() => {
-                            setError(null);
-                            setSuccessMsg(null);
-                            startTransition(async () => {
-                                try {
-                                    const result = await resendInvite(requestId);
-                                    if (result.success) {
-                                        setSuccessMsg(result.message);
-                                    } else {
-                                        setError(result.message);
-                                    }
-                                    router.refresh();
-                                } catch (e) {
-                                    setError(e instanceof Error ? e.message : "Something went wrong");
-                                }
-                            });
-                        }}
-                        className="sf-button-secondary !border-blue-500/30 !bg-blue-500/10 text-blue-300 hover:!bg-blue-500/20 disabled:opacity-50"
-                    >
-                        Send Invite
-                    </button>
-                </div>
+                </>
             )}
 
-            {/* Bypass pipeline */}
+            {/* ── Bypass Pipeline (web exclusive, kept) ── */}
             {bypassEligible && (
                 <div className="border-t border-white/[0.06] pt-4">
                     {!confirmBypass ? (
                         <button
                             disabled={pending}
                             onClick={() => setConfirmBypass(true)}
-                            className="sf-button-secondary disabled:opacity-50"
+                            className="w-full py-3 rounded-xl text-sm font-semibold text-amber-400 ring-1 ring-white/[0.06] transition-colors hover:bg-amber-500/[0.06] disabled:opacity-50"
                         >
                             Bypass Pipeline — Activate Directly
                         </button>
                     ) : (
-                        <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                        <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-4">
                             <p className="text-sm text-amber-300">
                                 Are you sure? This will skip intake forms and add <strong>{prospectName}</strong> directly to your active client roster.
                             </p>
@@ -461,32 +343,15 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                                 <button
                                     disabled={pending}
                                     onClick={() => {
-                                        setError(null);
-                                        setSuccessMsg(null);
-                                        startTransition(async () => {
-                                            try {
-                                                const result = await bypassPipelineAndActivate({ requestId });
-                                                if (result.success) {
-                                                    setSuccessMsg(result.message ?? "Client activated.");
-                                                } else {
-                                                    setError(result.message);
-                                                }
-                                                router.refresh();
-                                            } catch (e) {
-                                                setError(e instanceof Error ? e.message : "Something went wrong");
-                                            }
-                                        });
+                                        run(() => bypassPipelineAndActivate({ requestId }), "Client activated.");
                                         setConfirmBypass(false);
                                     }}
                                     className="sf-button-primary disabled:opacity-50"
+                                    style={{ minHeight: "44px" }}
                                 >
                                     Yes, Activate Now
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setConfirmBypass(false)}
-                                    className="sf-button-ghost"
-                                >
+                                <button type="button" onClick={() => setConfirmBypass(false)} className="sf-button-ghost" style={{ minHeight: "44px" }}>
                                     Cancel
                                 </button>
                             </div>
@@ -494,12 +359,58 @@ export function LeadActions({ requestId, status, prospectId, prospectName, consu
                     )}
                 </div>
             )}
-            </div>{/* end: old actions wrapper */}
         </div>
     );
 }
 
-function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSignedAt }: {
+// ── Reusable Action Button ──────────────────────────────────────────────────
+function ActionButton({ icon, label, variant, loading, onClick, href }: {
+    icon: React.ReactNode;
+    label: string;
+    variant: "primary" | "secondary";
+    loading?: boolean;
+    onClick?: () => void;
+    href?: string;
+}) {
+    const cls = variant === "primary"
+        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_8px_16px_rgba(37,99,235,0.3)]"
+        : "bg-white/[0.04] text-zinc-200 ring-1 ring-white/[0.08] hover:bg-white/[0.06]";
+
+    const inner = (
+        <span className="flex items-center justify-center gap-2.5">
+            {loading ? (
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            ) : icon}
+            <span className="text-sm font-semibold">{loading ? `${label}…` : label}</span>
+        </span>
+    );
+
+    if (href) {
+        return (
+            <Link
+                href={href}
+                className={`flex w-full items-center justify-center rounded-xl py-3.5 transition-all ${cls}`}
+                style={{ minHeight: "52px" }}
+            >
+                {inner}
+            </Link>
+        );
+    }
+
+    return (
+        <button
+            disabled={loading}
+            onClick={onClick}
+            className={`w-full rounded-xl py-3.5 transition-all disabled:opacity-50 ${cls}`}
+            style={{ minHeight: "52px" }}
+        >
+            {inner}
+        </button>
+    );
+}
+
+// ── Activate Client Button (gradient, iOS style) ────────────────────────────
+function ActivateButton({ requestId, prospectName, prospectEmailAddr, formsSignedAt }: {
     requestId: string;
     prospectName: string;
     prospectEmailAddr: string | null;
@@ -531,6 +442,42 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
         });
     };
 
+    if (step === "success" && result) {
+        return (
+            <div role="status" className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+                <p className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    {prospectName} is now an active client!
+                </p>
+                {result.path === "existing_account" && result.clientId && (
+                    <Link href={`/coach/clients/${result.clientId}`} className="block text-sm text-blue-400 hover:underline">
+                        View {prospectName}&apos;s dashboard →
+                    </Link>
+                )}
+                {result.path === "invite_sent" && result.email && (
+                    <p className="text-sm text-zinc-400">
+                        Invite sent to <strong className="text-zinc-200">{result.email}</strong> — they&apos;ll appear once they sign up.
+                    </p>
+                )}
+                <Link href="/coach/leads" className="block text-sm text-zinc-400 hover:text-zinc-200">← Back to all leads</Link>
+            </div>
+        );
+    }
+
+    if (step === "error") {
+        return (
+            <div className="space-y-3">
+                <div className="flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400 shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                    <p className="text-sm text-red-300">{errorMsg}</p>
+                </div>
+                <button onClick={() => { setStep("idle"); setErrorMsg(null); }} className="sf-button-secondary w-full disabled:opacity-50" style={{ minHeight: "48px" }}>
+                    Try Again
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-3">
             {formsSignedAt && (
@@ -544,18 +491,22 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                 <button
                     disabled={pending}
                     onClick={() => setStep("confirm")}
-                    className="sf-button-primary w-full text-base disabled:opacity-50"
+                    className="w-full rounded-xl py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-[0_8px_16px_rgba(37,99,235,0.3)] transition-all hover:shadow-[0_8px_24px_rgba(37,99,235,0.5)] disabled:opacity-50"
                     style={{ minHeight: "56px" }}
                 >
-                    Activate {prospectName} as a Client
+                    <span className="flex items-center justify-center gap-2">
+                        {pending ? (
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                        )}
+                        {pending ? "Activating…" : "Activate Client"}
+                    </span>
                 </button>
             )}
 
             {step === "confirm" && (
-                <div
-                    role="alert"
-                    className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-5"
-                >
+                <div className="space-y-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5">
                     <p className="text-sm text-zinc-300 leading-relaxed">
                         This will add <strong className="text-zinc-100">{prospectName}</strong> to your active client roster.
                     </p>
@@ -574,148 +525,38 @@ function ActivateSection({ requestId, prospectName, prospectEmailAddr, formsSign
                         >
                             {pending ? "Activating..." : "Yes, Activate"}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setStep("idle")}
-                            className="sf-button-ghost"
-                            style={{ minHeight: "48px" }}
-                        >
+                        <button type="button" onClick={() => setStep("idle")} className="sf-button-ghost" style={{ minHeight: "48px" }}>
                             Cancel
                         </button>
                     </div>
-                </div>
-            )}
-
-            {step === "success" && result && (
-                <div role="status" className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-5">
-                    <p className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                        {prospectName} is now an active client!
-                    </p>
-                    {result.path === "existing_account" && result.clientId && (
-                        <Link
-                            href={`/coach/clients/${result.clientId}`}
-                            className="block text-sm text-blue-400 hover:underline"
-                        >
-                            View {prospectName}&apos;s dashboard →
-                        </Link>
-                    )}
-                    {result.path === "invite_sent" && result.email && (
-                        <p className="text-sm text-zinc-400">
-                            Invite sent to <strong className="text-zinc-200">{result.email}</strong> — they&apos;ll appear on your dashboard once they sign up.
-                        </p>
-                    )}
-                    <Link href="/coach/leads" className="block text-sm text-zinc-500 hover:text-zinc-300">
-                        ← Back to all leads
-                    </Link>
-                </div>
-            )}
-
-            {step === "error" && (
-                <div className="space-y-3">
-                    <p role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
-                        {errorMsg}
-                    </p>
-                    <button
-                        disabled={pending}
-                        onClick={() => { setStep("idle"); setErrorMsg(null); }}
-                        className="sf-button-secondary disabled:opacity-50"
-                        style={{ minHeight: "48px" }}
-                    >
-                        Try Again
-                    </button>
                 </div>
             )}
         </div>
     );
 }
 
-function daysAgoText(dateStr: string) {
-    const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return "today";
-    if (days === 1) return "1 day ago";
-    return `${days} days ago`;
-}
-
-function SendIntakePacketSection({ requestId, activeDocuments }: { requestId: string; activeDocuments: { id: string; title: string; type: string }[] }) {
-    const [pending, startTransition] = useTransition();
-    const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set(activeDocuments.map(d => d.id)));
-    const [sent, setSent] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const toggleDoc = (id: string) => {
-        setSelectedDocs(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id); else next.add(id);
-            return next;
-        });
+// ── Info Card (iOS match) ───────────────────────────────────────────────────
+function InfoCard({ icon, color, text }: { icon: React.ReactNode; color: "emerald" | "zinc"; text: string }) {
+    const colorMap = {
+        emerald: {
+            bg: "bg-emerald-500/[0.06]",
+            border: "border-emerald-500/15",
+            icon: "text-emerald-400",
+            text: "text-zinc-300",
+        },
+        zinc: {
+            bg: "bg-zinc-500/[0.06]",
+            border: "border-zinc-500/15",
+            icon: "text-zinc-500",
+            text: "text-zinc-400",
+        },
     };
-
-    const handleSend = () => {
-        setError(null);
-        startTransition(async () => {
-            try {
-                const res = await sendIntakePacket({ requestId, documentIds: Array.from(selectedDocs) });
-                if (res.success) {
-                    setSent(true);
-                } else {
-                    setError((res as { message?: string }).message ?? "Failed to send.");
-                }
-            } catch (e) {
-                setError(e instanceof Error ? e.message : "Failed to send.");
-            }
-        });
-    };
-
-    if (sent) {
-        return (
-            <div className="space-y-2">
-                <p className="flex items-center gap-2 text-sm text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    Intake packet sent!
-                </p>
-                <p className="text-xs text-zinc-500">The page will refresh with the updated status.</p>
-            </div>
-        );
-    }
+    const c = colorMap[color];
 
     return (
-        <div className="space-y-4">
-            <p className="flex items-center gap-2 text-sm text-emerald-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Consultation complete
-            </p>
-
-            {activeDocuments.length > 0 && (
-                <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Include documents</p>
-                    {activeDocuments.map(doc => (
-                        <label key={doc.id} className="flex items-center gap-2 text-sm text-zinc-300">
-                            <input
-                                type="checkbox"
-                                checked={selectedDocs.has(doc.id)}
-                                onChange={() => toggleDoc(doc.id)}
-                                className="h-4 w-4 rounded border-zinc-600 bg-zinc-800"
-                            />
-                            {doc.title}
-                            <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${doc.type === "FILE" ? "bg-blue-500/10 text-blue-400" : "bg-violet-500/10 text-violet-400"}`}>
-                                {doc.type === "FILE" ? "File" : "Text"}
-                            </span>
-                        </label>
-                    ))}
-                </div>
-            )}
-
-            {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-
-            <button
-                disabled={pending}
-                onClick={handleSend}
-                className="sf-button-primary w-full disabled:opacity-50"
-                style={{ minHeight: "48px" }}
-            >
-                {pending ? "Sending..." : `Send Intake Packet${selectedDocs.size > 0 ? ` (${selectedDocs.size} doc${selectedDocs.size > 1 ? "s" : ""})` : ""}`}
-            </button>
+        <div className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 ${c.bg} ${c.border}`}>
+            <span className={c.icon}>{icon}</span>
+            <p className={`text-sm leading-relaxed ${c.text}`}>{text}</p>
         </div>
     );
 }

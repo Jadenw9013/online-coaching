@@ -9,6 +9,13 @@ const sendEmail = async (opts: { to: string; subject: string; text: string }) =>
     await resend.emails.send({ from: process.env.EMAIL_FROM || "Steadfast <noreply@steadfast.app>", ...opts });
 };
 
+/** Resolve the current coach's CoachProfile.id. */
+async function getCoachProfileId(userId: string): Promise<string> {
+    const profile = await db.coachProfile.findUnique({ where: { userId }, select: { id: true } });
+    if (!profile) throw new Error("Coach profile not found");
+    return profile.id;
+}
+
 /** Resolve prospect email with 3-step fallback + backfill. */
 async function resolveProspectEmail(request: {
     id: string;
@@ -56,11 +63,49 @@ export async function saveIntakeDraft(input: {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: select only non-Json fields for auth check
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
+
+    const submission = await db.clientFormSubmission.upsert({
+        where: { coachingRequestId: input.requestId },
+        create: {
+            coachingRequestId: input.requestId,
+            answers: input.answers as Record<string, string>,
+            status: "DRAFT",
+        },
+        update: {
+            answers: input.answers as Record<string, string>,
+        },
+    });
+
+    return { success: true, submissionId: submission.id };
+}
+
+/**
+ * Client-side: let the prospect/client save their intake answers
+ * to the same shared workspace (ClientFormSubmission).
+ */
+export async function saveClientIntakeDraft(input: {
+    requestId: string;
+    answers: Record<string, unknown>;
+}) {
+    const { getCurrentDbUser } = await import("@/lib/auth/roles");
+    const user = await getCurrentDbUser();
+
+    // Verify the user owns this coaching request (as prospect)
+    const request = await db.coachingRequest.findUnique({
+        where: { id: input.requestId },
+        select: { id: true, prospectId: true, prospectEmail: true },
+    });
+    if (!request) throw new Error("Request not found");
+    const isOwner = request.prospectId === user.id || request.prospectEmail?.toLowerCase() === user.email?.toLowerCase();
+    if (!isOwner) throw new Error("Unauthorized");
 
     const submission = await db.clientFormSubmission.upsert({
         where: { coachingRequestId: input.requestId },
@@ -85,14 +130,21 @@ export async function markIntakeReadyToSend(input: {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: separate queries
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } }, formSubmission: true },
+        select: { id: true, coachProfileId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
-    if (!request.formSubmission) throw new Error("No intake form exists for this lead.");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
-    const answers = request.formSubmission.answers as Record<string, unknown>;
+    const formSubmission = await db.clientFormSubmission.findUnique({
+        where: { coachingRequestId: input.requestId },
+    });
+    if (!formSubmission) throw new Error("No intake form exists for this lead.");
+
+    const answers = formSubmission.answers as Record<string, unknown>;
 
     // Dynamic validation — load coach's template to find required questions
     const template = await db.intakeFormTemplate.findUnique({ where: { coachId: user.id } });
@@ -135,12 +187,20 @@ export async function sendFormsForSignature(input: {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: separate queries
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } }, formSubmission: true },
+        select: { id: true, coachProfileId: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
-    if (!request.formSubmission || request.formSubmission.status !== "READY_TO_SEND") {
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
+
+    const formSubmission = await db.clientFormSubmission.findUnique({
+        where: { coachingRequestId: input.requestId },
+        select: { id: true, status: true },
+    });
+    if (!formSubmission || formSubmission.status !== "READY_TO_SEND") {
         return { success: false, message: "Intake form is not ready to send. Complete all required fields first." };
     }
 
@@ -188,14 +248,17 @@ export async function sendIntakePacket(input: {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: select only
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
-    if (!["CONSULTATION_DONE", "CONSULTATION_SCHEDULED", "INTAKE_SENT"].includes(request.consultationStage)) {
-        return { success: false, message: "Lead must be in Consultation Done, Consultation Scheduled, or Intake Sent stage." };
+    if (!["CONSULTATION_DONE", "CONSULTATION_SCHEDULED", "INTAKE_SENT", "PENDING"].includes(request.consultationStage)) {
+        return { success: false, message: "Lead must be in a valid stage to send the intake." };
     }
 
     const prospectEmail = await resolveProspectEmail(request);
@@ -252,17 +315,26 @@ export async function submitIntakePacket(input: {
     documentSignatures: { intakePacketDocumentId: string; coachDocumentId: string; signatureType: "TYPED" | "DRAWN"; signatureValue: string }[];
 }) {
     // Token-gated — no auth required
+    // IntakePacket doesn't have Json columns at top level, but its related
+    // coachingRequest does. Split the queries to avoid adapter-pg crash.
     const packet = await db.intakePacket.findUnique({
         where: { token: input.token },
-        include: {
-            coachingRequest: { include: { coachProfile: { select: { id: true, userId: true, user: { select: { email: true, firstName: true } } } } } },
-            documents: true,
-        },
+        include: { documents: true },
     });
 
     if (!packet) return { success: false, message: "Invalid link." };
     if (packet.tokenExpiresAt < new Date()) return { success: false, message: "This link has expired. Please contact your coach for a new one." };
     if (packet.submittedAt) return { success: false, message: "You have already submitted this form." };
+
+    // Fetch coaching request + coach info separately
+    const requestRow = await db.coachingRequest.findUnique({
+        where: { id: packet.coachingRequestId },
+        select: { id: true, prospectName: true, coachProfileId: true },
+    });
+    const coachProfile = requestRow ? await db.coachProfile.findUnique({
+        where: { id: requestRow.coachProfileId },
+        select: { userId: true, user: { select: { email: true, firstName: true } } },
+    }) : null;
 
     // Validate all docs have signatures
     if (packet.documents.length > 0) {
@@ -300,12 +372,13 @@ export async function submitIntakePacket(input: {
 
     // Email coach
     try {
-        const coachUser = packet.coachingRequest.coachProfile.user;
-        const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
-        const { intakeSubmittedNotificationEmail } = await import("@/lib/email/templates");
-        const reviewUrl = `${appUrl}/coach/leads/${packet.coachingRequestId}/review`;
-        const emailContent = intakeSubmittedNotificationEmail(packet.coachingRequest.prospectName, reviewUrl);
-        await sendEmail({ to: coachUser.email, ...emailContent });
+        if (coachProfile?.user && requestRow) {
+            const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+            const { intakeSubmittedNotificationEmail } = await import("@/lib/email/templates");
+            const reviewUrl = `${appUrl}/coach/leads/${packet.coachingRequestId}/review`;
+            const emailContent = intakeSubmittedNotificationEmail(requestRow.prospectName, reviewUrl);
+            await sendEmail({ to: coachProfile.user.email, ...emailContent });
+        }
     } catch { /* email failure must not block */ }
 
     return { success: true };
@@ -320,11 +393,21 @@ export async function saveReviewEdits(input: {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: separate queries
     const packet = await db.intakePacket.findUnique({
         where: { id: input.packetId },
-        include: { coachingRequest: { include: { coachProfile: { select: { id: true, userId: true } } } } },
+        select: { id: true, coachingRequestId: true },
     });
-    if (!packet || packet.coachingRequest.coachProfile.userId !== user.id) throw new Error("Not found");
+    if (!packet) throw new Error("Not found");
+
+    const request = await db.coachingRequest.findUnique({
+        where: { id: packet.coachingRequestId },
+        select: { coachProfileId: true },
+    });
+    if (!request) throw new Error("Not found");
+
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Not found");
 
     const data: Record<string, unknown> = {};
     if (input.formAnswers !== undefined) data.formAnswers = input.formAnswers as object;
@@ -339,11 +422,14 @@ export async function resendFormsLink(input: { requestId: string }) {
     const user = await getCurrentDbUser();
     if (!user.isCoach) throw new Error("Unauthorized");
 
+    // adapter-pg safe: select only
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: { select: { id: true, userId: true } } },
+        select: { id: true, coachProfileId: true, consultationStage: true, prospectName: true, prospectEmail: true, prospectPhone: true, prospectEmailAddr: true, prospectId: true },
     });
-    if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
+    if (!request) throw new Error("Request not found");
+    const profileId = await getCoachProfileId(user.id);
+    if (request.coachProfileId !== profileId) throw new Error("Request not found");
 
     if (request.consultationStage !== "FORMS_SENT") {
         return { success: false, message: "Lead must be in Forms Sent stage." };
@@ -391,6 +477,7 @@ export async function uploadSignedDocument(formData: FormData) {
     }
 
     // Token-gated — no auth required
+    // IntakePacket.documents doesn't touch CoachingRequest Json — adapter-pg safe
     const packet = await db.intakePacket.findUnique({
         where: { token },
         include: { documents: { include: { coachDocument: true } } },

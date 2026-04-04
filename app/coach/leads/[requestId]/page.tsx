@@ -25,12 +25,12 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         id: string; coachProfileId: string; prospectName: string; prospectEmail: string;
         prospectPhone: string | null; prospectEmailAddr: string | null; prospectId: string | null;
         intakeAnswers: Record<string, string>; status: string; consultationStage: string;
-        consultationDate: Date | null; coachNotes: string | null; formsSignedAt: Date | null;
-        createdAt: Date; updatedAt: Date;
+        consultationDate: Date | null; formsSignedAt: Date | null;
+        source: string | null; createdAt: Date; updatedAt: Date;
     }>>(
         `SELECT "id","coachProfileId","prospectName","prospectEmail","prospectPhone",
                 "prospectEmailAddr","prospectId","intakeAnswers","status","consultationStage",
-                "consultationDate","coachNotes","formsSignedAt","createdAt","updatedAt"
+                "consultationDate","formsSignedAt","source","createdAt","updatedAt"
          FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
     );
     const lead = leadRows[0] ?? null;
@@ -42,7 +42,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         where: { requestId },
     });
 
-    const answers = lead.intakeAnswers as Record<string, string>;
+    const answers = (lead.intakeAnswers ?? {}) as Record<string, string>;
 
     // Fetch active documents for this coach (for the intake packet UI)
     const activeDocuments = await getCoachDocuments(user.id).then(docs => docs.filter(d => d.isActive).map(d => ({ id: d.id, title: d.title, type: d.type })));
@@ -53,119 +53,216 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         select: { sentAt: true },
     });
 
+    // ── Status badge colors ──────────────────────────────────────────────────
     const statusMeta: Record<string, { label: string; color: string; bg: string }> = {
-        PENDING:        { label: "New",           color: "text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
-        CONTACTED:      { label: "Contacted",     color: "text-violet-400",  bg: "bg-violet-500/10 border-violet-500/20" },
-        CALL_SCHEDULED: { label: "Call Scheduled",color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20" },
-        ACCEPTED:       { label: "Accepted ✓",    color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-        APPROVED:       { label: "Accepted ✓",    color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-        DECLINED:       { label: "Inactive",      color: "text-zinc-500",    bg: "bg-zinc-800 border-zinc-700" },
-        REJECTED:       { label: "Inactive",      color: "text-zinc-500",    bg: "bg-zinc-800 border-zinc-700" },
-        WAITLISTED:     { label: "Waitlisted",    color: "text-zinc-400",    bg: "bg-zinc-800 border-zinc-700" },
+        PENDING:   { label: "Pending",  color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
+        APPROVED:  { label: "Approved", color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
+        ACCEPTED:  { label: "Approved", color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
+        CONTACTED: { label: "Contacted", color: "text-amber-300",  bg: "bg-amber-500/15 border-amber-500/30" },
+        DECLINED:  { label: "Inactive", color: "text-zinc-400",    bg: "bg-zinc-700/50 border-zinc-600" },
+        REJECTED:  { label: "Inactive", color: "text-zinc-400",    bg: "bg-zinc-700/50 border-zinc-600" },
     };
     const meta = statusMeta[lead.status] ?? statusMeta.PENDING;
 
+    // ── Effective stage helper ────────────────────────────────────────────────
+    const effectiveStage = lead.consultationStage ?? "PENDING";
+    const isDeclined = effectiveStage === "DECLINED" || lead.status === "DECLINED" || lead.status === "REJECTED";
+    const hasIntakeAnswers = !!(answers.goals || answers.experience || answers.injuries);
+
+    // Stage ring gradient colors (matching iOS)
+    function stageRingColors(stage: string): [string, string] {
+        switch (stage) {
+            case "PENDING":                return ["#3B82F6", "#6366F1"];
+            case "CONSULTATION_SCHEDULED":
+            case "CONSULTATION_DONE":      return ["#F59E0B", "#EF4444"];
+            case "INTAKE_SENT":
+            case "INTAKE_SUBMITTED":       return ["#10B981", "#3B82F6"];
+            case "FORMS_SENT":
+            case "FORMS_SIGNED":           return ["#10B981", "#3B82F6"];
+            case "ACTIVE":                 return ["#10B981", "#34D399"];
+            default:                       return ["#3B82F6", "#6366F1"];
+        }
+    }
+
+    const [c1, c2] = stageRingColors(effectiveStage);
+
     return (
-        <div className="mx-auto max-w-2xl space-y-8">
+        <div className="mx-auto max-w-2xl space-y-5 pb-12">
             {/* Back */}
-            <Link href="/coach/leads" className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <Link href="/coach/leads" className="inline-flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 All Leads
             </Link>
 
-            {/* Pipeline */}
-            <div className="sf-glass-card p-4">
-                <PipelineBar currentStage={lead.consultationStage} />
-            </div>
-
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 sf-glass-card p-6">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/[0.06] text-xl font-bold text-zinc-200">
-                        {lead.prospectName[0]?.toUpperCase() ?? "?"}
+            {/* ── 1. Hero Header ─────────────────────────────────────────────── */}
+            <div className="sf-glass-card p-6">
+                <div className="flex items-start gap-4">
+                    {/* Avatar with gradient ring */}
+                    <div className="relative shrink-0">
+                        <div
+                            className="flex h-16 w-16 items-center justify-center rounded-full"
+                            style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+                        >
+                            <div className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-[#0e1117]">
+                                <span className="text-xl font-bold text-zinc-100">
+                                    {lead.prospectName[0]?.toUpperCase() ?? "?"}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-xl font-black tracking-tight text-zinc-100">{lead.prospectName}</h1>
-                        <a href={`tel:${(lead.prospectPhone ?? lead.prospectEmail).replace(/\s/g, "")}`} className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.66a16 16 0 0 0 6 6l1.02-1.02a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                            {lead.prospectPhone ?? lead.prospectEmail}
-                        </a>
-                        {lead.prospectEmailAddr && (
-                            <a href={`mailto:${lead.prospectEmailAddr}`} className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                                {lead.prospectEmailAddr}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0 space-y-2">
+                        <h1 className="text-xl font-bold tracking-tight text-white">{lead.prospectName}</h1>
+
+                        {/* Phone — tappable row */}
+                        {(lead.prospectPhone || lead.prospectEmail) && (
+                            <a
+                                href={`tel:${(lead.prospectPhone ?? lead.prospectEmail).replace(/\s/g, "")}`}
+                                className="flex items-center gap-2 group"
+                            >
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.35 2 2 0 0 1 3.68 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.66a16 16 0 0 0 6 6l1.02-1.02a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                </span>
+                                <span className="text-sm font-medium text-blue-400 group-hover:underline truncate">{lead.prospectPhone ?? lead.prospectEmail}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500 shrink-0"><path d="m9 18 6-6-6-6"/></svg>
                             </a>
                         )}
-                        <p className="mt-1 text-xs text-zinc-500">
-                            Submitted {new Date(lead.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        </p>
+
+                        {/* Email row */}
+                        {lead.prospectEmailAddr && (
+                            <a
+                                href={`mailto:${lead.prospectEmailAddr}`}
+                                className="flex items-center gap-2 group"
+                            >
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/15">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                </span>
+                                <span className="text-sm font-medium text-blue-400 group-hover:underline truncate">{lead.prospectEmailAddr}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500 shrink-0"><path d="m9 18 6-6-6-6"/></svg>
+                            </a>
+                        )}
+
+                        {/* Source + date */}
+                        <div className="flex items-center gap-2 pt-0.5">
+                            {lead.source && (
+                                <span className="text-xs font-medium text-zinc-400">{lead.source.charAt(0).toUpperCase() + lead.source.slice(1)}</span>
+                            )}
+                            {lead.source && <span className="text-zinc-600">·</span>}
+                            <span className="text-xs font-medium text-zinc-400">
+                                Added {new Date(lead.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                        </div>
                     </div>
+
+                    {/* Status badge */}
+                    <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${meta.color} ${meta.bg}`}>
+                        {meta.label}
+                    </span>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${meta.color} ${meta.bg}`}>
-                    {meta.label}
-                </span>
             </div>
 
-            {/* Intake answers */}
-            <div className="sf-glass-card p-6 space-y-5">
-                <h2 className="sf-section-label">Intake Answers</h2>
+            {/* ── 2. Pipeline (4-stage) ──────────────────────────────────────── */}
+            {!isDeclined && (
+                <div className="sf-glass-card p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Pipeline</span>
+                    </div>
+                    <PipelineBar currentStage={effectiveStage} />
+                </div>
+            )}
+
+            {/* ── 3. Prospect Info ────────────────────────────────────────────── */}
+            <div className="sf-glass-card p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Prospect Info</span>
+                </div>
+
+                {/* Intake answers */}
                 {answers.goals && (
-                    <div>
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Goals</p>
-                        <p className="text-sm text-zinc-300 leading-relaxed">{answers.goals}</p>
+                    <div className="flex gap-4">
+                        <span className="shrink-0 w-24 text-sm font-semibold text-zinc-400">Goals</span>
+                        <p className="text-sm text-zinc-200 leading-relaxed">{answers.goals}</p>
                     </div>
                 )}
+                {answers.goals && (answers.experience || answers.injuries) && <hr className="border-white/[0.08]" />}
+
                 {answers.experience && (
-                    <div>
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Experience</p>
-                        <p className="text-sm text-zinc-300 leading-relaxed">{answers.experience}</p>
+                    <div className="flex gap-4">
+                        <span className="shrink-0 w-24 text-sm font-semibold text-zinc-400">Experience</span>
+                        <p className="text-sm text-zinc-200 leading-relaxed">{answers.experience}</p>
                     </div>
                 )}
+                {answers.experience && answers.injuries && <hr className="border-white/[0.08]" />}
+
                 {answers.injuries && (
-                    <div>
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Injuries / Limitations</p>
-                        <p className="text-sm text-zinc-300 leading-relaxed">{answers.injuries}</p>
+                    <div className="flex gap-4">
+                        <span className="shrink-0 w-24 text-sm font-semibold text-zinc-400">Injuries</span>
+                        <p className="text-sm text-zinc-200 leading-relaxed">{answers.injuries}</p>
                     </div>
                 )}
-                {!answers.goals && !answers.experience && !answers.injuries && (
+
+                {!hasIntakeAnswers && (
                     <p className="text-sm text-zinc-400">No intake answers recorded.</p>
                 )}
             </div>
 
-            {/* Consultation */}
-            {consultationMeeting && (
-                <div className="sf-glass-card p-6 space-y-3" style={{ borderColor: "rgba(245, 158, 11, 0.20)" }}>
-                    <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Consultation</h2>
-                    {consultationMeeting.scheduledTime && (
-                        <p className="inline-flex items-center gap-1.5 text-sm text-zinc-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-500" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                            {new Date(consultationMeeting.scheduledTime).toLocaleString("en-US", {
-                                month: "short", day: "numeric", year: "numeric",
-                                hour: "numeric", minute: "2-digit",
-                            })}
-                        </p>
-                    )}
-                    {consultationMeeting.meetingLink && (
-                        <a href={consultationMeeting.meetingLink} target="_blank" rel="noopener noreferrer"
-                           className="text-sm text-blue-400 hover:underline break-all">
-                            {consultationMeeting.meetingLink}
-                        </a>
-                    )}
-                    {consultationMeeting.notes && (
-                        <p className="text-sm text-zinc-400">{consultationMeeting.notes}</p>
+            {/* ── 4. Intake Section (conditional) ─────────────────────────────── */}
+            {["CONSULTATION_SCHEDULED", "CONSULTATION_DONE", "INTAKE_SENT", "INTAKE_SUBMITTED", "ACTIVE"].includes(effectiveStage) && (
+                <div className="sf-glass-card p-6 space-y-3">
+                    <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Intake</span>
+                    </div>
+
+                    {(effectiveStage === "INTAKE_SUBMITTED" || effectiveStage === "ACTIVE") ? (
+                        <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-semibold text-emerald-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                Intake Finalized
+                            </span>
+                            <Link href={`/coach/leads/${requestId}/review`} className="text-sm font-semibold text-blue-400 hover:underline">
+                                View
+                            </Link>
+                        </div>
+                    ) : hasIntakeAnswers ? (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/25 bg-blue-500/10 px-3.5 py-1.5 text-sm font-semibold text-blue-300">
+                                    Client Pre-filled
+                                </span>
+                                <Link href={`/coach/leads/${requestId}/review`} className="text-sm font-semibold text-blue-400 hover:underline">
+                                    Open &amp; Edit
+                                </Link>
+                            </div>
+                            <p className="text-sm text-zinc-400">Review and finalize during your consultation meeting.</p>
+                        </>
+                    ) : (
+                        <div className="space-y-2">
+                            <Link href={`/coach/leads/${requestId}/review`} className="flex items-center gap-2 text-sm font-semibold text-blue-400 hover:underline">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+                                Open Intake Form
+                            </Link>
+                            <p className="text-sm text-zinc-400">Fill out intake during your consultation meeting.</p>
+                        </div>
                     )}
                 </div>
             )}
 
-            {/* Actions */}
+            {/* ── 5. Actions ─────────────────────────────────────────────────── */}
             <div className="sf-glass-card p-6 space-y-4">
-                <h2 className="sf-section-label">Actions</h2>
+                <div className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Actions</span>
+                </div>
                 <LeadActions
                     requestId={lead.id}
                     status={lead.status}
                     prospectId={lead.prospectId}
                     prospectName={lead.prospectName}
-                    consultationStage={lead.consultationStage}
+                    consultationStage={effectiveStage}
                     consultationDate={(lead.consultationDate ?? consultationMeeting?.scheduledTime)?.toISOString() ?? null}
                     formsSignedAt={lead.formsSignedAt?.toISOString() ?? null}
                     prospectEmailAddr={lead.prospectEmailAddr ?? null}
@@ -176,7 +273,7 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     } : null}
                     activeDocuments={activeDocuments}
                     intakePacketSentAt={intakePacket?.sentAt?.toISOString() ?? null}
-                    coachNotes={lead.coachNotes ?? null}
+                    coachNotes={null}
                 />
             </div>
         </div>

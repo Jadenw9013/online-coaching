@@ -23,6 +23,7 @@ export async function getMyCoachingRequests() {
         select: {
             id: true,
             status: true,
+            consultationStage: true,
             createdAt: true,
             coachProfile: {
                 select: {
