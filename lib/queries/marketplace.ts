@@ -136,9 +136,36 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
         where.OR = orClauses;
     }
 
+    // NOTE: explicit select avoids relying on include which pulls all
+    // CoachProfile columns (including String[] fields like specialties,
+    // services, etc.) that can crash @prisma/adapter-pg on Neon pooled
+    // connections.
     const profiles = await db.coachProfile.findMany({
         where,
-        include: {
+        select: {
+            id: true,
+            slug: true,
+            userId: true,
+            headline: true,
+            bio: true,
+            specialties: true,
+            pricing: true,
+            acceptingClients: true,
+            isPublished: true,
+            bannerPhotoPath: true,
+            experience: true,
+            certifications: true,
+            coachingType: true,
+            location: true,
+            city: true,
+            state: true,
+            serviceTier: true,
+            gymName: true,
+            phoneNumber: true,
+            services: true,
+            clientGoals: true,
+            clientTypes: true,
+            createdAt: true,
             user: {
                 select: {
                     id: true,
@@ -291,7 +318,32 @@ export async function getPublishedCoaches(filters?: CoachFilters) {
 export async function getCoachProfileBySlug(slug: string) {
     const profile = await db.coachProfile.findUnique({
         where: { slug, isPublished: true },
-        include: {
+        select: {
+            id: true,
+            slug: true,
+            userId: true,
+            headline: true,
+            bio: true,
+            specialties: true,
+            pricing: true,
+            acceptingClients: true,
+            isPublished: true,
+            welcomeMessage: true,
+            bannerPhotoPath: true,
+            experience: true,
+            certifications: true,
+            coachingType: true,
+            location: true,
+            city: true,
+            state: true,
+            serviceTier: true,
+            gymName: true,
+            phoneNumber: true,
+            services: true,
+            clientGoals: true,
+            clientTypes: true,
+            yearsCoaching: true,
+            createdAt: true,
             user: {
                 select: {
                     id: true,

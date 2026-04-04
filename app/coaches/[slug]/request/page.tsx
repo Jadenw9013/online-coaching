@@ -17,7 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { slug } = await params;
     const profile = await db.coachProfile.findUnique({
         where: { slug, isPublished: true },
-        include: { user: { select: { firstName: true, lastName: true } } },
+        select: {
+            id: true,
+            slug: true,
+            user: { select: { firstName: true, lastName: true } },
+        },
     });
 
     if (!profile) return { title: "Coach Not Found" };
@@ -27,9 +31,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CoachingRequestPage({ params }: PageProps) {
     const { slug } = await params;
+    // NOTE: explicit select avoids String[]/Json columns (specialties,
+    // services, etc.) that crash @prisma/adapter-pg on Neon pooled connections.
     const profile = await db.coachProfile.findUnique({
         where: { slug, isPublished: true },
-        include: {
+        select: {
+            id: true,
+            slug: true,
+            acceptingClients: true,
             user: {
                 select: { firstName: true, lastName: true },
             },

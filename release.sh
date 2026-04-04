@@ -88,6 +88,26 @@ if [[ -n "${HITS}" ]]; then
 fi
 
 echo ""
+echo "7. Checking for Prisma include in pages/queries (use select instead)..."
+# The @prisma/adapter-pg driver crashes on String[]/Int[]/Json columns
+# when include pulls all columns via Neon pooled connections.
+HITS=$(grep -Rn "include:" app/ lib/queries/ "${EXCLUDES[@]}" \
+  --include="*.ts" --include="*.tsx" \
+  | grep -Ev "\"use client\"" \
+  | grep -Ev "^\\s*//" \
+  | grep -Ev "^\\s*\\*" \
+  | grep -Ev "app/actions/" \
+  | grep -Ev "app/api/" \
+  || true)
+
+if [[ -n "${HITS}" ]]; then
+  echo "${HITS}"
+  echo "WARN: Found Prisma 'include:' in page/query files."
+  echo "      Prefer explicit 'select:' to avoid @prisma/adapter-pg crashes"
+  echo "      with String[]/Int[]/Json columns on Neon pooled connections."
+fi
+
+echo ""
 echo "=============================="
 echo "Release checks complete."
 echo "If no FAIL errors above, safe to deploy."
