@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 type Params = { params: Promise<{ leadId: string }> };
 
 // ── POST — bypass pipeline and activate client directly ──────────────────────
+// Uses raw SQL throughout to avoid adapter-pg column mapping issues.
 
 export async function POST(_req: NextRequest, { params }: Params) {
   let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
@@ -18,99 +19,98 @@ export async function POST(_req: NextRequest, { params }: Params) {
   try {
     const { leadId } = await params;
 
-    // 1. Get coach profile
-    const profile = await db.coachProfile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-    if (!profile) return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    // 1. Verify coach owns this lead
+    const leads = await db.$queryRaw<Array<{
+      id: string;
+      coachProfileId: string;
+      consultationStage: string;
+      prospectName: string;
+      prospectEmail: string;
+      prospectPhone: string | null;
+      prospectEmailAddr: string | null;
+    }>>`
+      SELECT cr."id", cr."coachProfileId", cr."consultationStage",
+             cr."prospectName", cr."prospectEmail", cr."prospectPhone", cr."prospectEmailAddr"
+      FROM "CoachingRequest" cr
+      JOIN "CoachProfile" cp ON cp."id" = cr."coachProfileId"
+      WHERE cr."id" = ${leadId} AND cp."userId" = ${user.id}
+      LIMIT 1
+    `;
 
-    // 2. Fetch the lead (read-only — safe with adapter-pg)
-    const request = await db.coachingRequest.findUnique({
-      where: { id: leadId },
-      select: {
-        id: true,
-        coachProfileId: true,
-        consultationStage: true,
-        prospectName: true,
-        prospectEmail: true,
-        prospectPhone: true,
-        prospectEmailAddr: true,
-      },
-    });
-
-    if (!request || request.coachProfileId !== profile.id) {
+    if (leads.length === 0) {
       return NextResponse.json({ success: false, message: "Lead not found" }, { status: 404 });
     }
+    const lead = leads[0];
 
-    if (request.consultationStage === "ACTIVE") {
+    if (lead.consultationStage === "ACTIVE") {
       return NextResponse.json({ success: false, message: "This lead is already active." }, { status: 409 });
     }
-    if (request.consultationStage === "DECLINED") {
+    if (lead.consultationStage === "DECLINED") {
       return NextResponse.json({ success: false, message: "This lead was declined." }, { status: 409 });
     }
 
-    // 3. Find the prospect's User account
-    const email = request.prospectEmailAddr ?? null;
-    const phone = (request.prospectPhone ?? request.prospectEmail ?? "").replace(/\D/g, "");
-    let existingUser = email
-      ? await db.user.findUnique({ where: { email: email.toLowerCase() } })
-      : null;
-    if (!existingUser && phone.length >= 7) {
-      existingUser = await db.user.findFirst({
-        where: { phoneNumber: { contains: phone.slice(-10) } },
-      });
+    // 2. Find the prospect's User account by email or phone
+    const email = lead.prospectEmailAddr ?? null;
+    const phone = (lead.prospectPhone ?? lead.prospectEmail ?? "").replace(/\D/g, "");
+
+    let users: Array<{ id: string; email: string; firstName: string | null }> = [];
+    if (email) {
+      users = await db.$queryRaw<typeof users>`
+        SELECT "id", "email", "firstName" FROM "User" WHERE LOWER("email") = ${email.toLowerCase()} LIMIT 1
+      `;
+    }
+    if (users.length === 0 && phone.length >= 7) {
+      users = await db.$queryRaw<typeof users>`
+        SELECT "id", "email", "firstName" FROM "User" WHERE "phoneNumber" LIKE ${"%" + phone.slice(-10)} LIMIT 1
+      `;
     }
 
-    if (!existingUser) {
+    if (users.length === 0) {
       return NextResponse.json({
         success: false,
         message: "This prospect hasn't created a Steadfast account yet. Send them an invite first.",
       }, { status: 422 });
     }
+    const prospectUser = users[0];
 
-    // 4. Create CoachClient link (idempotent)
-    const existingConn = await db.coachClient.findUnique({
-      where: { coachId_clientId: { coachId: user.id, clientId: existingUser.id } },
-    });
-    if (!existingConn) {
-      await db.coachClient.create({
-        data: { coachId: user.id, clientId: existingUser.id, coachNotes: "Activated via pipeline bypass." },
-      });
-    }
+    // 3. Create CoachClient link (idempotent)
+    await db.$executeRaw`
+      INSERT INTO "CoachClient" ("id", "coachId", "clientId", "coachNotes", "createdAt")
+      VALUES (gen_random_uuid()::text, ${user.id}, ${prospectUser.id}, 'Activated via pipeline bypass.', NOW())
+      ON CONFLICT ("coachId", "clientId") DO NOTHING
+    `;
 
-    // 5. Update the coaching request to ACTIVE
-    await db.coachingRequest.update({
-      where: { id: leadId },
-      data: {
-        consultationStage: "ACTIVE",
-        status: "ACCEPTED",
-        prospectId: existingUser.id,
-      },
-    });
+    // 4. Update lead to ACTIVE
+    await db.$executeRaw`
+      UPDATE "CoachingRequest"
+      SET "consultationStage" = 'ACTIVE'::"ConsultationStage",
+          "status" = 'ACCEPTED'::"RequestStatus",
+          "prospectId" = ${prospectUser.id},
+          "updatedAt" = NOW()
+      WHERE "id" = ${leadId}
+    `;
 
-    // 6. Send welcome email (fire-and-forget — never blocks)
+    // 5. Welcome email (fire-and-forget)
     try {
       const { sendEmail } = await import("@/lib/email/sendEmail");
       const { coachConnectedEmail } = await import("@/lib/email/templates");
-      const emailContent = coachConnectedEmail(
-        existingUser.firstName || request.prospectName,
+      const content = coachConnectedEmail(
+        prospectUser.firstName || lead.prospectName,
         user.firstName || "Your coach"
       );
-      sendEmail({ to: existingUser.email, ...emailContent }).catch(() => {});
-    } catch { /* email failure must not block */ }
+      sendEmail({ to: prospectUser.email, ...content }).catch(() => {});
+    } catch { /* never block */ }
 
-    // 7. Revalidate cache (non-blocking — may throw in edge contexts)
+    // 6. Revalidate (non-blocking)
     try { const { revalidatePath } = await import("next/cache"); revalidatePath("/coach/leads"); } catch {}
-    try { const { revalidatePath } = await import("next/cache"); revalidatePath("/coach/dashboard"); } catch {}
 
     return NextResponse.json({
       success: true,
-      message: `${request.prospectName} has been added to your roster.`,
+      message: `${lead.prospectName} has been added to your roster.`,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[POST /api/coach/leads/[leadId]/bypass-activate]", msg, err);
-    return NextResponse.json({ success: false, message: `Internal server error: ${msg}` }, { status: 500 });
+    console.error("[bypass-activate]", msg);
+    return NextResponse.json({ success: false, message: `Server error: ${msg}` }, { status: 500 });
   }
 }

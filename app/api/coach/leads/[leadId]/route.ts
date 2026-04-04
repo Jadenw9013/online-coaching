@@ -5,19 +5,17 @@ import { db } from "@/lib/db";
 
 type Params = { params: Promise<{ leadId: string }> };
 
-async function verifyOwnership(user: Awaited<ReturnType<typeof getCurrentDbUser>>, leadId: string) {
-  const profile = await db.coachProfile.findUnique({
-    where: { userId: user.id },
-    select: { id: true },
-  });
-  if (!profile) return null;
+// ── Helper: verify coach owns this lead ──────────────────────────────────────
 
-  const lead = await db.coachingRequest.findUnique({
-    where: { id: leadId },
-    select: { coachProfileId: true },
-  });
-  if (!lead || lead.coachProfileId !== profile.id) return null;
-  return profile;
+async function verifyCoachOwnsLead(userId: string, leadId: string) {
+  const rows = await db.$queryRaw<Array<{ id: string }>>`
+    SELECT cr."id"
+    FROM "CoachingRequest" cr
+    JOIN "CoachProfile" cp ON cp."id" = cr."coachProfileId"
+    WHERE cr."id" = ${leadId} AND cp."userId" = ${userId}
+    LIMIT 1
+  `;
+  return rows.length > 0;
 }
 
 // ── GET — full lead detail ────────────────────────────────────────────────────
@@ -34,105 +32,100 @@ export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const { leadId } = await params;
 
-    const profile = await db.coachProfile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-    if (!profile) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Single raw query with LEFT JOINs for related data
+    const rows = await db.$queryRaw<Array<{
+      id: string;
+      prospectName: string;
+      prospectEmail: string;
+      prospectEmailAddr: string | null;
+      prospectPhone: string | null;
+      status: string;
+      consultationStage: string;
+      source: string;
+      sourceDetail: string | null;
+      coachNotes: string | null;
+      intakeAnswers: unknown;
+      createdAt: Date;
+      updatedAt: Date;
+      formsSentAt: Date | null;
+      formsSignedAt: Date | null;
+      prospectId: string | null;
+      coachProfileId: string;
+      ip_id: string | null;
+      ip_sentAt: Date | null;
+      ip_submittedAt: Date | null;
+      ip_formAnswers: unknown;
+      fs_status: string | null;
+      fs_completedAt: Date | null;
+      sig_signedAt: Date | null;
+    }>>`
+      SELECT
+        cr."id", cr."prospectName", cr."prospectEmail", cr."prospectEmailAddr",
+        cr."prospectPhone", cr."status"::text, cr."consultationStage"::text,
+        cr."source"::text, cr."sourceDetail", cr."coachNotes",
+        cr."intakeAnswers", cr."createdAt", cr."updatedAt",
+        cr."formsSentAt", cr."formsSignedAt", cr."prospectId", cr."coachProfileId",
+        ip."id" as "ip_id", ip."sentAt" as "ip_sentAt",
+        ip."submittedAt" as "ip_submittedAt", ip."formAnswers" as "ip_formAnswers",
+        fs."status"::text as "fs_status", fs."completedAt" as "fs_completedAt",
+        sig."signedAt" as "sig_signedAt"
+      FROM "CoachingRequest" cr
+      JOIN "CoachProfile" cp ON cp."id" = cr."coachProfileId" AND cp."userId" = ${user.id}
+      LEFT JOIN "IntakePacket" ip ON ip."coachingRequestId" = cr."id"
+      LEFT JOIN "ClientFormSubmission" fs ON fs."coachingRequestId" = cr."id"
+      LEFT JOIN "ClientFormSignature" sig ON sig."coachingRequestId" = cr."id"
+      WHERE cr."id" = ${leadId}
+      LIMIT 1
+    `;
 
-    const lead = await db.coachingRequest.findUnique({
-      where: { id: leadId },
-      select: {
-        id: true,
-        prospectName: true,
-        prospectEmail: true,
-        prospectEmailAddr: true,
-        prospectPhone: true,
-        status: true,
-        consultationStage: true,
-        source: true,
-        sourceDetail: true,
-        coachNotes: true,
-        intakeAnswers: true,
-        createdAt: true,
-        updatedAt: true,
-        formsSentAt: true,
-        formsSignedAt: true,
-        prospectId: true,
-        coachProfileId: true,
-        intakePacket: {
-          select: { id: true, sentAt: true, submittedAt: true, formAnswers: true },
-        },
-        formSubmission: {
-          select: { status: true, completedAt: true },
-        },
-        signature: {
-          select: { signedAt: true },
-        },
-      },
-    });
-
-    if (!lead || lead.coachProfileId !== profile.id) {
+    if (rows.length === 0) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
-    const intakeStatus = lead.intakePacket
-      ? lead.intakePacket.submittedAt
-        ? "SUBMITTED"
-        : "SENT"
-      : "NOT_SENT";
+    const r = rows[0];
+    const toISO = (d: Date | null) => d ? new Date(d).toISOString() : null;
 
-    const documentsStatus = lead.formsSignedAt
-      ? "SIGNED"
-      : lead.formsSentAt
-      ? "SENT"
-      : "NOT_SENT";
+    const intakeStatus = r.ip_id ? (r.ip_submittedAt ? "SUBMITTED" : "SENT") : "NOT_SENT";
+    const documentsStatus = r.formsSignedAt ? "SIGNED" : r.formsSentAt ? "SENT" : "NOT_SENT";
 
     return NextResponse.json({
       lead: {
-        id: lead.id,
-        prospectName: lead.prospectName,
-        prospectEmail: lead.prospectEmail,
-        prospectEmailAddr: lead.prospectEmailAddr,
-        prospectPhone: lead.prospectPhone,
-        status: lead.status,
-        consultationStage: lead.consultationStage,
-        source: lead.source,
-        sourceDetail: lead.sourceDetail,
-        coachNotes: lead.coachNotes,
-        intakeAnswers: lead.intakeAnswers,
-        createdAt: lead.createdAt.toISOString(),
-        updatedAt: lead.updatedAt.toISOString(),
-        formsSentAt: lead.formsSentAt?.toISOString() ?? null,
-        formsSignedAt: lead.formsSignedAt?.toISOString() ?? null,
-        prospectId: lead.prospectId,
+        id: r.id,
+        prospectName: r.prospectName,
+        prospectEmail: r.prospectEmail,
+        prospectEmailAddr: r.prospectEmailAddr,
+        prospectPhone: r.prospectPhone,
+        status: r.status,
+        consultationStage: r.consultationStage,
+        source: r.source,
+        sourceDetail: r.sourceDetail,
+        coachNotes: r.coachNotes,
+        intakeAnswers: r.intakeAnswers,
+        createdAt: toISO(r.createdAt),
+        updatedAt: toISO(r.updatedAt),
+        formsSentAt: toISO(r.formsSentAt),
+        formsSignedAt: toISO(r.formsSignedAt),
+        prospectId: r.prospectId,
         intakeStatus,
         documentsStatus,
-        intakePacket: lead.intakePacket
-          ? {
-              id: lead.intakePacket.id,
-              sentAt: lead.intakePacket.sentAt.toISOString(),
-              submittedAt: lead.intakePacket.submittedAt?.toISOString() ?? null,
-            }
+        intakePacket: r.ip_id
+          ? { id: r.ip_id, sentAt: toISO(r.ip_sentAt), submittedAt: toISO(r.ip_submittedAt) }
           : null,
-        formSubmission: lead.formSubmission
-          ? { status: lead.formSubmission.status, completedAt: lead.formSubmission.completedAt?.toISOString() ?? null }
+        formSubmission: r.fs_status
+          ? { status: r.fs_status, completedAt: toISO(r.fs_completedAt) }
           : null,
-        signature: lead.signature ? { signedAt: lead.signature.signedAt.toISOString() } : null,
+        signature: r.sig_signedAt ? { signedAt: toISO(r.sig_signedAt) } : null,
       },
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[GET /api/coach/leads/[leadId]]", msg, err);
+    console.error("[GET /api/coach/leads/[leadId]]", msg);
     return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 });
   }
 }
 
 // ── PATCH — update coach notes, intake answers, and/or stage ──────────────────
 
-// intakeAnswers accepts any JSON shape:
-//   Legacy:      { goals, experience, injuries }
-//   Structured:  { sections: [{ sectionId, sectionTitle, answers: [{ questionId, questionLabel, value }] }] }
 const patchSchema = z.object({
   coachNotes: z.string().max(5000).optional(),
   intakeAnswers: z.record(z.string(), z.unknown()).optional(),
@@ -150,8 +143,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   try {
     const { leadId } = await params;
-    const profile = await verifyOwnership(user, leadId);
-    if (!profile) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    if (!(await verifyCoachOwnsLead(user.id, leadId))) {
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    }
 
     const body = await req.json();
     const parsed = patchSchema.safeParse(body);
@@ -159,49 +153,86 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Invalid input" }, { status: 422 });
     }
 
-    const data: Record<string, unknown> = {};
-    if (parsed.data.coachNotes !== undefined) data.coachNotes = parsed.data.coachNotes;
-    if (parsed.data.intakeAnswers !== undefined) data.intakeAnswers = parsed.data.intakeAnswers;
-    if (parsed.data.consultationStage !== undefined) data.consultationStage = parsed.data.consultationStage;
+    // Build dynamic SET clauses
+    const sets: string[] = ['"updatedAt" = NOW()'];
+    const values: unknown[] = [];
 
-    const updated = await db.coachingRequest.update({
-      where: { id: leadId },
-      data,
-      select: { id: true, coachNotes: true, intakeAnswers: true, consultationStage: true, updatedAt: true },
-    });
+    if (parsed.data.coachNotes !== undefined) {
+      values.push(parsed.data.coachNotes);
+      sets.push(`"coachNotes" = $${values.length + 1}`);
+    }
+    if (parsed.data.intakeAnswers !== undefined) {
+      values.push(JSON.stringify(parsed.data.intakeAnswers));
+      sets.push(`"intakeAnswers" = $${values.length + 1}::jsonb`);
+    }
+    if (parsed.data.consultationStage !== undefined) {
+      values.push(parsed.data.consultationStage);
+      sets.push(`"consultationStage" = $${values.length + 1}::"ConsultationStage"`);
+    }
 
+    // Use tagged template for parameterized raw query
+    if (parsed.data.coachNotes !== undefined && parsed.data.intakeAnswers === undefined && parsed.data.consultationStage === undefined) {
+      await db.$executeRaw`
+        UPDATE "CoachingRequest" SET "coachNotes" = ${parsed.data.coachNotes}, "updatedAt" = NOW() WHERE "id" = ${leadId}
+      `;
+    } else if (parsed.data.intakeAnswers !== undefined && parsed.data.coachNotes === undefined && parsed.data.consultationStage === undefined) {
+      const json = JSON.stringify(parsed.data.intakeAnswers);
+      await db.$executeRaw`
+        UPDATE "CoachingRequest" SET "intakeAnswers" = ${json}::jsonb, "updatedAt" = NOW() WHERE "id" = ${leadId}
+      `;
+    } else if (parsed.data.consultationStage !== undefined && parsed.data.coachNotes === undefined && parsed.data.intakeAnswers === undefined) {
+      await db.$executeRaw`
+        UPDATE "CoachingRequest" SET "consultationStage" = ${parsed.data.consultationStage}::"ConsultationStage", "updatedAt" = NOW() WHERE "id" = ${leadId}
+      `;
+    } else {
+      // Multiple fields — update them individually
+      if (parsed.data.coachNotes !== undefined) {
+        await db.$executeRaw`UPDATE "CoachingRequest" SET "coachNotes" = ${parsed.data.coachNotes} WHERE "id" = ${leadId}`;
+      }
+      if (parsed.data.intakeAnswers !== undefined) {
+        const json = JSON.stringify(parsed.data.intakeAnswers);
+        await db.$executeRaw`UPDATE "CoachingRequest" SET "intakeAnswers" = ${json}::jsonb WHERE "id" = ${leadId}`;
+      }
+      if (parsed.data.consultationStage !== undefined) {
+        await db.$executeRaw`UPDATE "CoachingRequest" SET "consultationStage" = ${parsed.data.consultationStage}::"ConsultationStage" WHERE "id" = ${leadId}`;
+      }
+      await db.$executeRaw`UPDATE "CoachingRequest" SET "updatedAt" = NOW() WHERE "id" = ${leadId}`;
+    }
+
+    // Fetch updated record
+    const rows = await db.$queryRaw<Array<{
+      id: string; coachNotes: string | null; intakeAnswers: unknown; consultationStage: string; updatedAt: Date;
+    }>>`
+      SELECT "id", "coachNotes", "intakeAnswers", "consultationStage"::text, "updatedAt"
+      FROM "CoachingRequest" WHERE "id" = ${leadId} LIMIT 1
+    `;
+
+    const updated = rows[0];
     return NextResponse.json({
       lead: {
         id: updated.id,
         coachNotes: updated.coachNotes,
         intakeAnswers: updated.intakeAnswers,
         consultationStage: updated.consultationStage,
-        updatedAt: updated.updatedAt.toISOString(),
+        updatedAt: new Date(updated.updatedAt).toISOString(),
       },
     });
-  } catch (err) {
-    console.error("[PATCH /api/coach/leads/[leadId]]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[PATCH /api/coach/leads/[leadId]]", msg);
+    return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 });
   }
 }
 
 // ── PUT — update lead status and/or consultation stage ────────────────────────
 
 const VALID_CONSULTATION_STAGES = [
-  "PENDING",
-  "CONSULTATION_SCHEDULED",
-  "CONSULTATION_DONE",
-  "INTAKE_SENT",
-  "INTAKE_SUBMITTED",
-  "FORMS_SENT",
-  "FORMS_SIGNED",
-  "DECLINED",
+  "PENDING", "CONSULTATION_SCHEDULED", "CONSULTATION_DONE",
+  "INTAKE_SENT", "INTAKE_SUBMITTED", "FORMS_SENT", "FORMS_SIGNED", "DECLINED",
 ] as const;
 
 const updateLeadSchema = z.object({
-  status: z
-    .enum(["PENDING", "CONTACTED", "CALL_SCHEDULED", "ACCEPTED", "DECLINED", "WAITLISTED"])
-    .optional(),
+  status: z.enum(["PENDING", "CONTACTED", "CALL_SCHEDULED", "ACCEPTED", "DECLINED", "WAITLISTED"]).optional(),
   stage: z.enum(VALID_CONSULTATION_STAGES).optional(),
   consultationStage: z.enum(VALID_CONSULTATION_STAGES).optional(),
 });
@@ -217,8 +248,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     const { leadId } = await params;
-    const profile = await verifyOwnership(user, leadId);
-    if (!profile) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    if (!(await verifyCoachOwnsLead(user.id, leadId))) {
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    }
 
     const body = await req.json();
     const parsed = updateLeadSchema.safeParse(body);
@@ -230,28 +262,38 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
 
     const { status, stage, consultationStage } = parsed.data;
-    // Accept stage from either "stage" or "consultationStage" field
     const newStage = stage ?? consultationStage;
 
-    const updated = await db.coachingRequest.update({
-      where: { id: leadId },
-      data: {
-        ...(status !== undefined && { status }),
-        ...(newStage !== undefined && { consultationStage: newStage }),
-      },
-      select: { id: true, status: true, consultationStage: true, updatedAt: true },
-    });
+    if (status !== undefined) {
+      await db.$executeRaw`
+        UPDATE "CoachingRequest" SET "status" = ${status}::"RequestStatus", "updatedAt" = NOW() WHERE "id" = ${leadId}
+      `;
+    }
+    if (newStage !== undefined) {
+      await db.$executeRaw`
+        UPDATE "CoachingRequest" SET "consultationStage" = ${newStage}::"ConsultationStage", "updatedAt" = NOW() WHERE "id" = ${leadId}
+      `;
+    }
 
+    const rows = await db.$queryRaw<Array<{
+      id: string; status: string; consultationStage: string; updatedAt: Date;
+    }>>`
+      SELECT "id", "status"::text, "consultationStage"::text, "updatedAt"
+      FROM "CoachingRequest" WHERE "id" = ${leadId} LIMIT 1
+    `;
+
+    const updated = rows[0];
     return NextResponse.json({
       lead: {
         id: updated.id,
         status: updated.status,
         consultationStage: updated.consultationStage,
-        updatedAt: updated.updatedAt.toISOString(),
+        updatedAt: new Date(updated.updatedAt).toISOString(),
       },
     });
-  } catch (err) {
-    console.error("[PUT /api/coach/leads/[leadId]]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[PUT /api/coach/leads/[leadId]]", msg);
+    return NextResponse.json({ error: `Internal server error: ${msg}` }, { status: 500 });
   }
 }
