@@ -58,7 +58,7 @@ export async function saveIntakeDraft(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -87,7 +87,7 @@ export async function markIntakeReadyToSend(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true, formSubmission: true },
+        include: { coachProfile: { select: { id: true, userId: true } }, formSubmission: true },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
     if (!request.formSubmission) throw new Error("No intake form exists for this lead.");
@@ -137,7 +137,7 @@ export async function sendFormsForSignature(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true, formSubmission: true },
+        include: { coachProfile: { select: { id: true, userId: true } }, formSubmission: true },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
     if (!request.formSubmission || request.formSubmission.status !== "READY_TO_SEND") {
@@ -190,7 +190,7 @@ export async function sendIntakePacket(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -255,7 +255,7 @@ export async function submitIntakePacket(input: {
     const packet = await db.intakePacket.findUnique({
         where: { token: input.token },
         include: {
-            coachingRequest: { include: { coachProfile: { include: { user: true } } } },
+            coachingRequest: { include: { coachProfile: { select: { id: true, userId: true, user: { select: { email: true, firstName: true } } } } } },
             documents: true,
         },
     });
@@ -322,7 +322,7 @@ export async function saveReviewEdits(input: {
 
     const packet = await db.intakePacket.findUnique({
         where: { id: input.packetId },
-        include: { coachingRequest: { include: { coachProfile: true } } },
+        include: { coachingRequest: { include: { coachProfile: { select: { id: true, userId: true } } } } },
     });
     if (!packet || packet.coachingRequest.coachProfile.userId !== user.id) throw new Error("Not found");
 
@@ -341,7 +341,7 @@ export async function resendFormsLink(input: { requestId: string }) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 

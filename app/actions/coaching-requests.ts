@@ -202,7 +202,7 @@ export async function approveCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!request || request.coachProfile.userId !== user.id) {
@@ -302,7 +302,7 @@ export async function rejectCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!request || request.coachProfile.userId !== user.id) {
@@ -345,7 +345,7 @@ export async function cancelCoachingRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!request) throw new Error("Request not found");
@@ -385,7 +385,7 @@ export async function resendInvite(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!request || request.coachProfile.userId !== user.id) {
@@ -480,7 +480,7 @@ export async function markContacted(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -511,7 +511,7 @@ export async function scheduleConsultation(input: unknown) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -548,7 +548,7 @@ export async function acceptClient(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -606,7 +606,7 @@ export async function declineRequest(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -647,7 +647,7 @@ export async function updateConsultationStage(input: {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true, consultationMeeting: true },
+        include: { coachProfile: { select: { id: true, userId: true } }, consultationMeeting: true },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -679,7 +679,7 @@ export async function bypassPipelineAndActivate(input: { requestId: string }) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -747,7 +747,7 @@ export async function activateClient(input: { requestId: string }) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: input.requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 
@@ -868,7 +868,7 @@ export async function goBackStage(requestId: string) {
 
     const request = await db.coachingRequest.findUnique({
         where: { id: requestId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
     if (!request || request.coachProfile.userId !== user.id) throw new Error("Request not found");
 

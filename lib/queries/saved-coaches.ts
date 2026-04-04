@@ -8,7 +8,15 @@ export async function getSavedCoaches(userId: string) {
         where: { userId },
         include: {
             coachProfile: {
-                include: {
+                select: {
+                    id: true,
+                    slug: true,
+                    headline: true,
+                    pricing: true,
+                    isPublished: true,
+                    acceptingClients: true,
+                    coachingType: true,
+                    location: true,
                     user: {
                         select: {
                             firstName: true,

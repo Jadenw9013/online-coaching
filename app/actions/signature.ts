@@ -19,7 +19,7 @@ export async function submitSignature(input: {
     const request = await db.coachingRequest.findUnique({
         where: { formsToken: input.token },
         include: {
-            coachProfile: { include: { user: true } },
+            coachProfile: { select: { id: true, userId: true, user: { select: { email: true, firstName: true } } } },
             formSubmission: true,
         },
     });

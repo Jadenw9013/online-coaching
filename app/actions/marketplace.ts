@@ -168,7 +168,7 @@ export async function updatePortfolioItem(data: z.infer<typeof updatePortfolioIt
     // Verify ownership
     const item = await db.portfolioItem.findUnique({
         where: { id: validated.id },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!item || item.coachProfile.userId !== user.id) {
@@ -197,7 +197,7 @@ export async function deletePortfolioItem(itemId: string) {
 
     const item = await db.portfolioItem.findUnique({
         where: { id: itemId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!item || item.coachProfile.userId !== user.id) {
@@ -222,7 +222,7 @@ export async function removePortfolioItemMedia(itemId: string) {
 
     const item = await db.portfolioItem.findUnique({
         where: { id: itemId },
-        include: { coachProfile: true },
+        include: { coachProfile: { select: { id: true, userId: true } } },
     });
 
     if (!item || item.coachProfile.userId !== user.id) {
