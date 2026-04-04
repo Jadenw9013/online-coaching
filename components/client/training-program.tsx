@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect } from "react";
+import { useState, useTransition, useRef } from "react";
 import type { BlockType } from "@/app/generated/prisma/enums";
 import { toggleExerciseCheckoff } from "@/app/actions/adherence";
-import { saveExerciseResult } from "@/app/actions/exercise-results";
+import { saveExerciseResult, deleteExerciseResult, clearExerciseHistory } from "@/app/actions/exercise-results";
 
 type TrainingBlock = {
   id: string;
@@ -39,14 +39,16 @@ type WorkoutAdherenceProps = {
 };
 
 type ExerciseResultData = {
+  id: string;
   exerciseName: string;
   programDay: string;
   weight: number;
   reps: number;
+  createdAt: string;
 };
 
 type ExerciseProgressProps = {
-  /** Map key: "programDay::exerciseName" */
+  /** Map key: "programDay::exerciseName::setNumber" */
   currentWeek: Record<string, ExerciseResultData>;
   previousWeek: Record<string, ExerciseResultData>;
 };
@@ -545,7 +547,7 @@ export function TrainingProgram({
   );
 }
 
-// ── Inline Exercise Progress Logger ─────────────────────────────────────────
+// ── Inline Exercise Progress Logger (append-only, matching iOS UX) ───────────
 
 type ExerciseProgressInputProps = {
   exerciseName: string;
@@ -555,165 +557,275 @@ type ExerciseProgressInputProps = {
   previousAll: Record<string, ExerciseResultData>;
 };
 
+type LoggedSet = { id: string; weight: string; reps: string; createdAt: string };
+
+function formatLogTimestamp(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+
+    const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    if (isToday) return `Today at ${time}`;
+    if (isYesterday) return `Yesterday at ${time}`;
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + ` at ${time}`;
+  } catch {
+    return "";
+  }
+}
+
 function ExerciseProgressInput({
   exerciseName,
   programDay,
-  setCount,
   currentAll,
   previousAll,
 }: ExerciseProgressInputProps) {
-  // DB key for set i — single-set exercises keep no suffix for backwards compat
-  function exNameForSet(i: number) {
-    return setCount === 1 ? exerciseName : `${exerciseName} [Set ${i + 1}]`;
+  // Collect all previously-saved sets from currentAll that match this exercise
+  // Keys are formatted as "programDay::exerciseName::setNumber"
+  const keyPrefix = `${programDay}::${exerciseName}::`;
+  const initialLogged: LoggedSet[] = [];
+  for (const [key, val] of Object.entries(currentAll)) {
+    if (key.startsWith(keyPrefix)) {
+      initialLogged.push({
+        id: val.id,
+        weight: val.weight?.toString() ?? "",
+        reps: val.reps?.toString() ?? "",
+        createdAt: val.createdAt ?? "",
+      });
+    }
   }
-  function lookupKey(i: number) {
-    return `${programDay}::${exNameForSet(i)}`;
-  }
-  // Legacy key (old single-set entries without a set suffix)
-  const legacyKey = `${programDay}::${exerciseName}`;
+  // Sort by createdAt ascending (oldest first)
+  initialLogged.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-  const [sets, setSets] = useState<{ weight: string; reps: string }[]>(() =>
-    Array.from({ length: setCount }, (_, i) => {
-      const cur = currentAll[lookupKey(i)] ?? (i === 0 ? currentAll[legacyKey] : undefined);
-      return { weight: cur?.weight?.toString() ?? "", reps: cur?.reps?.toString() ?? "" };
-    })
-  );
-  const [saveStates, setSaveStates] = useState<("idle" | "saving" | "saved" | "error")[]>(() =>
-    Array(setCount).fill("idle")
-  );
-  const timerRefs = useRef<(ReturnType<typeof setTimeout> | null)[]>(Array(setCount).fill(null));
+  const [logged, setLogged] = useState<LoggedSet[]>(initialLogged);
+  const [weight, setWeight] = useState("");
+  const [reps, setReps] = useState("");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [clearConfirm, setClearConfirm] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep state arrays in sync if setCount changes between renders
-  useEffect(() => {
-    startTransition(() => {
-      setSets((prev) => {
-        if (prev.length === setCount) return prev;
-        if (prev.length > setCount) return prev.slice(0, setCount);
-        return [...prev, ...Array.from({ length: setCount - prev.length }, () => ({ weight: "", reps: "" }))];
-      });
-      setSaveStates((prev) => {
-        if (prev.length === setCount) return prev;
-        if (prev.length > setCount) return prev.slice(0, setCount);
-        return [...prev, ...Array<"idle">(setCount - prev.length).fill("idle")];
-      });
-    });
-  }, [setCount, startTransition]);
+  const nextSetNumber = logged.length + 1;
 
-  function updateSet(i: number, field: "weight" | "reps", value: string) {
-    setSets((prev) => { const next = [...prev]; next[i] = { ...next[i], [field]: value }; return next; });
-  }
+  // Previous week data for reference — grab the first set's result
+  const prevResult = previousAll[`${programDay}::${exerciseName}::1`];
 
-  function saveSet(i: number) {
-    const { weight: w, reps: r } = sets[i];
-    const weightNum = parseFloat(w);
-    const repsNum = parseInt(r, 10);
-    if (!w || !r || isNaN(weightNum) || isNaN(repsNum) || weightNum <= 0 || repsNum <= 0) return;
-    const cur = currentAll[lookupKey(i)] ?? (i === 0 ? currentAll[legacyKey] : undefined);
-    if (cur && cur.weight === weightNum && cur.reps === repsNum) return;
+  function handleSave() {
+    const w = parseFloat(weight);
+    const r = parseInt(reps, 10);
+    if (!weight || !reps || isNaN(w) || isNaN(r) || w <= 0 || r <= 0) return;
 
-    setSaveStates((prev) => { const next = [...prev]; next[i] = "saving"; return next; });
-    if (timerRefs.current[i]) clearTimeout(timerRefs.current[i]!);
+    setSaveState("saving");
+    if (timerRef.current) clearTimeout(timerRef.current);
 
     startTransition(async () => {
       const result = await saveExerciseResult({
-        exerciseName: exNameForSet(i),
+        exerciseName,
         programDay,
-        weight: weightNum,
-        reps: repsNum,
+        setNumber: nextSetNumber,
+        weight: w,
+        reps: r,
       });
-      setSaveStates((prev) => {
-        const next = [...prev];
-        if (result?.error) {
-          next[i] = "error";
-        } else {
-          next[i] = "saved";
-          timerRefs.current[i] = setTimeout(() => {
-            setSaveStates((p) => { const n = [...p]; n[i] = "idle"; return n; });
-          }, 2000);
-        }
-        return next;
-      });
+
+      if (result?.error) {
+        setSaveState("error");
+        timerRef.current = setTimeout(() => setSaveState("idle"), 3000);
+      } else {
+        // Move to history, clear form
+        setLogged((prev) => [...prev, {
+          id: result.id ?? `temp-${Date.now()}`,
+          weight,
+          reps,
+          createdAt: result.createdAt ?? new Date().toISOString(),
+        }]);
+        setWeight("");
+        setReps("");
+        setSaveState("saved");
+        timerRef.current = setTimeout(() => setSaveState("idle"), 2000);
+      }
     });
   }
 
+  function handleDeleteSingle(id: string) {
+    setDeletingId(id);
+    startTransition(async () => {
+      const result = await deleteExerciseResult(id);
+      if (result?.success) {
+        setLogged((prev) => prev.filter((s) => s.id !== id));
+      }
+      setDeletingId(null);
+    });
+  }
+
+  function handleClearAll() {
+    setClearConfirm(false);
+    startTransition(async () => {
+      const result = await clearExerciseHistory(exerciseName);
+      if (result?.success) {
+        setLogged([]);
+      }
+    });
+  }
+
+  const totalReps = logged.reduce((sum, s) => sum + (parseInt(s.reps, 10) || 0), 0);
+  const bestWeight = logged.length > 0 ? Math.max(...logged.map((s) => parseFloat(s.weight) || 0)) : 0;
+
   return (
-    <div className="ml-9 mt-2 sf-glass-card px-3 py-2.5 space-y-2.5">
-      {Array.from({ length: setCount }, (_, i) => {
-        const prev = previousAll[lookupKey(i)] ?? (i === 0 ? previousAll[legacyKey] : undefined);
-        const { weight, reps } = sets[i] ?? { weight: "", reps: "" };
-        const saveState = saveStates[i];
-        return (
-          <div key={i}>
-            {/* Set label + previous result */}
-            <div className="mb-1.5 flex items-center justify-between">
-              {setCount > 1 ? (
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Set {i + 1}
-                </span>
-              ) : (
-                <span className="text-xs text-zinc-500">
-                  {prev ? "Last week" : "No previous result"}
-                </span>
-              )}
-              {prev && (
-                <span className="text-xs text-zinc-500">
-                  {setCount > 1 ? "Last: " : ""}
-                  <span className="font-semibold text-zinc-400">
-                    {prev.weight} × {prev.reps}
-                  </span>
-                </span>
-              )}
-            </div>
+    <div className="ml-9 mt-2 sf-glass-card px-3 py-3 space-y-3">
+      {/* Summary metrics */}
+      {logged.length > 0 && (
+        <div className="flex items-center gap-3 text-xs">
+          <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 font-semibold text-emerald-400">
+            {logged.length} logged
+          </span>
+          {bestWeight > 0 && (
+            <span className="text-zinc-400">
+              Best: <span className="font-semibold text-zinc-300">{bestWeight} lbs</span>
+            </span>
+          )}
+          {totalReps > 0 && (
+            <span className="text-zinc-400">
+              Total: <span className="font-semibold text-zinc-300">{totalReps} reps</span>
+            </span>
+          )}
+        </div>
+      )}
 
-            {/* Weight × Reps inputs */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <label htmlFor={`w-${programDay}-${exerciseName}-${i}`} className="text-xs font-medium text-zinc-400">Weight</label>
-                <input
-                  id={`w-${programDay}-${exerciseName}-${i}`}
-                  type="number" inputMode="decimal" step="any" min="0"
-                  value={weight}
-                  onChange={(e) => updateSet(i, "weight", e.target.value)}
-                  onBlur={() => saveSet(i)}
-                  placeholder="lbs"
-                  style={{ fontSize: "max(1rem, 16px)" }}
-                  className="sf-input w-16 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  aria-label={`Weight for ${exerciseName} set ${i + 1}`}
-                />
-              </div>
-              <span className="text-zinc-600">×</span>
-              <div className="flex items-center gap-1.5">
-                <label htmlFor={`r-${programDay}-${exerciseName}-${i}`} className="text-xs font-medium text-zinc-400">Reps</label>
-                <input
-                  id={`r-${programDay}-${exerciseName}-${i}`}
-                  type="number" inputMode="numeric" min="0"
-                  value={reps}
-                  onChange={(e) => updateSet(i, "reps", e.target.value)}
-                  onBlur={() => saveSet(i)}
-                  placeholder="0"
-                  style={{ fontSize: "max(1rem, 16px)" }}
-                  className="sf-input w-14 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  aria-label={`Reps for ${exerciseName} set ${i + 1}`}
-                />
-              </div>
-              {saveState === "saving" && <span className="text-xs text-zinc-500">Saving…</span>}
-              {saveState === "saved" && (
-                <span className="flex items-center gap-1 text-xs font-medium text-emerald-400">
-                  <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  Saved
-                </span>
-              )}
-              {saveState === "error" && <span className="text-xs font-medium text-red-500">Failed</span>}
-            </div>
+      {/* Current set editor */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-xs font-medium text-zinc-500">Log a set</span>
+          {prevResult && (
+            <span className="text-xs text-zinc-500">
+              Last week:{" "}
+              <span className="font-semibold text-zinc-400">
+                {prevResult.weight} × {prevResult.reps}
+              </span>
+            </span>
+          )}
+        </div>
 
-            {/* Divider between sets */}
-            {setCount > 1 && i < setCount - 1 && (
-              <div className="mt-2.5 border-t border-zinc-800/60" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <label htmlFor={`w-${programDay}-${exerciseName}`} className="text-xs font-medium text-zinc-400">Weight</label>
+            <input
+              id={`w-${programDay}-${exerciseName}`}
+              type="number" inputMode="decimal" step="any" min="0"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+              placeholder="lbs"
+              style={{ fontSize: "max(1rem, 16px)" }}
+              className="sf-input w-16 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              aria-label={`Weight for ${exerciseName}`}
+            />
+          </div>
+          <span className="text-zinc-600">×</span>
+          <div className="flex items-center gap-1.5">
+            <label htmlFor={`r-${programDay}-${exerciseName}`} className="text-xs font-medium text-zinc-400">Reps</label>
+            <input
+              id={`r-${programDay}-${exerciseName}`}
+              type="number" inputMode="numeric" min="0"
+              value={reps}
+              onChange={(e) => setReps(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+              placeholder="0"
+              style={{ fontSize: "max(1rem, 16px)" }}
+              className="sf-input w-14 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              aria-label={`Reps for ${exerciseName}`}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveState === "saving" || !weight || !reps}
+            className="ml-auto flex items-center gap-1.5 rounded-lg bg-[var(--sf-accent)] px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saveState === "saving" ? (
+              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            ) : saveState === "saved" ? (
+              <>
+                <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                Saved
+              </>
+            ) : saveState === "error" ? (
+              <span className="text-red-200">Failed</span>
+            ) : (
+              <>
+                <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                Log Set
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Logged history */}
+      {logged.length > 0 && (
+        <div className="border-t border-zinc-800/60 pt-2 space-y-1">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">History</p>
+            {logged.length > 1 && !clearConfirm && (
+              <button
+                type="button"
+                onClick={() => setClearConfirm(true)}
+                className="text-[10px] font-semibold text-red-400/60 hover:text-red-400 transition-colors"
+              >
+                Clear All
+              </button>
+            )}
+            {clearConfirm && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-semibold text-red-400">Delete all logs?</span>
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 hover:bg-red-500/30 transition-colors"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setClearConfirm(false)}
+                  className="text-[10px] font-semibold text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             )}
           </div>
-        );
-      })}
+          {[...logged].reverse().map((s) => (
+            <div key={s.id} className="group flex items-center justify-between rounded-lg bg-zinc-800/30 px-2.5 py-1.5">
+              <div className="min-w-0">
+                <span className="text-xs font-semibold text-zinc-300">{s.weight} lbs × {s.reps} reps</span>
+                {s.createdAt && (
+                  <p className="text-[10px] text-zinc-500">{formatLogTimestamp(s.createdAt)}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteSingle(s.id)}
+                disabled={deletingId === s.id}
+                className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 rounded hover:bg-red-500/20"
+                aria-label="Delete this log entry"
+              >
+                {deletingId === s.id ? (
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-red-400/30 border-t-red-400" />
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400/60 hover:text-red-400">
+                    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

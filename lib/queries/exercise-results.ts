@@ -2,16 +2,20 @@ import { db } from "@/lib/db";
 import { normalizeToMonday } from "@/lib/utils/date";
 
 type ExerciseResultRow = {
+  id: string;
   exerciseName: string;
   programDay: string;
+  setNumber: number;
   weight: number;
   reps: number;
   weekOf: Date;
+  createdAt: Date;
 };
 
 /**
  * Get all exercise results for a client for a specific week.
- * Returns a Map keyed by "programDay::exerciseName" for fast lookup.
+ * Returns a Map keyed by "programDay::exerciseName::setNumber" for fast lookup.
+ * Multiple sets per exercise are preserved as separate entries.
  */
 export async function getExerciseResultsForWeek(
   clientId: string,
@@ -20,15 +24,20 @@ export async function getExerciseResultsForWeek(
   const monday = normalizeToMonday(weekOf);
   const results = await db.exerciseResult.findMany({
     where: { clientId, weekOf: monday },
+    orderBy: { createdAt: "asc" },
   });
   const map = new Map<string, ExerciseResultRow>();
   for (const r of results) {
-    map.set(`${r.programDay}::${r.exerciseName}`, {
+    const key = `${r.programDay}::${r.exerciseName}::${r.setNumber}`;
+    map.set(key, {
+      id: r.id,
       exerciseName: r.exerciseName,
       programDay: r.programDay,
+      setNumber: r.setNumber,
       weight: r.weight,
       reps: r.reps,
       weekOf: r.weekOf,
+      createdAt: r.createdAt,
     });
   }
   return map;

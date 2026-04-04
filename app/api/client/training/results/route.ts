@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
         weight: true,
         reps: true,
         weekOf: true,
+        createdAt: true,
       },
+      orderBy: { createdAt: "asc" },
     });
 
     return NextResponse.json({
@@ -48,6 +50,7 @@ export async function GET(req: NextRequest) {
         weight: r.weight,
         reps: r.reps,
         weekOf: r.weekOf.toISOString(),
+        createdAt: r.createdAt.toISOString(),
       })),
     });
   } catch (err) {
@@ -138,6 +141,7 @@ export async function POST(req: NextRequest) {
         weight: true,
         reps: true,
         weekOf: true,
+        createdAt: true,
       },
     });
 
@@ -149,9 +153,75 @@ export async function POST(req: NextRequest) {
       weight: result.weight,
       reps: result.reps,
       weekOf: result.weekOf.toISOString(),
+      createdAt: result.createdAt.toISOString(),
     });
   } catch (err) {
     console.error("[POST /api/client/training/results]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// ── DELETE ─────────────────────────────────────────────────────────────────────
+
+const deleteResultSchema = z.object({
+  id: z.string().min(1).optional(),
+  exerciseName: z.string().min(1).optional(),
+  clearAll: z.boolean().optional(),
+});
+
+export async function DELETE(req: NextRequest) {
+  let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
+  try {
+    user = await getCurrentDbUser();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!user.isClient) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    const body = await req.json();
+    const parsed = deleteResultSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed" },
+        { status: 422 }
+      );
+    }
+
+    const weekOf = normalizeToMonday(new Date());
+
+    if (parsed.data.clearAll && parsed.data.exerciseName) {
+      // Clear all history for a specific exercise this week
+      const deleted = await db.exerciseResult.deleteMany({
+        where: {
+          clientId: user.id,
+          exerciseName: parsed.data.exerciseName,
+          weekOf,
+        },
+      });
+      return NextResponse.json({ deleted: deleted.count });
+    } else if (parsed.data.id) {
+      // Delete a single result (verify ownership)
+      const existing = await db.exerciseResult.findUnique({
+        where: { id: parsed.data.id },
+        select: { clientId: true },
+      });
+      if (!existing || existing.clientId !== user.id) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+      await db.exerciseResult.delete({ where: { id: parsed.data.id } });
+      return NextResponse.json({ deleted: 1 });
+    }
+
+    return NextResponse.json({ error: "Must provide id or (exerciseName + clearAll)" }, { status: 422 });
+  } catch (err) {
+    console.error("[DELETE /api/client/training/results]", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

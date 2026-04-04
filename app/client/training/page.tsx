@@ -53,13 +53,13 @@ export default async function ClientTrainingPage() {
   ]);
 
   // Serialize Maps to plain Records for the client component
-  const currentWeek: Record<string, { exerciseName: string; programDay: string; weight: number; reps: number }> = {};
+  const currentWeek: Record<string, { id: string; exerciseName: string; programDay: string; weight: number; reps: number; createdAt: string }> = {};
   for (const [key, val] of currentResults) {
-    currentWeek[key] = { exerciseName: val.exerciseName, programDay: val.programDay, weight: val.weight, reps: val.reps };
+    currentWeek[key] = { id: val.id, exerciseName: val.exerciseName, programDay: val.programDay, weight: val.weight, reps: val.reps, createdAt: val.createdAt.toISOString() };
   }
-  const previousWeek: Record<string, { exerciseName: string; programDay: string; weight: number; reps: number }> = {};
+  const previousWeek: Record<string, { id: string; exerciseName: string; programDay: string; weight: number; reps: number; createdAt: string }> = {};
   for (const [key, val] of previousResults) {
-    previousWeek[key] = { exerciseName: val.exerciseName, programDay: val.programDay, weight: val.weight, reps: val.reps };
+    previousWeek[key] = { id: val.id, exerciseName: val.exerciseName, programDay: val.programDay, weight: val.weight, reps: val.reps, createdAt: val.createdAt.toISOString() };
   }
 
   return (

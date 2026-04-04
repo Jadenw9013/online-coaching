@@ -88,3 +88,72 @@ export async function GET(
     );
   }
 }
+
+// ── DELETE — remove client from roster ───────────────────────────────────────
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ clientId: string }> }
+) {
+  let user: Awaited<ReturnType<typeof getCurrentDbUser>>;
+  try {
+    user = await getCurrentDbUser();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!user.isCoach) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    const { clientId } = await params;
+
+    // Verify assignment exists
+    const assignment = await db.coachClient.findUnique({
+      where: { coachId_clientId: { coachId: user.id, clientId } },
+      select: { id: true },
+    });
+    if (!assignment) {
+      return NextResponse.json({ error: "Client not found on roster" }, { status: 404 });
+    }
+
+    // Delete the coach-client link (preserves the client's account + data)
+    await db.coachClient.delete({
+      where: { id: assignment.id },
+    });
+
+    // Best-effort: set any associated lead back to CONTACTED so coach can re-add later
+    try {
+      const coachProfile = await db.coachProfile.findFirst({
+        where: { userId: user.id },
+        select: { id: true },
+      });
+      if (coachProfile) {
+        const clientEmail = (
+          await db.user.findUnique({ where: { id: clientId }, select: { email: true } })
+        )?.email;
+        if (clientEmail) {
+          await db.coachingRequest.updateMany({
+            where: {
+              coachProfileId: coachProfile.id,
+              prospectEmail: clientEmail,
+              consultationStage: "ACTIVE",
+            },
+            data: { consultationStage: "CONSULTATION_DONE" },
+          });
+        }
+      }
+    } catch {
+      // Non-fatal: lead update is best-effort
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE /api/coach/clients/[clientId]]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
