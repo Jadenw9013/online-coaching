@@ -15,7 +15,7 @@ type LeadActionsProps = {
     consultationDate: string | null;
     formsSignedAt: string | null;
     prospectEmailAddr: string | null;
-    existingMeeting?: { meetingLink: string | null; scheduledTime: Date | null; notes: string | null } | null;
+    existingMeeting?: { meetingLink: string | null; scheduledTime: string | null; notes: string | null } | null;
     activeDocuments?: { id: string; title: string; type: string }[];
     intakePacketSentAt?: string | null;
     coachNotes?: string | null;

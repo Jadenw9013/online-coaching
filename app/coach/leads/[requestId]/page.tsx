@@ -26,11 +26,11 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         prospectPhone: string | null; prospectEmailAddr: string | null; prospectId: string | null;
         intakeAnswers: Record<string, string>; status: string; consultationStage: string;
         consultationDate: Date | null; formsSignedAt: Date | null;
-        source: string | null; createdAt: Date; updatedAt: Date;
+        source: string | null; coachNotes: string | null; createdAt: Date; updatedAt: Date;
     }>>(
         `SELECT "id","coachProfileId","prospectName","prospectEmail","prospectPhone",
                 "prospectEmailAddr","prospectId","intakeAnswers","status","consultationStage",
-                "consultationDate","formsSignedAt","source","createdAt","updatedAt"
+                "consultationDate","formsSignedAt","source","coachNotes","createdAt","updatedAt"
          FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
     );
     const lead = leadRows[0] ?? null;
@@ -277,12 +277,12 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     prospectEmailAddr={lead.prospectEmailAddr ?? null}
                     existingMeeting={consultationMeeting ? {
                         meetingLink: consultationMeeting.meetingLink,
-                        scheduledTime: consultationMeeting.scheduledTime,
+                        scheduledTime: consultationMeeting.scheduledTime ? new Date(consultationMeeting.scheduledTime).toISOString() : null,
                         notes: consultationMeeting.notes,
                     } : null}
                     activeDocuments={activeDocuments}
-                    intakePacketSentAt={intakePacket?.sentAt?.toISOString() ?? null}
-                    coachNotes={null}
+                    intakePacketSentAt={(() => { try { return intakePacket?.sentAt ? new Date(intakePacket.sentAt).toISOString() : null; } catch { return null; } })()}
+                    coachNotes={lead.coachNotes ?? null}
                 />
             </div>
         </div>
