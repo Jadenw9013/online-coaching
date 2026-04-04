@@ -20,35 +20,46 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
     });
     if (!profile) notFound();
 
-    // Raw SQL: adapter-pg crashes on CoachingRequest (Json columns) regardless of select/include
-    const leadRows = await db.$queryRawUnsafe<Array<{
+    // Raw SQL: adapter-pg crashes on models with Json columns regardless of select/include
+    type LeadRow = {
         id: string; coachProfileId: string; prospectName: string; prospectEmail: string;
         prospectPhone: string | null; prospectEmailAddr: string | null; prospectId: string | null;
-        intakeAnswers: Record<string, string>; status: string; consultationStage: string;
-        consultationDate: Date | null; formsSignedAt: Date | null;
-        source: string | null; coachNotes: string | null; createdAt: Date; updatedAt: Date;
-    }>>(
-        `SELECT "id","coachProfileId","prospectName","prospectEmail","prospectPhone",
-                "prospectEmailAddr","prospectId","intakeAnswers","status","consultationStage",
-                "consultationDate","formsSignedAt","source","coachNotes","createdAt","updatedAt"
-         FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
-    );
-    const lead = leadRows[0] ?? null;
+        intakeAnswers: unknown; status: string; consultationStage: string;
+        consultationDate: string | null; formsSignedAt: string | null;
+        source: string | null; coachNotes: string | null; createdAt: string; updatedAt: string;
+    };
+
+    let lead: LeadRow | null = null;
+
+    try {
+        const leadRows = await db.$queryRawUnsafe<LeadRow[]>(
+            `SELECT "id","coachProfileId","prospectName","prospectEmail","prospectPhone",
+                    "prospectEmailAddr","prospectId","intakeAnswers","status","consultationStage",
+                    "consultationDate","formsSignedAt","source","coachNotes","createdAt","updatedAt"
+             FROM "CoachingRequest" WHERE "id" = $1 LIMIT 1`, requestId
+        );
+        lead = leadRows[0] ?? null;
+    } catch (err) {
+        console.error("[LeadProfilePage] raw SQL CoachingRequest failed:", err);
+        throw new Error("Failed to load lead data");
+    }
 
     if (!lead || lead.coachProfileId !== profile.id) notFound();
 
-    // Fetch consultation meeting separately — select only to avoid relation loading (adapter-pg safe)
-    const consultationMeeting = await db.consultationMeeting.findUnique({
-        where: { requestId },
-        select: { meetingLink: true, scheduledTime: true, notes: true },
-    }).catch(() => null);
+    // Raw SQL for consultation meeting (avoids adapter-pg relation issues)
+    let consultationMeeting: { meetingLink: string | null; scheduledTime: string | null; notes: string | null } | null = null;
+    try {
+        const meetingRows = await db.$queryRawUnsafe<Array<{ meetingLink: string | null; scheduledTime: string | null; notes: string | null }>>(
+            `SELECT "meetingLink","scheduledTime","notes" FROM "ConsultationMeeting" WHERE "requestId" = $1 LIMIT 1`, requestId
+        );
+        consultationMeeting = meetingRows[0] ?? null;
+    } catch { /* meeting not found is fine */ }
 
-    // Safely parse intakeAnswers (raw SQL may return string)
+    // Safely parse intakeAnswers (raw SQL may return string or object)
     let answers: Record<string, string> = {};
     try {
-        answers = typeof lead.intakeAnswers === "string"
-            ? JSON.parse(lead.intakeAnswers)
-            : (lead.intakeAnswers ?? {}) as Record<string, string>;
+        const raw = lead.intakeAnswers;
+        answers = typeof raw === "string" ? JSON.parse(raw) : (raw ?? {}) as Record<string, string>;
     } catch { answers = {}; }
 
     // Fetch active documents for this coach (for the intake packet UI)
@@ -56,11 +67,14 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
         .then(docs => docs.filter(d => d.isActive).map(d => ({ id: d.id, title: d.title, type: d.type })))
         .catch(() => [] as { id: string; title: string; type: string }[]);
 
-    // Fetch intake packet sent date if it exists
-    const intakePacket = await db.intakePacket.findUnique({
-        where: { coachingRequestId: requestId },
-        select: { sentAt: true },
-    }).catch(() => null);
+    // Raw SQL for intake packet (IntakePacket has formAnswers Json? — adapter-pg unsafe)
+    let intakePacketSentAt: string | null = null;
+    try {
+        const ipRows = await db.$queryRawUnsafe<Array<{ sentAt: string }>>(
+            `SELECT "sentAt" FROM "IntakePacket" WHERE "coachingRequestId" = $1 LIMIT 1`, requestId
+        );
+        intakePacketSentAt = ipRows[0]?.sentAt ? new Date(ipRows[0].sentAt).toISOString() : null;
+    } catch { /* packet not found is fine */ }
 
     // ── Status badge colors ──────────────────────────────────────────────────
     const statusMeta: Record<string, { label: string; color: string; bg: string }> = {
@@ -272,16 +286,16 @@ export default async function LeadProfilePage({ params }: { params: Promise<{ re
                     prospectId={lead.prospectId}
                     prospectName={lead.prospectName}
                     consultationStage={effectiveStage}
-                    consultationDate={(() => { try { return lead.consultationDate ? new Date(lead.consultationDate).toISOString() : consultationMeeting?.scheduledTime ? new Date(consultationMeeting.scheduledTime).toISOString() : null; } catch { return null; } })()}
-                    formsSignedAt={(() => { try { return lead.formsSignedAt ? new Date(lead.formsSignedAt).toISOString() : null; } catch { return null; } })()}
+                    consultationDate={lead.consultationDate ?? consultationMeeting?.scheduledTime ?? null}
+                    formsSignedAt={lead.formsSignedAt ?? null}
                     prospectEmailAddr={lead.prospectEmailAddr ?? null}
                     existingMeeting={consultationMeeting ? {
                         meetingLink: consultationMeeting.meetingLink,
-                        scheduledTime: consultationMeeting.scheduledTime ? new Date(consultationMeeting.scheduledTime).toISOString() : null,
+                        scheduledTime: consultationMeeting.scheduledTime ?? null,
                         notes: consultationMeeting.notes,
                     } : null}
                     activeDocuments={activeDocuments}
-                    intakePacketSentAt={(() => { try { return intakePacket?.sentAt ? new Date(intakePacket.sentAt).toISOString() : null; } catch { return null; } })()}
+                    intakePacketSentAt={intakePacketSentAt}
                     coachNotes={lead.coachNotes ?? null}
                 />
             </div>
