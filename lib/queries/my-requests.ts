@@ -10,6 +10,9 @@ import { getCurrentDbUser } from "@/lib/auth/roles";
 export async function getMyCoachingRequests() {
     const user = await getCurrentDbUser();
 
+    // NOTE: explicit select avoids selecting Int[]/String[]/Json columns
+    // (intakeAnswers, specialties, services, etc.) that can trip up the
+    // @prisma/adapter-pg driver on Neon pooled connections.
     const requests = await db.coachingRequest.findMany({
         where: {
             OR: [
@@ -17,9 +20,13 @@ export async function getMyCoachingRequests() {
                 { prospectEmail: user.email.toLowerCase() },
             ],
         },
-        include: {
+        select: {
+            id: true,
+            status: true,
+            createdAt: true,
             coachProfile: {
-                include: {
+                select: {
+                    slug: true,
                     user: {
                         select: { firstName: true, lastName: true, profilePhotoPath: true },
                     },
