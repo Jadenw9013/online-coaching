@@ -57,9 +57,10 @@ export async function getCurrentDbUser() {
     userId, email, clerkUser.firstName, clerkUser.lastName, activeRole, isCoach, !isCoach
   );
 
-  // Re-fetch the user via raw SQL
+  // Re-fetch the user via raw SQL (alias @map columns)
   const newRows = await db.$queryRawUnsafe<Array<Record<string, unknown>>>(
-    `SELECT * FROM "User" WHERE "clerkId" = $1 LIMIT 1`, userId
+    `SELECT *, "role" AS "activeRole", "team_id" AS "teamId", "team_role" AS "teamRole"
+     FROM "User" WHERE "clerkId" = $1 LIMIT 1`, userId
   );
   const newUser = newRows[0] as ReturnType_getCurrentDbUser;
   if (!newUser) throw new Error("Failed to create user");
