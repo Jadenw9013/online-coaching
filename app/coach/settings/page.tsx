@@ -1,5 +1,6 @@
 import { getCurrentDbUser } from "@/lib/auth/roles";
 import { getDefaultTemplate } from "@/lib/queries/check-in-templates";
+import { DeleteAccountSection } from "@/components/shared/delete-account-section";
 import Link from "next/link";
 import { ResetTemplateButton } from "@/components/coach/reset-template-button";
 import { CadenceEditor } from "@/components/coach/cadence-editor";
@@ -191,6 +192,9 @@ export default async function CoachSettingsPage({
           justJoined={justJoined}
         />
       </section>
+
+      {/* Account Deletion */}
+      <DeleteAccountSection role={user.isCoach && user.isClient ? "both" : "coach"} />
     </div>
   );
 }

@@ -13,6 +13,9 @@ export default async function CoachLayout({
   if (user.activeRole !== "COACH") {
     redirect("/client");
   }
+  if (user.isDeactivated) {
+    redirect("/account-deletion-pending");
+  }
 
   return (
     <div className="min-h-screen bg-black">

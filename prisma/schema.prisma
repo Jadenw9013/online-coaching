@@ -119,6 +119,9 @@ model User {
 
   intakeFormTemplate IntakeFormTemplate?
   coachDocuments     CoachDocument[]
+
+  isDeactivated       Boolean                @default(false)
+  deletionRequest     AccountDeletionRequest?
 }
 
 model IntakeFormTemplate {
@@ -1058,4 +1061,34 @@ model DocumentSignature {
   signedAt               DateTime             @default(now())
   ipAddress              String?
   userAgent              String?
+}
+
+// ── Account Deletion ─────────────────────────────────────────────────────────
+
+enum AccountDeletionStatus {
+  PENDING
+  CANCELLED
+  PURGING
+  COMPLETED
+}
+
+model AccountDeletionRequest {
+  id                              String                @id @default(cuid())
+  userId                          String                @unique
+  user                            User                  @relation(fields: [userId], references: [id])
+  status                          AccountDeletionStatus @default(PENDING)
+  requestedAt                     DateTime              @default(now())
+  scheduledPurgeAt                DateTime
+  cancelledAt                     DateTime?
+  purgeStartedAt                  DateTime?
+  purgeCompletedAt                DateTime?
+  deletionReason                  String?
+  roleAtRequest                   String
+  clerkId                         String?
+  retryCount                      Int                   @default(0)
+  stripeSubscriptionCancelledAt   DateTime?
+  storageCleanedAt                DateTime?
+  clerkDeletedAt                  DateTime?
+  createdAt                       DateTime              @default(now())
+  updatedAt                       DateTime              @updatedAt
 }

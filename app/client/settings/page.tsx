@@ -2,6 +2,7 @@ import { getCurrentDbUser } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
 import { LeaveCoachButton } from "@/components/client/leave-coach-button";
 import { ClientEmailSettings } from "@/components/client/client-email-settings";
+import { DeleteAccountSection } from "@/components/shared/delete-account-section";
 
 export default async function ClientSettingsPage() {
   const user = await getCurrentDbUser();
@@ -49,6 +50,9 @@ export default async function ClientSettingsPage() {
           />
         </div>
       )}
+
+      {/* Account Deletion */}
+      <DeleteAccountSection role={user.isCoach && user.isClient ? "both" : "client"} />
     </div>
   );
 }

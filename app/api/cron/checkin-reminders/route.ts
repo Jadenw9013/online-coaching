@@ -248,7 +248,36 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ sentClientReminders, sentEmailReminders, sentCoachAlerts });
+    // ── Purge expired account deletions (piggybacked on this cron) ──────────
+    let purgeResult = { processed: 0, errors: 0 };
+    try {
+      const expired = await db.accountDeletionRequest.findMany({
+        where: { status: "PENDING", scheduledPurgeAt: { lte: new Date() } },
+        select: { id: true, userId: true },
+      });
+      for (const req of expired) {
+        try {
+          await db.accountDeletionRequest.update({
+            where: { id: req.id },
+            data: { status: "PURGING", purgeStartedAt: new Date() },
+          });
+          const { purgeUserAccount } = await import("@/lib/account-deletion/purge");
+          await purgeUserAccount(req.userId);
+          purgeResult.processed++;
+        } catch (purgeErr) {
+          console.error(`[cron] purge failed for ${req.userId}:`, purgeErr);
+          await db.accountDeletionRequest.update({
+            where: { id: req.id },
+            data: { status: "PENDING", retryCount: { increment: 1 } },
+          }).catch(() => {});
+          purgeResult.errors++;
+        }
+      }
+    } catch (err) {
+      console.error("[cron] purge sweep error:", err);
+    }
+
+    return NextResponse.json({ sentClientReminders, sentEmailReminders, sentCoachAlerts, purge: purgeResult });
 
   } catch (err) {
     console.error("Cron checkin-reminders failed", err);

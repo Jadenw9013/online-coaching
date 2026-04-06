@@ -14,6 +14,9 @@ export default async function ClientLayout({
   if (user.activeRole !== "CLIENT") {
     redirect("/coach/dashboard");
   }
+  if (user.isDeactivated) {
+    redirect("/account-deletion-pending");
+  }
 
   // Enforce Onboarding Questionnaire completion before allowing dashboard access
   // NOTE: explicit select avoids selecting Int[]/Json columns that can trip up
