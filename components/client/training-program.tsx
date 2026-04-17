@@ -305,7 +305,7 @@ export function TrainingProgram({
             <button
               type="button"
               onClick={() => toggleExpand(day.id)}
-              className="flex w-full items-center gap-3 border-l-4 px-5 py-4 text-left transition-colors hover:bg-zinc-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 cursor-pointer"
+              className="flex w-full items-center gap-3 sm:border-l-4 px-3.5 sm:px-5 py-3.5 sm:py-4 text-left transition-colors hover:bg-zinc-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 cursor-pointer"
               style={{
                 borderLeftColor: isExpanded
                   ? allDone ? "rgb(16 185 129)" : "currentColor"
@@ -448,7 +448,7 @@ export function TrainingProgram({
                           : false;
 
                         return (
-                          <div key={block.id} className={`px-5 py-3.5 ${isChecked ? "bg-emerald-950/10" : ""}`}>
+                          <div key={block.id} className={`px-3.5 sm:px-5 py-3 sm:py-3.5 ${isChecked ? "bg-emerald-950/10" : ""}`}>
                             <div className="flex items-start gap-3">
                               {/* Exercise checkbox or number */}
                               {isExercise && adherence ? (
@@ -682,7 +682,7 @@ function ExerciseProgressInput({
   const bestWeight = logged.length > 0 ? Math.max(...logged.map((s) => parseFloat(s.weight) || 0)) : 0;
 
   return (
-    <div className="ml-9 mt-2 sf-glass-card px-3 py-3 space-y-3">
+    <div className="ml-0 sm:ml-9 mt-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 space-y-2.5">
       {/* Summary metrics */}
       {logged.length > 0 && (
         <div className="flex items-center gap-3 text-xs">
@@ -716,42 +716,36 @@ function ExerciseProgressInput({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <label htmlFor={`w-${programDay}-${exerciseName}`} className="text-xs font-medium text-zinc-400">Weight</label>
-            <input
-              id={`w-${programDay}-${exerciseName}`}
-              type="number" inputMode="decimal" step="any" min="0"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
-              placeholder="lbs"
-              style={{ fontSize: "max(1rem, 16px)" }}
-              className="sf-input w-16 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-              aria-label={`Weight for ${exerciseName}`}
-            />
-          </div>
-          <span className="text-zinc-600">×</span>
-          <div className="flex items-center gap-1.5">
-            <label htmlFor={`r-${programDay}-${exerciseName}`} className="text-xs font-medium text-zinc-400">Reps</label>
-            <input
-              id={`r-${programDay}-${exerciseName}`}
-              type="number" inputMode="numeric" min="0"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
-              placeholder="0"
-              style={{ fontSize: "max(1rem, 16px)" }}
-              className="sf-input w-14 px-2 py-1.5 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-              aria-label={`Reps for ${exerciseName}`}
-            />
-          </div>
+        <div className="flex items-center gap-1.5">
+          <input
+            id={`w-${programDay}-${exerciseName}`}
+            type="number" inputMode="decimal" step="any" min="0"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+            placeholder="lbs"
+            style={{ fontSize: "max(1rem, 16px)" }}
+            className="sf-input flex-1 min-w-0 px-2.5 py-2 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            aria-label={`Weight for ${exerciseName}`}
+          />
+          <span className="text-xs font-medium text-zinc-600">×</span>
+          <input
+            id={`r-${programDay}-${exerciseName}`}
+            type="number" inputMode="numeric" min="0"
+            value={reps}
+            onChange={(e) => setReps(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+            placeholder="reps"
+            style={{ fontSize: "max(1rem, 16px)" }}
+            className="sf-input flex-1 min-w-0 px-2.5 py-2 tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            aria-label={`Reps for ${exerciseName}`}
+          />
 
           <button
             type="button"
             onClick={handleSave}
             disabled={saveState === "saving" || !weight || !reps}
-            className="ml-auto flex items-center gap-1.5 rounded-lg bg-[var(--sf-accent)] px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-white/15 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
             {saveState === "saving" ? (
               <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />

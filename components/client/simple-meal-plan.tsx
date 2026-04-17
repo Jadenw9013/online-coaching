@@ -285,30 +285,28 @@ function MetadataSection({ extras }: { extras: PlanExtras }) {
   if (!m) return null;
   const items = [
     m.phase && { label: "Phase", value: m.phase },
-    m.startDate && { label: "Start Date", value: m.startDate },
+    m.startDate && { label: "Start", value: m.startDate },
     m.bodyweight && { label: "Weight", value: m.bodyweight },
   ].filter(Boolean) as { label: string; value: string }[];
   if (!items.length && !m.coachNotes && !m.highlightedChanges) return null;
   return (
-    <div className="sf-glass-card p-5">
-      <h3 className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-zinc-500">Plan Overview</h3>
+    <div className="space-y-3">
       {items.length > 0 && (
-        <div className="flex flex-wrap gap-2.5 mb-3">
+        <div className="flex items-center gap-6">
           {items.map(({ label, value }) => (
-            <div key={label} className="rounded-xl bg-white/[0.04] px-3.5 py-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{label}</span>
-              <p className="text-sm font-semibold text-zinc-200">{value}</p>
+            <div key={label}>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">{label}</p>
+              <p className="text-sm font-bold text-zinc-200">{value}</p>
             </div>
           ))}
         </div>
       )}
       {m.highlightedChanges && (
-        <div className="rounded-xl border border-amber-900/40 bg-amber-950/20 px-3.5 py-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Changes</span>
-          <p className="mt-0.5 text-sm text-amber-300">{m.highlightedChanges}</p>
-        </div>
+        <p className="text-xs text-amber-400/80">
+          <span className="font-semibold">Changes:</span> {m.highlightedChanges}
+        </p>
       )}
-      {m.coachNotes && <p className="mt-2 text-sm text-zinc-400">{m.coachNotes}</p>}
+      {m.coachNotes && <p className="text-xs text-zinc-500">{m.coachNotes}</p>}
     </div>
   );
 }
@@ -330,37 +328,21 @@ function MacroSummary({ items }: { items: ResolvedItem[] }) {
   // Don't show if no macro data at all
   if (totals.calories === 0 && totals.protein === 0 && totals.carbs === 0 && totals.fats === 0) return null;
 
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      <MacroPill label="Calories" value={`${totals.calories}`} flowIndex={0} />
-      <MacroPill label="Protein" value={`${totals.protein}g`} flowIndex={1} />
-      <MacroPill label="Carbs" value={`${totals.carbs}g`} flowIndex={2} />
-      <MacroPill label="Fats" value={`${totals.fats}g`} flowIndex={3} />
-    </div>
-  );
-}
-
-function MacroPill({ label, value, flowIndex }: { label: string; value: string; flowIndex: number }) {
-  // Flow palette per macro — gives each pill a unique atmospheric vibe
-  const PILL_PALETTE = [
-    { bg: "rgba(59, 130, 246, 0.08)", border: "rgba(59, 130, 246, 0.18)", text: "text-blue-400" },
-    { bg: "rgba(16, 185, 129, 0.08)", border: "rgba(16, 185, 129, 0.18)", text: "text-emerald-400" },
-    { bg: "rgba(245, 158, 11, 0.08)", border: "rgba(245, 158, 11, 0.18)", text: "text-amber-400" },
-    { bg: "rgba(244, 63, 94, 0.08)", border: "rgba(244, 63, 94, 0.18)", text: "text-rose-400" },
+  const macros = [
+    { label: "Cal", value: `${totals.calories}` },
+    { label: "P", value: `${totals.protein}g` },
+    { label: "C", value: `${totals.carbs}g` },
+    { label: "F", value: `${totals.fats}g` },
   ];
-  const s = PILL_PALETTE[flowIndex] ?? PILL_PALETTE[0];
+
   return (
-    <div
-      className="flex flex-col items-center gap-1 rounded-2xl py-3 backdrop-blur-sm"
-      style={{
-        background: s.bg,
-        borderWidth: "1px",
-        borderStyle: "solid",
-        borderColor: s.border,
-      }}
-    >
-      <span className="text-base font-bold text-white">{value}</span>
-      <span className={`text-[10px] font-semibold uppercase tracking-wider ${s.text} opacity-80`}>{label}</span>
+    <div className="flex items-center gap-5 text-sm">
+      {macros.map(({ label, value }) => (
+        <span key={label} className="tabular-nums">
+          <span className="font-semibold text-zinc-200">{value}</span>
+          <span className="ml-1 text-zinc-600">{label}</span>
+        </span>
+      ))}
     </div>
   );
 }
@@ -403,7 +385,7 @@ function DaySelector({
   overridesByDay: Map<string, DayOverride[]>;
 }) {
   return (
-    <div className="sf-glass-card flex items-center gap-1.5 overflow-x-auto p-1.5">
+    <div className="flex items-center gap-1 overflow-x-auto">
       {WEEKDAYS.map((day) => {
         const isSelected = day === selectedDay;
         const dayOverrides = overridesByDay.get(day.toLowerCase());
@@ -414,17 +396,17 @@ function DaySelector({
             key={day}
             type="button"
             onClick={() => onSelect(day)}
-            className={`relative flex min-w-[44px] flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-xs font-bold tracking-wide transition-all cursor-pointer ${
+            className={`relative flex min-w-[40px] flex-1 flex-col items-center gap-1 rounded-lg px-1.5 py-2 text-xs font-bold tracking-wide transition-all cursor-pointer ${
               isSelected
-                ? "bg-white/[0.12] text-white shadow-sm backdrop-blur-sm"
-                : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+                ? "bg-white/[0.10] text-white"
+                : "text-zinc-600 hover:text-zinc-400"
             }`}
           >
             <span>{day.slice(0, 3).toUpperCase()}</span>
             <span className={`h-1.5 w-1.5 rounded-full ${
               hasOverride
                 ? isSelected ? "bg-white/60" : dotColor
-                : "bg-white/[0.1]"
+                : "bg-white/[0.08]"
             }`} />
           </button>
         );
@@ -571,18 +553,18 @@ export function SimpleMealPlan({
 
       {/* Meal progress bar — only visible when viewing today's tab */}
       {adherence && isViewingToday && progressTotal > 0 && (
-        <div className="sf-glass-card px-5 py-3.5">
-          <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-zinc-400">
-              Today&rsquo;s meals
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-zinc-400">
+              Today&rsquo;s Meals
             </span>
-            <span className="text-xs font-bold tabular-nums text-zinc-300">
+            <span className="text-sm font-semibold tabular-nums text-zinc-300">
               {progressDone} / {progressTotal}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800/60">
             <div
-              className="h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-white/30 transition-all duration-500 ease-out"
               style={{ width: progressTotal > 0 ? `${Math.round((progressDone / progressTotal) * 100)}%` : "0%" }}
               role="progressbar"
               aria-valuenow={progressDone}
@@ -608,23 +590,13 @@ export function SimpleMealPlan({
         const isMealDone = isViewingToday ? completedMeals.has(mealName) : false;
 
         return (
-          <div
-            key={mealName}
-            className={`group overflow-hidden rounded-2xl border transition-all ${
-              isMealDone
-                ? "border-emerald-900/40 bg-emerald-950/[0.06]"
-                : "sf-glass-card hover:border-white/[0.14]"
-            }`}
-            style={!isMealDone ? {
-              "--sf-card-highlight": MEAL_FLOW[mealIndex % MEAL_FLOW.length].highlight,
-            } as React.CSSProperties : undefined}
-          >
-            {/* Meal header */}
-            <div className={`flex items-center border-b border-white/[0.04] ${isViewingToday ? "pl-1 pr-5 py-3" : "px-5 py-4"}`}>
-              {/* Adherence checkbox */}
+          <div key={mealName} className="transition-all">
+            {/* Meal header — open, no card */}
+            <div className={`flex items-center gap-3 ${mealIndex > 0 ? "mt-2" : ""}`}>
+              {/* Adherence checkbox — circle style */}
               {isViewingToday && (
                 <label
-                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg"
+                  className="flex shrink-0 cursor-pointer items-center justify-center"
                   aria-label={`${mealName}: ${isMealDone ? "mark incomplete" : "mark complete"}`}
                 >
                   <input
@@ -632,20 +604,15 @@ export function SimpleMealPlan({
                     checked={isMealDone}
                     onChange={() => handleMealToggle(mealName, mealIndex)}
                     disabled={isPending}
-                    className="h-[18px] w-[18px] cursor-pointer rounded border-2 border-zinc-600 accent-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1224] disabled:opacity-50"
+                    className="h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-zinc-600 bg-transparent checked:border-emerald-500 checked:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
                   />
                 </label>
               )}
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className={`text-lg font-bold ${isMealDone ? "text-emerald-400" : "text-white"}`}>
+                  <h3 className={`text-lg font-bold tracking-tight ${isMealDone ? "text-emerald-400 line-through decoration-emerald-500/30" : "text-white"}`}>
                     {mealName}
                   </h3>
-                  {isMealDone && (
-                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-emerald-500">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
                   {hasOverriddenItems && overrideLabels.map((label) => {
                     const colorId = overriddenItems.find((i) => i.overridden?.overrideLabel === label)?.overridden?.overrideColor;
                     const color = getOverrideColor(colorId);
@@ -656,18 +623,15 @@ export function SimpleMealPlan({
                     );
                   })}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">
-                    {items.length} {items.length === 1 ? "item" : "items"}
-                  </span>
-                  <MealMacroBar items={items} />
-                </div>
+                <span className="text-xs text-zinc-600">
+                  {items.length} {items.length === 1 ? "item" : "items"}
+                </span>
               </div>
             </div>
 
-            {/* Food items */}
-            <ul>
-              {items.map((item, itemIndex) => {
+            {/* Food items — flat list with bullet dots */}
+            <ul className="mt-2 space-y-0">
+              {items.map((item) => {
                 const color = item.overridden ? getOverrideColor(item.overridden.overrideColor) : null;
                 const changeLabel = item.overridden ? getChangeTypeLabel(item.overridden.changeType) : null;
                 const servingLabel = formatQuantityUnit(item.quantity, item.unit);
@@ -675,30 +639,26 @@ export function SimpleMealPlan({
                 return (
                   <li
                     key={item.id}
-                    className={`flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-white/[0.02] ${
-                      itemIndex < items.length - 1 ? "border-b border-white/[0.03]" : ""
-                    }`}
+                    className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.02]"
                   >
-                    {/* Override indicator dot */}
-                    {color && <span className={`h-2 w-2 shrink-0 rounded-full ${color.dot}`} />}
+                    {/* Bullet dot */}
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                      color ? color.dot : "bg-zinc-600"
+                    }`} />
 
                     <div className="min-w-0 flex-1">
-                      <span className="text-[15px] font-semibold text-zinc-200">{item.foodName}</span>
+                      <span className={`text-sm font-semibold ${isMealDone ? "text-zinc-500" : "text-zinc-200"}`}>{item.foodName}</span>
                       {item.overridden && (
-                        <p className={`mt-0.5 text-[11px] font-medium ${color?.text ?? "text-zinc-400"}`}>
+                        <p className={`text-[11px] font-medium ${color?.text ?? "text-zinc-500"}`}>
                           {changeLabel}
                           {item.overridden.originalServing && ` from ${item.overridden.originalServing}`}
-                          {" — "}
-                          {item.overridden.overrideLabel}
                         </p>
                       )}
                     </div>
 
-                    {/* Serving badge — quantity + unit */}
-                    <span className={`shrink-0 rounded-xl px-2.5 py-1 text-[13px] font-semibold ${
-                      color
-                        ? `${color.bg} ${color.text} ring-1 ring-inset ${color.border}`
-                        : "bg-white/[0.05] text-zinc-400"
+                    {/* Serving — plain text */}
+                    <span className={`shrink-0 text-sm font-medium tabular-nums ${
+                      color ? `${color.text}` : "text-zinc-300"
                     }`}>
                       {servingLabel}
                     </span>

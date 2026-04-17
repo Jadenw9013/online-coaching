@@ -623,9 +623,7 @@ export function MessageThread({
           {/* ── Compose bar ──────────────────────────────────────── */}
           <form
             onSubmit={handleSend}
-            className={`flex items-end gap-2.5 border-t border-white/[0.08] px-4 py-3 ${
-              fullScreen ? "mb-14 sm:mb-0" : ""
-            }`}
+            className={`flex items-end gap-2.5 border-t border-white/[0.08] px-4 py-3`}
             style={
               fullScreen
                 ? {

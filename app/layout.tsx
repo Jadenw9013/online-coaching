@@ -12,6 +12,7 @@ const chakraPetch = Chakra_Petch({
   variable: "--font-chakra",
   subsets: ["latin"],
   display: "swap",
+  fallback: ["system-ui", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "sans-serif"],
 });
 
 const sora = Sora({
@@ -19,6 +20,7 @@ const sora = Sora({
   variable: "--font-sora",
   subsets: ["latin"],
   display: "swap",
+  fallback: ["system-ui", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "sans-serif"],
 });
 
 const geistMono = Geist_Mono({

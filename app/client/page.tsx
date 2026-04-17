@@ -336,30 +336,24 @@ export default async function ClientDashboard() {
             {mealPlan ? (
               <Link
                 href="/client/meal-plan"
-                className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] border-l-[3px] border-l-blue-500 transition-all hover:bg-white/[0.06] hover:border-white/[0.14] hover:shadow-lg hover:shadow-blue-500/[0.06] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+                className="group sf-glass-card flex items-center justify-between px-4 py-5 transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
                 aria-label="View your meal plan"
               >
-                <div className="flex items-center gap-3 p-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                  </div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-300" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Nutrition</p>
-                    <p className="text-sm font-bold text-white leading-tight">Meal Plan</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Nutrition</p>
+                    <p className="text-base font-semibold text-white leading-tight">Meal Plan</p>
                   </div>
                 </div>
-                <div className="border-t border-white/[0.06] bg-blue-500/[0.08] px-4 py-2.5 text-center text-[11px] font-semibold text-blue-300 transition-colors group-hover:bg-blue-500/[0.12] group-hover:text-blue-200">
-                  Open →
-                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
               </Link>
             ) : (
-              <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800/60">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                </div>
+              <div className="sf-glass-card flex items-center gap-3 px-4 py-5" style={{ opacity: 0.5 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Nutrition</p>
-                  <p className="text-xs text-zinc-600">Not assigned</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Nutrition</p>
+                  <p className="text-sm text-zinc-600">Not assigned</p>
                 </div>
               </div>
             )}
@@ -367,30 +361,24 @@ export default async function ClientDashboard() {
             {trainingProgram && trainingProgram.days.length > 0 ? (
               <Link
                 href="/client/training"
-                className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] border-l-[3px] border-l-emerald-500 transition-all hover:bg-white/[0.06] hover:border-white/[0.14] hover:shadow-lg hover:shadow-emerald-500/[0.06] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                className="group sf-glass-card flex items-center justify-between px-4 py-5 transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
                 aria-label="View your training program"
               >
-                <div className="flex items-center gap-3 p-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
-                  </div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-300" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Training</p>
-                    <p className="text-sm font-bold text-white leading-tight">Workout</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Training</p>
+                    <p className="text-base font-semibold text-white leading-tight">Workout</p>
                   </div>
                 </div>
-                <div className="border-t border-white/[0.06] bg-emerald-500/[0.08] px-4 py-2.5 text-center text-[11px] font-semibold text-emerald-300 transition-colors group-hover:bg-emerald-500/[0.12] group-hover:text-emerald-200">
-                  Open →
-                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
               </Link>
             ) : (
-              <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800/60">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
-                </div>
+              <div className="sf-glass-card flex items-center gap-3 px-4 py-5" style={{ opacity: 0.5 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Training</p>
-                  <p className="text-xs text-zinc-600">Not assigned</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Training</p>
+                  <p className="text-sm text-zinc-600">Not assigned</p>
                 </div>
               </div>
             )}

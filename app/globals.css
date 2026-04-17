@@ -158,7 +158,7 @@
 body {
   background: linear-gradient(to bottom, #070708, #020203, #09090B);
   color: var(--foreground);
-  font-family: var(--font-sora), system-ui, sans-serif;
+  font-family: var(--font-sora), system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -1625,6 +1625,17 @@ a,
   transform: scale(0.97);
 }
 
+/* ─── Fixed CTA above mobile nav ─── */
+
+.sf-cta-above-nav {
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 640px) {
+  .sf-cta-above-nav {
+    bottom: 0;
+  }
+}
+
 /* ─── Inputs (iOS sfTextField parity) ─── */
 
 .sf-input {
@@ -1644,7 +1655,7 @@ a,
   appearance: none;
 }
 .sf-input::placeholder {
-  color: rgba(255, 255, 255, 0.32);
+  color: rgba(255, 255, 255, 0.45);
 }
 .sf-input:hover {
   border-color: rgba(255, 255, 255, 0.18);

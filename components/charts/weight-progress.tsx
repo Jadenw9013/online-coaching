@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,6 +13,17 @@ import {
 
 type WeightDataPoint = { date: string; weight: number };
 type Range = "30d" | "90d" | "all";
+
+/**
+ * Format a date string like "Feb 17" → "Feb 17", but thin it out
+ * so only a few labels show on mobile. Recharts handles this via
+ * interval="preserveStartEnd" but we also shorten month names.
+ */
+function formatAxisDate(dateStr: string) {
+  // dateStr is typically "Mon DD" or "YYYY-MM-DD"
+  // If it's already short like "Feb 17", keep it
+  return dateStr;
+}
 
 export function WeightProgress({
   data,
@@ -58,6 +69,9 @@ export function WeightProgress({
   const minW = Math.floor(Math.min(...weights) - 1);
   const maxW = Math.ceil(Math.max(...weights) + 1);
 
+  // Compute a clean tick count — aim for 3-4 ticks
+  const yTickCount = Math.min(4, maxW - minW + 1);
+
   const ranges: { key: Range; label: string }[] = [
     { key: "30d", label: "30d" },
     { key: "90d", label: "90d" },
@@ -66,19 +80,17 @@ export function WeightProgress({
 
   return (
     <div className={className} role="img" aria-label="Weight progress chart">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-          Weight Progress
-        </p>
-        <div className="flex gap-1">
+      {/* Range selector — right-aligned pill group */}
+      <div className="mb-4 flex items-center justify-end">
+        <div className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
           {ranges.map((r) => (
             <button
               key={r.key}
               onClick={() => handleRangeChange(r.key)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-md px-3 py-1.5 text-[11px] font-semibold tracking-wide transition-all ${
                 range === r.key
-                  ? "bg-zinc-900 text-white"
-                  : "text-zinc-500 hover:bg-zinc-100"
+                  ? "bg-white/[0.12] text-white shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
               {r.label}
@@ -86,44 +98,72 @@ export function WeightProgress({
           ))}
         </div>
       </div>
-      <div className={`h-48 ${loading ? "opacity-50" : ""}`}>
+
+      {/* Chart — taller with clean area fill */}
+      <div className={`h-40 sm:h-52 ${loading ? "opacity-40 transition-opacity" : "transition-opacity"}`}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
+          <AreaChart
             data={chartData}
-            margin={{ top: 5, right: 5, left: -10, bottom: 5 }}
+            margin={{ top: 4, right: 4, left: -24, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+            <defs>
+              <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.20} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="0"
+              stroke="rgba(255,255,255,0.04)"
+              vertical={false}
+            />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: "#a1a1aa" }}
+              tick={{ fontSize: 10, fill: "#52525b" }}
               tickLine={false}
               axisLine={false}
+              tickMargin={8}
+              interval="preserveStartEnd"
+              minTickGap={40}
+              tickFormatter={formatAxisDate}
             />
             <YAxis
               domain={[minW, maxW]}
-              tick={{ fontSize: 11, fill: "#a1a1aa" }}
+              tick={{ fontSize: 10, fill: "#52525b" }}
               tickLine={false}
               axisLine={false}
+              tickCount={yTickCount}
+              tickMargin={4}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#18181b",
-                border: "1px solid #3f3f46",
-                borderRadius: "8px",
-                fontSize: "13px",
+                backgroundColor: "rgba(24, 24, 27, 0.95)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "10px",
+                fontSize: "12px",
+                backdropFilter: "blur(12px)",
+                padding: "8px 12px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
               }}
-              labelStyle={{ color: "#a1a1aa" }}
-              itemStyle={{ color: "#fafafa" }}
+              labelStyle={{ color: "#71717a", fontSize: "11px", marginBottom: "2px" }}
+              itemStyle={{ color: "#fafafa", fontWeight: 600 }}
+              cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="weight"
               stroke="#3b82f6"
               strokeWidth={2}
+              fill="url(#weightGradient)"
               dot={false}
-              activeDot={{ r: 4, fill: "#3b82f6" }}
+              activeDot={{
+                r: 4,
+                fill: "#3b82f6",
+                stroke: "#0a0f1e",
+                strokeWidth: 2,
+              }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>

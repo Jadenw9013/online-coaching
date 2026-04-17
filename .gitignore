@@ -77,6 +77,13 @@ ts_errors*.txt
 typescript-errors.txt
 errors.txt
 
+# Graphify (knowledge graph output)
+graphify-out/
+.graphifyignore
+
+# Antigravity agent config (local-only)
+.agent/
+
 # Accidental shell artifacts
 tatus
 "({,+"

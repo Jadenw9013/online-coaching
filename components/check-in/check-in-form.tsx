@@ -254,42 +254,43 @@ export function CheckInForm({
   // Diet options
   const dietLabels = ["Off track", "Needs work", "OK", "Good", "Crushed it"];
   const dietIcons = [
-    <svg key="offtrack" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>,
-    <svg key="needswork" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
-    <svg key="ok" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
-    <svg key="good" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#84cc16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" /></svg>,
-    <svg key="crushedit" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" /><circle cx="12" cy="8" r="6" /></svg>,
+    <svg key="offtrack" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>,
+    <svg key="needswork" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
+    <svg key="ok" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
+    <svg key="good" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" /></svg>,
+    <svg key="crushedit" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" /><circle cx="12" cy="8" r="6" /></svg>,
   ];
   const dietActiveColors = [
-    "ring-2 ring-red-500/60 bg-red-500/20 text-red-300",
-    "ring-2 ring-orange-500/60 bg-orange-500/20 text-orange-300",
-    "ring-2 ring-yellow-500/60 bg-yellow-500/20 text-yellow-300",
-    "ring-2 ring-lime-500/60 bg-lime-500/20 text-lime-300",
-    "ring-2 ring-emerald-500/60 bg-emerald-500/20 text-emerald-300",
+    "ring-1 ring-red-400/50 bg-red-500/15 text-red-300",
+    "ring-1 ring-orange-400/50 bg-orange-500/15 text-orange-300",
+    "ring-1 ring-amber-400/50 bg-amber-500/15 text-amber-300",
+    "ring-1 ring-green-400/50 bg-green-500/15 text-green-300",
+    "ring-1 ring-emerald-400/50 bg-emerald-500/15 text-emerald-300",
   ];
 
   // Energy options
   const energyLabels = ["Drained", "Low", "Average", "Good", "Fired up"];
   const energyIcons = [
-    <svg key="drained" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6" /><path d="M4.93 4.93A10 10 0 1 0 19.07 19.07" /></svg>,
-    <svg key="low" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
-    <svg key="average" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="15" x2="16" y2="15" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>,
-    <svg key="good" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>,
-    <svg key="firedup" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m13 9-3 4h4l-3 4" /></svg>,
+    <svg key="drained" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6" /><path d="M4.93 4.93A10 10 0 1 0 19.07 19.07" /></svg>,
+    <svg key="low" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
+    <svg key="average" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="15" x2="16" y2="15" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>,
+    <svg key="good" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>,
+    <svg key="firedup" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m13 9-3 4h4l-3 4" /></svg>,
   ];
   const energyActiveColors = [
-    "ring-2 ring-red-500/60 bg-red-500/20 text-red-300",
-    "ring-2 ring-orange-500/60 bg-orange-500/20 text-orange-300",
-    "ring-2 ring-yellow-500/60 bg-yellow-500/20 text-yellow-300",
-    "ring-2 ring-lime-500/60 bg-lime-500/20 text-lime-300",
-    "ring-2 ring-indigo-500/60 bg-indigo-500/20 text-indigo-300",
+    "ring-1 ring-red-400/50 bg-red-500/15 text-red-300",
+    "ring-1 ring-orange-400/50 bg-orange-500/15 text-orange-300",
+    "ring-1 ring-amber-400/50 bg-amber-500/15 text-amber-300",
+    "ring-1 ring-green-400/50 bg-green-500/15 text-green-300",
+    "ring-1 ring-indigo-400/50 bg-indigo-500/15 text-indigo-300",
   ];
 
-  const stepCard = "sf-glass-card p-4 sm:p-5 shadow-lg";
-  const stepLabel = "mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-400";
+  const stepCard = "rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5";
+  const stepLabel = "mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400";
   const stepTitle = "text-lg sm:text-xl font-bold text-white";
-  const emojiBtn = "flex flex-col items-center gap-1 sm:gap-1.5 sf-chip py-2.5 sm:py-3 text-[10px] sm:text-[11px] font-semibold text-zinc-400 transition-all duration-150 active:scale-95 cursor-pointer border-white/[0.07]";
-  const emojiBtnActive = "scale-[1.04]";
+  const emojiBtn = "flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 sm:py-3 text-[10px] sm:text-[11px] font-medium text-zinc-400 transition-all duration-150 active:scale-95 cursor-pointer";
+  const emojiBtnActive = "scale-[1.02]";
+
 
   return (
     <>
@@ -341,7 +342,7 @@ export function CheckInForm({
             <span
               key={step.label}
               className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider transition-colors ${
-                i <= activeStep ? "text-blue-400" : "text-zinc-600"
+                i <= activeStep ? "text-zinc-200" : "text-zinc-500"
               }`}
             >
               {step.label}
@@ -354,14 +355,14 @@ export function CheckInForm({
             <div
               key={i}
               className={`h-[3px] flex-1 rounded-full transition-all duration-500 ${
-                filled ? "bg-blue-500" : i === activeStep ? "bg-blue-500/30" : "bg-white/10"
+                filled ? "bg-white/40" : i === activeStep ? "bg-white/15" : "bg-white/[0.06]"
               }`}
             />
           ))}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-3 pb-36 sm:pb-28" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-3 pb-44 sm:pb-28" noValidate>
 
         {error && (
           <div role="alert" className="rounded-xl border border-red-900/50 bg-red-950/50 px-4 py-3 text-sm text-red-400">
@@ -376,17 +377,17 @@ export function CheckInForm({
 
           {weightValue && (
             <p className="mt-3 font-display text-4xl sm:text-5xl font-black tabular-nums text-white">
-              {weightValue}<span className="ml-1.5 text-base sm:text-xl font-normal text-zinc-500">lbs</span>
+              {weightValue}<span className="ml-1.5 text-base sm:text-xl font-normal text-zinc-400">lbs</span>
             </p>
           )}
           {!weightValue && (
-            <p className="mt-3 font-display text-4xl sm:text-5xl font-black tabular-nums text-zinc-600">—<span className="ml-1.5 text-base sm:text-xl font-normal text-zinc-700">lbs</span></p>
+            <p className="mt-3 font-display text-4xl sm:text-5xl font-black tabular-nums text-zinc-500">—<span className="ml-1.5 text-base sm:text-xl font-normal text-zinc-500">lbs</span></p>
           )}
 
           {previousWeight && (
             <p className="mt-1 text-xs text-zinc-400">
               Last week: <span className="font-medium text-zinc-300">{previousWeight.weight} lbs</span>
-              <span className="ml-1.5 text-zinc-500">{previousDateLabel}</span>
+              <span className="ml-1.5 text-zinc-400">{previousDateLabel}</span>
             </p>
           )}
 
@@ -518,37 +519,43 @@ export function CheckInForm({
 
       </form>
 
-      {/* Fixed bottom CTA — step 4, sits above mobile bottom nav */}
+      {/* Fixed bottom CTA — sits above bottom nav on mobile */}
       <div
-        className="fixed left-0 right-0 z-30 border-t border-white/[0.06] bg-[#0a0a0b]/95 backdrop-blur-2xl px-4 py-3 sm:py-4"
+        className="fixed left-0 right-0 z-30 sf-cta-above-nav px-5 pb-3 pt-6 sm:pb-5"
         style={{
-          bottom: 0,
-          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
-          backdropFilter: "blur(40px) saturate(180%)",
-          WebkitBackdropFilter: "blur(40px) saturate(180%)",
+          background: "linear-gradient(to top, rgba(10, 10, 11, 1) 40%, rgba(10, 10, 11, 0.9) 70%, transparent)",
         }}
       >
-        {/* On mobile (sm:hidden bottom nav is ~56px), add offset so button doesn't sit behind it */}
-        <div className="mx-auto max-w-lg mb-14 sm:mb-0">
+        <div className="mx-auto max-w-lg sm:mb-0">
           <button
             type="submit"
             form="checkin-form"
             disabled={uploadState !== "idle"}
             onClick={handleSubmit(onSubmit)}
-            style={{ minHeight: "52px" }}
-            className="sf-button-primary w-full text-[15px] tracking-wide shadow-lg shadow-blue-600/25"
+            className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-4 text-[15px] font-semibold tracking-wide text-white transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            style={{
+              background: "linear-gradient(135deg, #4a6cf7 0%, #3b5bdb 50%, #2b4bc8 100%)",
+              boxShadow: "0 0 0 1px rgba(74,108,247,0.3), 0 4px 16px rgba(59,91,219,0.4), 0 8px 32px rgba(59,91,219,0.2)",
+            }}
           >
+            {/* Subtle shimmer overlay on hover */}
+            <span
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%)",
+              }}
+            />
             {uploadState !== "idle" ? (
               <>
-                <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
-                {buttonLabel}
+                <span>{buttonLabel}</span>
               </>
             ) : (
               <>
-                {buttonLabel}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <span>{buttonLabel}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">
                   <path d="m5 12 14 0" /><path d="m13 5 7 7-7 7" />
                 </svg>
               </>
