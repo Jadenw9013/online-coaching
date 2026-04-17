@@ -36,6 +36,36 @@ export async function getCurrentDbUser() {
     (clerkUser.publicMetadata?.role as string)?.toUpperCase() === "COACH";
   const activeRole = isCoach ? "COACH" : "CLIENT" as const;
 
+  // ── Handle re-registration: email may exist under a different clerkId ───
+  // This happens when a user deletes their account (purging the Clerk user)
+  // and then signs back in — Clerk issues a new clerkId for the same email.
+  const existingByEmail = await db.user.findUnique({ where: { email } });
+  if (existingByEmail && existingByEmail.clerkId !== userId) {
+    // Cancel any pending deletion request
+    const deletionRequest = await db.accountDeletionRequest.findUnique({
+      where: { userId: existingByEmail.id },
+    });
+    if (deletionRequest && deletionRequest.status === "PENDING") {
+      await db.accountDeletionRequest.update({
+        where: { id: deletionRequest.id },
+        data: { status: "CANCELLED", cancelledAt: new Date() },
+      });
+    }
+
+    // Re-associate the existing DB user with the new Clerk identity
+    const reactivatedUser = await db.user.update({
+      where: { id: existingByEmail.id },
+      data: {
+        clerkId: userId,
+        email,
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+        isDeactivated: false,
+      },
+    });
+    return reactivatedUser;
+  }
+
   const newUser = await db.user.upsert({
     where: { clerkId: userId },
     update: {
