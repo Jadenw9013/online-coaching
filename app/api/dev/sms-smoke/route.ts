@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         const message = await client.messages.create({
             body: `Steadfast Twilio smoke test: ${new Date().toISOString()}`,
             messagingServiceSid: messagingServiceSid,
-            to: "+14253629948"
+            to: process.env.DEV_SMS_PHONE || "+10000000000"
         });
 
         return NextResponse.json({

@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error("[testimonial-image-upload] Error:", error);
         return NextResponse.json(
-            { error: error instanceof Error ? error.message : "Upload failed" },
+            { error: "Upload failed" },
             { status: 500 }
         );
     }

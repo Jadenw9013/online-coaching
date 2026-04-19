@@ -120,8 +120,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     return NextResponse.json({ success: true, message });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[bypass-activate]", msg);
-    return NextResponse.json({ success: false, message: `Server error: ${msg}` }, { status: 500 });
+    console.error("[bypass-activate]", err instanceof Error ? err.message : String(err));
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
   }
 }

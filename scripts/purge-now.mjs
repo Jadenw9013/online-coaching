@@ -1,6 +1,6 @@
 /**
  * One-off script to immediately purge a user by email.
- * Usage: node --env-file=.env.local scripts/purge-now.mjs jadenwong777@gmail.com
+ * Usage: node --env-file=.env.local scripts/purge-now.mjs <email>
  */
 import pg from "pg";
 const { Pool } = pg;

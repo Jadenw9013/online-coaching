@@ -62,13 +62,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "needs_review" });
     } catch (parseError) {
       const message = parseError instanceof Error ? parseError.message : "Unknown error";
+      console.error("[parse] OCR/LLM parse failed:", message);
 
       await db.mealPlanUpload.update({
         where: { id: uploadId },
         data: { status: "FAILED", errorMessage: message },
       });
 
-      return NextResponse.json({ status: "failed", error: message }, { status: 500 });
+      return NextResponse.json({ status: "failed", error: "Failed to parse meal plan. Please try again." }, { status: 500 });
     }
   } catch (error) {
     const { message, status } = prismaErrorMessage(error);

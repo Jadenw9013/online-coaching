@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 import { notifyDailyCheckInReminder, notifyMissedCheckInAlert } from "@/lib/sms/notify";
 import { sendEmail } from "@/lib/email/sendEmail";
@@ -16,11 +17,24 @@ function isTimeToTrigger(configuredTime: string, currentHourStr: string) {
   return timeParts[0] === currentHourStr;
 }
 
-export async function POST(req: NextRequest) {
+/** Timing-safe bearer token comparison. */
+function verifyCronSecret(authHeader: string | null, secret: string): boolean {
+  const expected = `Bearer ${secret}`;
+  const actual = authHeader || "";
+  const bufA = Buffer.from(actual);
+  const bufB = Buffer.from(expected);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
+export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || !verifyCronSecret(authHeader, cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

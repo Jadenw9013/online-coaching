@@ -13,7 +13,7 @@ const isPublicRoute = createRouteMatcher([
   "/coaches/:slug",
   "/api/webhooks(.*)",
   "/api/cron(.*)",
-  "/api/dev/test-email",
+  "/api/public(.*)",
   ...(process.env.NODE_ENV === "development" ? [
     "/api/dev/test-sms(.*)",
     "/api/dev/sms-smoke(.*)"
@@ -29,7 +29,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|api/dev/test-email|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api(?!/dev/test-email)|trpc)(.*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 };

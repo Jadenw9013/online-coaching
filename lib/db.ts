@@ -15,10 +15,7 @@ function createPrismaClient() {
 
   // Pass PoolConfig to PrismaPg — it creates and manages its own Pool internally.
   // This gives proper type parsing for Json columns vs passing connectionString directly.
-  const adapter = new PrismaPg({
-    connectionString,
-    ssl: connectionString.includes("neon.tech") ? { rejectUnauthorized: false } : undefined,
-  });
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 
