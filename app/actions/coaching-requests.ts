@@ -12,6 +12,7 @@ import {
     requestApprovedEmail,
     waitlistConfirmationEmail,
 } from "@/lib/email/templates";
+import { linkOrInviteProspect, getActivationMessage } from "@/lib/activation";
 
 /** Resolve the current coach's CoachProfile.id (cached per request via Prisma). */
 async function getCoachProfileId(userId: string): Promise<string> {
@@ -743,54 +744,25 @@ export async function bypassPipelineAndActivate(input: { requestId: string }) {
         WHERE "id" = ${input.requestId}
     `;
 
-    // 3. Best-effort: link prospect account if it exists
-    let linked = false;
+    // 3. Link prospect or create invite (shared helper — single source of truth)
+    let linkResult: Awaited<ReturnType<typeof linkOrInviteProspect>> | null = null;
     try {
-        const email = lead.prospectEmailAddr ?? null;
-        const phone = (lead.prospectPhone ?? lead.prospectEmail ?? "").replace(/\D/g, "");
-
-        let users: Array<{ id: string; email: string; firstName: string | null }> = [];
-        if (email) {
-            users = await db.$queryRaw<typeof users>`
-                SELECT "id", "email", "firstName" FROM "User"
-                WHERE LOWER("email") = ${email.toLowerCase()} LIMIT 1
-            `;
-        }
-        if (users.length === 0 && phone.length >= 7) {
-            users = await db.$queryRaw<typeof users>`
-                SELECT "id", "email", "firstName" FROM "User"
-                WHERE "phoneNumber" LIKE ${"%" + phone.slice(-10)} LIMIT 1
-            `;
-        }
-
-        if (users.length > 0) {
-            const prospect = users[0];
-            await db.$executeRaw`
-                UPDATE "CoachingRequest" SET "prospectId" = ${prospect.id}, "updatedAt" = NOW()
-                WHERE "id" = ${input.requestId}
-            `;
-            await db.$executeRaw`
-                INSERT INTO "CoachClient" ("id", "coachId", "clientId", "coachNotes", "createdAt")
-                VALUES (gen_random_uuid()::text, ${user.id}, ${prospect.id}, 'Activated via pipeline bypass.', NOW())
-                ON CONFLICT ("coachId", "clientId") DO NOTHING
-            `;
-            linked = true;
-
-            try {
-                const { coachConnectedEmail } = await import("@/lib/email/templates");
-                const content = coachConnectedEmail(prospect.firstName || lead.prospectName, user.firstName || "Your coach");
-                await sendEmail({ to: prospect.email, ...content });
-            } catch { /* email never blocks */ }
-        }
+        linkResult = await linkOrInviteProspect(
+            lead,
+            { coachId: user.id, coachFirstName: user.firstName },
+            input.requestId,
+            "Activated via pipeline bypass.",
+        );
     } catch (err) {
         console.error("[bypassPipelineAndActivate] link failed (non-fatal):", err);
     }
 
     revalidatePath("/coach/leads");
-    const message = linked
-        ? `${lead.prospectName} has been activated and added to your roster.`
-        : `${lead.prospectName} has been activated. They'll appear on your roster once they create their account.`;
-    return { success: true, message };
+    revalidatePath("/coach/dashboard");
+    return {
+        success: true,
+        message: getActivationMessage(lead.prospectName, linkResult ?? { linked: false, inviteToken: "", email: "" }),
+    };
 }
 
 export async function activateClient(input: { requestId: string }) {
@@ -813,89 +785,27 @@ export async function activateClient(input: { requestId: string }) {
         return { success: false, message: "This lead must complete intake before activating." };
     }
 
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
-    const coachName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Your coach";
+    // Mark lead as ACTIVE
+    await db.coachingRequest.update({
+        where: { id: input.requestId },
+        data: { consultationStage: "ACTIVE", status: "ACCEPTED" },
+    });
 
-    // Prospect account lookup
-    const email = request.prospectEmailAddr ?? null;
-    const phone = (request.prospectPhone ?? request.prospectEmail ?? "").replace(/\D/g, "");
-    let prospectUser = email
-        ? await db.user.findUnique({ where: { email: email.toLowerCase() } })
-        : null;
-    if (!prospectUser && phone.length >= 7) {
-        prospectUser = await db.user.findFirst({
-            where: { phoneNumber: { contains: phone.slice(-10) } },
-        });
-    }
+    // Link prospect or create invite (shared helper — single source of truth)
+    const result = await linkOrInviteProspect(
+        request,
+        { coachId: user.id, coachFirstName: user.firstName, coachLastName: user.lastName },
+        input.requestId,
+        "Activated from intake pipeline.",
+    );
 
-    if (prospectUser) {
-        // Path A — prospect HAS a Steadfast account
-        const existingConn = await db.coachClient.findUnique({
-            where: { coachId_clientId: { coachId: user.id, clientId: prospectUser.id } },
-        });
-        if (!existingConn) {
-            await db.coachClient.create({
-                data: { coachId: user.id, clientId: prospectUser.id, coachNotes: "Activated from intake pipeline." },
-            });
-        }
+    revalidatePath("/coach/leads");
+    revalidatePath("/coach/dashboard");
 
-        await db.coachingRequest.update({
-            where: { id: input.requestId },
-            data: {
-                consultationStage: "ACTIVE",
-                status: "ACCEPTED",
-                prospectId: prospectUser.id,
-            },
-        });
-
-        try {
-            const { clientActivatedWelcomeEmail } = await import("@/lib/email/templates");
-            const emailContent = clientActivatedWelcomeEmail(
-                prospectUser.firstName || request.prospectName,
-                coachName,
-                `${appUrl}/client/dashboard`
-            );
-            await sendEmail({ to: prospectUser.email, ...emailContent });
-        } catch { /* email failure must not block */ }
-
-        revalidatePath("/coach/leads");
-        revalidatePath("/coach/dashboard");
-        return { success: true, path: "existing_account" as const, email: prospectUser.email, clientId: prospectUser.id };
+    if (result.linked) {
+        return { success: true, path: "existing_account" as const, email: result.email, clientId: result.clientId };
     } else {
-        // Path B — prospect does NOT have a Steadfast account
-        const prospectEmail = email ?? request.prospectEmail;
-
-        // Create ClientInvite (mirrors client-invites.ts pattern)
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-
-        const invite = await db.clientInvite.create({
-            data: {
-                coachId: user.id,
-                email: prospectEmail.toLowerCase(),
-                name: request.prospectName,
-                expiresAt,
-            },
-        });
-
-        await db.coachingRequest.update({
-            where: { id: input.requestId },
-            data: {
-                consultationStage: "ACTIVE",
-                status: "ACCEPTED",
-            },
-        });
-
-        try {
-            const { clientActivatedInviteEmail } = await import("@/lib/email/templates");
-            const inviteUrl = `${appUrl}/invite/${invite.inviteToken}`;
-            const emailContent = clientActivatedInviteEmail(request.prospectName, coachName, inviteUrl);
-            await sendEmail({ to: prospectEmail, ...emailContent });
-        } catch { /* email failure must not block */ }
-
-        revalidatePath("/coach/leads");
-        revalidatePath("/coach/dashboard");
-        return { success: true, path: "invite_sent" as const, email: prospectEmail };
+        return { success: true, path: "invite_sent" as const, email: result.email };
     }
 }
 
