@@ -285,7 +285,7 @@ export function TrainingProgramEditor({
         content: b.content,
       })),
     }));
-    // Extract cardio from template and populate cardio state
+    // Extract cardio from template and populate cardio state for the UI
     const { trainingDays, cardio } = extractCardioFromDays(allDays);
     if (cardio) {
       setShowCardio(true);
@@ -302,20 +302,37 @@ export function TrainingProgramEditor({
       setCardioIntensity("");
       setCardioNotes("");
     }
-    return trainingDays;
+    // Return ALL days (including __CARDIO__) so the payload sent to the
+    // server is complete. We can't rely on the setState calls above being
+    // flushed before buildPayload reads the cardio values.
+    return allDays;
   }
 
   async function handleSave() {
     setSaving(true);
     setError(null);
     try {
-      let payloadDays = days;
+      let payloadDays: TrainingDayGroup[];
       if (mode === "assign" && selectedTemplateId) {
+        // getTemplateDays returns ALL days including __CARDIO__
         payloadDays = getTemplateDays(selectedTemplateId);
-        setDays(payloadDays);
+        // Set editor state to non-cardio days only
+        setDays(payloadDays.filter((d) => d.dayName !== CARDIO_DAY_NAME));
+      } else {
+        payloadDays = getDaysPayload();
       }
 
-      const result = await saveTrainingProgram(buildPayload(payloadDays));
+      const payload = {
+        clientId,
+        weekStartDate,
+        days: payloadDays,
+        weeklyFrequency: weeklyFrequency ? Number(weeklyFrequency) : undefined,
+        clientNotes: clientNotes || undefined,
+        injuries: injuries || undefined,
+        equipment: equipment || undefined,
+        templateSourceId: selectedTemplateId || undefined,
+      };
+      const result = await saveTrainingProgram(payload);
       if ("error" in result) {
         setError("Save failed — check your inputs.");
       } else {
@@ -335,14 +352,28 @@ export function TrainingProgramEditor({
     setPublishing(true);
     setError(null);
     try {
-      let payloadDays = days;
+      let payloadDays: TrainingDayGroup[];
       if (mode === "assign" && selectedTemplateId) {
+        // getTemplateDays returns ALL days including __CARDIO__
         payloadDays = getTemplateDays(selectedTemplateId);
-        setDays(payloadDays);
+        // Set editor state to non-cardio days only
+        setDays(payloadDays.filter((d) => d.dayName !== CARDIO_DAY_NAME));
+      } else {
+        payloadDays = getDaysPayload();
       }
 
       // Always save the latest data (including cardio) before publishing
-      const result = await saveTrainingProgram(buildPayload(payloadDays));
+      const payload = {
+        clientId,
+        weekStartDate,
+        days: payloadDays,
+        weeklyFrequency: weeklyFrequency ? Number(weeklyFrequency) : undefined,
+        clientNotes: clientNotes || undefined,
+        injuries: injuries || undefined,
+        equipment: equipment || undefined,
+        templateSourceId: selectedTemplateId || undefined,
+      };
+      const result = await saveTrainingProgram(payload);
       if ("error" in result) {
         setError("Failed to save before publishing.");
         setPublishing(false);

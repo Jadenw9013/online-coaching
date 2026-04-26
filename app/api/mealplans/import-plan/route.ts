@@ -18,9 +18,10 @@ export async function POST(req: NextRequest) {
     if (!coach?.isCoach) return NextResponse.json({ error: "Not a coach" }, { status: 403 });
 
     const body = await req.json();
-    const { draftId, parsedJson: overrideJson } = body as {
+    const { draftId, parsedJson: overrideJson, publish } = body as {
       draftId?: string;
       parsedJson?: unknown;
+      publish?: boolean;
     };
 
     if (!draftId) return NextResponse.json({ error: "Missing draftId" }, { status: 400 });
@@ -84,13 +85,15 @@ export async function POST(req: NextRequest) {
     // Extract plan extras (metadata, overrides, supplements, etc.)
     const planExtras = extractPlanExtras(plan);
 
-    // Create meal plan as draft (coach can review/publish in normal editor)
+    // Create meal plan — publish immediately if requested, otherwise save as draft
+    const planStatus = publish ? "PUBLISHED" : "DRAFT";
     const mealPlan = await db.mealPlan.create({
       data: {
         clientId,
         weekOf,
         version: nextVersion,
-        status: "DRAFT",
+        status: planStatus,
+        ...(publish ? { publishedAt: new Date() } : {}),
         planExtras: planExtras ? JSON.parse(JSON.stringify(planExtras)) : undefined,
         ...(items.length > 0 ? { items: { create: items } } : {}),
       },
@@ -115,6 +118,7 @@ export async function POST(req: NextRequest) {
       mealPlanId: mealPlan.id,
       clientId,
       weekStartDate: weekOf.toISOString().split("T")[0],
+      published: !!publish,
     });
   } catch (error) {
     const { message, status } = prismaErrorMessage(error);

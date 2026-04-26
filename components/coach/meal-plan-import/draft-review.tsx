@@ -203,7 +203,7 @@ export function DraftReview({
   const hasExtrasContent =
     !!plan?.metadata || (plan?.dayOverrides?.length ?? 0) > 0 || !!plan?.supportContent;
 
-  async function handleImport() {
+  async function handleImport(publish = false) {
     if (!draftId || !plan) return;
 
     // Verify the plan has either meals or extras
@@ -228,7 +228,7 @@ export function DraftReview({
       const res = await fetch("/api/mealplans/import-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draftId, parsedJson: plan }),
+        body: JSON.stringify({ draftId, parsedJson: plan, publish }),
       });
 
       if (!res.ok) {
@@ -244,9 +244,15 @@ export function DraftReview({
       }
 
       const data = await res.json();
-      router.push(
-        `/coach/clients/${clientId}/review/${data.weekStartDate}`
-      );
+      if (publish) {
+        // Published — go straight to client profile (plan is already live)
+        router.push(`/coach/clients/${clientId}`);
+      } else {
+        // Draft — go to review workspace so coach can review & publish
+        router.push(
+          `/coach/clients/${clientId}/review/${data.weekStartDate}`
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import failed");
       setImporting(false);
@@ -578,14 +584,24 @@ export function DraftReview({
         >
           Back
         </button>
-        <button
-          type="button"
-          onClick={handleImport}
-          disabled={importing || (plan.meals.length === 0 && !hasExtrasContent)}
-          className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {importing ? "Importing..." : "Import Meal Plan"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleImport(false)}
+            disabled={importing || (plan.meals.length === 0 && !hasExtrasContent)}
+            className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Save as Draft
+          </button>
+          <button
+            type="button"
+            onClick={() => handleImport(true)}
+            disabled={importing || (plan.meals.length === 0 && !hasExtrasContent)}
+            className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {importing ? "Importing..." : "Import & Publish"}
+          </button>
+        </div>
       </div>
     </div>
   );
