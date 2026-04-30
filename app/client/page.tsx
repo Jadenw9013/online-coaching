@@ -5,11 +5,11 @@ import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
 import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getMyIntake } from "@/lib/queries/client-intake";
 import { parseCadenceConfig, getEffectiveCadence, getClientCadenceStatus, cadenceFromLegacyDays, getCadencePreview } from "@/lib/scheduling/cadence";
-import { getProfilePhotoUrl } from "@/lib/supabase/profile-photo-storage";
+
 import { getAdherenceEnabled, getTodayAdherence, getTodayMealNames } from "@/lib/queries/adherence";
 import { db } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
+
 import { ConnectCoachBanner } from "@/components/client/connect-coach-banner";
 import { MyRequestsCard } from "@/components/client/my-requests-card";
 import { getMyCoachingRequests } from "@/lib/queries/my-requests";
@@ -182,13 +182,7 @@ export default async function ClientDashboard() {
       ? +(latestWeight.weight - prevWeight.weight).toFixed(1)
       : null;
 
-  let coachAvatarUrl: string | null = null;
-  if (coachAssignment) {
-    const avatarPath = coachAssignment.coach.profilePhotoPath;
-    if (avatarPath) {
-      try { coachAvatarUrl = await getProfilePhotoUrl(avatarPath); } catch { /* */ }
-    }
-  }
+
   const coachInitial = coachAssignment?.coach.firstName?.[0] ?? "C";
 
   // ── iOS-style status derivation ─────────────────────────────────────────
@@ -259,23 +253,11 @@ export default async function ClientDashboard() {
             const slug = coachAssignment.coach.coachProfile?.slug;
             const isPublished = coachAssignment.coach.coachProfile?.isPublished;
             const badge = (
-              <div className={`sf-glass-card flex items-center gap-2.5 px-3 py-2 ${slug && isPublished ? "transition-colors hover:border-white/[0.16]" : ""}`}>
-                <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full border border-white/[0.12] bg-zinc-800">
-                  {coachAvatarUrl ? (
-                    <Image src={coachAvatarUrl} alt="" width={28} height={28} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-zinc-300">
-                      {coachInitial}
-                    </div>
-                  )}
+              <div className={`flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 ${slug && isPublished ? "transition-colors hover:border-white/[0.16]" : ""}`}>
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                  {coachInitial}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-semibold text-white leading-tight">
-                    {coachAssignment.coach.firstName ? coachAssignment.coach.firstName.toLowerCase() : "Your Coach"}
-                  </span>
-                  <span className="text-[11px] font-medium text-zinc-400">Coach</span>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 ml-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                <span className="text-[12px] font-semibold text-zinc-200">Coach</span>
               </div>
             );
             return slug && isPublished ? (
@@ -325,66 +307,101 @@ export default async function ClientDashboard() {
         </div>
       )}
 
-      {/* Your Program — compact 2-col grid */}
-      {(mealPlan || (trainingProgram && trainingProgram.days.length > 0)) && (
-        <section
-          className="animate-fade-in -mt-2"
-          style={{ animationDelay: "60ms" }}
-          aria-label="Your program"
-        >
-          <div className="grid grid-cols-2 gap-3">
-            {mealPlan ? (
-              <Link
-                href="/client/meal-plan"
-                className="group sf-glass-card flex items-center justify-between px-4 py-5 transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
-                aria-label="View your meal plan"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-300" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Nutrition</p>
-                    <p className="text-base font-semibold text-white leading-tight">Meal Plan</p>
-                  </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-              </Link>
-            ) : (
-              <div className="sf-glass-card flex items-center gap-3 px-4 py-5" style={{ opacity: 0.5 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Nutrition</p>
-                  <p className="text-sm text-zinc-600">Not assigned</p>
-                </div>
-              </div>
-            )}
+      {/* TODAY'S PLAN — full-width detailed cards */}
+      {(mealPlan || (trainingProgram && trainingProgram.days.length > 0)) && (() => {
+        // ── Nutrition data ──
+        const uniqueMeals = mealPlan
+          ? [...new Set(mealPlan.items.map((i) => i.mealName))]
+          : [];
+        const totalMealCount = uniqueMeals.length;
+        const mealsLogged = todayAdherence?.meals?.filter((m) => m.completed).length ?? 0;
+        const mealsRemaining = Math.max(0, totalMealCount - mealsLogged);
+        const mealProgress = totalMealCount > 0 ? (mealsLogged / totalMealCount) * 100 : 0;
 
-            {trainingProgram && trainingProgram.days.length > 0 ? (
-              <Link
-                href="/client/training"
-                className="group sf-glass-card flex items-center justify-between px-4 py-5 transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
-                aria-label="View your training program"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-300" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Training</p>
-                    <p className="text-base font-semibold text-white leading-tight">Workout</p>
+        // ── Training data (program-level, no day assumption) ──
+        const trainingDays = trainingProgram?.days?.filter((d) => d.dayName !== "__CARDIO__") ?? [];
+        const totalExercises = trainingDays.reduce((sum, d) => sum + (d.blocks?.length ?? 0), 0);
+
+        return (
+          <section
+            className="animate-fade-in"
+            style={{ animationDelay: "60ms" }}
+            aria-label="Today's plan"
+          >
+            <p className="mb-3 px-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
+              TODAY&apos;S PLAN
+            </p>
+            <div className="space-y-3">
+              {/* ── Nutrition Card ── */}
+              {mealPlan ? (
+                <Link
+                  href="/client/meal-plan"
+                  className="group sf-glass-card block px-4 py-4 transition-all active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
+                  aria-label="View your meal plan"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Nutrition</p>
+                        <p className="text-base font-bold text-white leading-tight">Meal Plan</p>
+                      </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                   </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-              </Link>
-            ) : (
-              <div className="sf-glass-card flex items-center gap-3 px-4 py-5" style={{ opacity: 0.5 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Training</p>
-                  <p className="text-sm text-zinc-600">Not assigned</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+                  <p className="mt-2.5 text-xs text-zinc-400">
+                    {totalMealCount} meals · {mealsLogged} logged
+                  </p>
+                  {/* Progress bar */}
+                  <div className="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all"
+                      style={{ width: `${mealProgress}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-500">{mealsLogged} of {totalMealCount} logged</span>
+                    {mealsRemaining > 0 && (
+                      <span className="font-semibold text-emerald-400">{mealsRemaining} remaining</span>
+                    )}
+                  </div>
+                </Link>
+              ) : null}
+
+              {/* ── Training Card ── */}
+              {trainingProgram && trainingDays.length > 0 ? (
+                <Link
+                  href="/client/training"
+                  className="group sf-glass-card block px-4 py-4 transition-all active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
+                  aria-label="View your training program"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 5v11"/><path d="M18 5v11"/><path d="M2 9h4"/><path d="M18 9h4"/><path d="M2 15h4"/><path d="M18 15h4"/><path d="M6 9h12"/><path d="M6 15h12"/></svg>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">Training</p>
+                        <p className="text-base font-bold text-white leading-tight">Workout</p>
+                      </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-500 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                  </div>
+                  <p className="mt-2.5 text-xs text-zinc-400">
+                    {trainingDays.length} days · {totalExercises} exercises
+                  </p>
+                  <div className="mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-500">Pick a day to start</span>
+                    <span className="font-semibold text-blue-400">View program</span>
+                  </div>
+                </Link>
+              ) : null}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Cardio Prescription strip */}
       {(() => {
@@ -447,17 +464,19 @@ export default async function ClientDashboard() {
         >
           <div className="sf-surface-edge" aria-hidden="true" />
           <div className="relative z-[1]">
-            <p className="text-[13px] font-bold text-white">
-              Weight Progress
-            </p>
-            <p className="mt-1 text-xs font-semibold text-zinc-400">
-              as of {latestWeight.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                WEIGHT PROGRESS
+              </p>
+              <p className="text-[11px] font-semibold text-zinc-500">
+                as of {latestWeight.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </p>
+            </div>
             <div className="mt-3 flex items-baseline gap-1">
               <p className="text-[44px] font-black tabular-nums tracking-tight text-white" style={{ fontVariantNumeric: "tabular-nums" }}>
                 {Number(latestWeight.weight).toFixed(1)}
               </p>
-              <span className="text-sm font-bold text-white/60">LBS</span>
+              <span className="text-sm font-bold text-white/60">lbs</span>
               {weightDelta != null && weightDelta !== 0 && (
                 <span
                   className={`ml-3 rounded-full px-2.5 py-0.5 text-xs font-semibold ${weightDelta < 0
@@ -471,7 +490,6 @@ export default async function ClientDashboard() {
             </div>
             <WeightProgress
               data={weightHistory}
-              clientId={user.id}
               className="mt-4"
             />
           </div>

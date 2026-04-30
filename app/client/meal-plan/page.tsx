@@ -79,9 +79,6 @@ export default async function ClientMealPlanPage() {
             <h1 className="mt-3 text-2xl font-black tracking-tight text-white">
               Meal Plan
             </h1>
-            <p className="mt-1.5 text-sm text-zinc-500">
-              Your personalized nutrition plan from your coach
-            </p>
           </div>
           {mealPlan && <ExportPdfButton mealPlanId={mealPlan.id} variant="small" />}
         </div>

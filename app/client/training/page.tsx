@@ -84,7 +84,7 @@ export default async function ClientTrainingPage() {
           {program && <ExportPdfButton resourceId={program.id} type="training-program" variant="small" />}
         </div>
         <p className="mt-1.5 text-sm text-zinc-500">
-          Tap a day to expand your workout
+          Select a day to start your workout
         </p>
       </section>
 

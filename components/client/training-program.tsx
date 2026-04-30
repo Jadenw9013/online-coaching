@@ -135,9 +135,9 @@ export function TrainingProgram({
 }) {
   const workoutDays = program.days.filter((d) => d.dayName !== "__CARDIO__");
 
-  // Custom expand/collapse state — all days closed by default
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(
-    () => new Set()
+  // Tab-based day selection — default to first day
+  const [selectedDayId, setSelectedDayId] = useState<string | null>(
+    () => workoutDays[0]?.id ?? null
   );
 
   // Per-exercise completion state
@@ -153,18 +153,6 @@ export function TrainingProgram({
     return set;
   });
   const [isPending, startTransition] = useTransition();
-
-  function toggleExpand(dayId: string) {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(dayId)) {
-        next.delete(dayId);
-      } else {
-        next.add(dayId);
-      }
-      return next;
-    });
-  }
 
   function handleExerciseToggle(dayName: string, exName: string, exOrder: number) {
     if (!adherence?.date) return;
@@ -238,6 +226,204 @@ export function TrainingProgram({
         </div>
       )}
 
+      {/* ── Day Tab Bar ── */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="tablist" aria-label="Training days">
+        {workoutDays.map((day, dayIndex) => {
+          const isActive = day.id === selectedDayId;
+          const dayProgress = adherence ? getDayProgress(day) : null;
+          const allDone = dayProgress ? dayProgress.total > 0 && dayProgress.done === dayProgress.total : false;
+          const hasProgress = dayProgress ? dayProgress.done > 0 && !allDone : false;
+          const dashMatch = day.dayName?.match(/^(Day\s*\d+)\s*[—–-]\s*(.+)$/i);
+          const shortLabel = dashMatch ? dashMatch[1] : `Day ${dayIndex + 1}`;
+
+          return (
+            <button
+              key={day.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`day-panel-${day.id}`}
+              onClick={() => setSelectedDayId(day.id)}
+              className={`relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 cursor-pointer ${
+                isActive
+                  ? allDone
+                    ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
+                    : "bg-white/10 text-white ring-1 ring-white/20"
+                  : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-300"
+              }`}
+            >
+              {shortLabel}
+              {/* Completion dot */}
+              {allDone && (
+                <svg aria-label="Completed" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><polyline points="20 6 9 17 4 12" /></svg>
+              )}
+              {hasProgress && (
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400" aria-label="In progress" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Selected Day Content ── */}
+      {(() => {
+        const day = workoutDays.find((d) => d.id === selectedDayId);
+        if (!day) return null;
+
+        const dayIndex = workoutDays.indexOf(day);
+        const dashMatch = day.dayName?.match(/^(Day\s*\d+)\s*[—–-]\s*(.+)$/i);
+        const dayLabel = dashMatch ? dashMatch[1] : `Day ${dayIndex + 1}`;
+        const dayTitle = dashMatch ? dashMatch[2] : day.dayName || "Untitled Day";
+        const dayProgress = adherence ? getDayProgress(day) : null;
+        const allDone = dayProgress ? dayProgress.total > 0 && dayProgress.done === dayProgress.total : false;
+
+        const goalBlock = day.blocks.find(
+          (b) => b.type === ("INSTRUCTION" as BlockType) && b.title?.toLowerCase().includes("goal")
+        );
+
+        return (
+          <div
+            id={`day-panel-${day.id}`}
+            role="tabpanel"
+            className={`sf-glass-card overflow-hidden ${allDone ? "border-emerald-900/40" : ""}`}
+          >
+            {/* Day header */}
+            <div className="px-4 py-4 border-b border-zinc-800/60">
+              <p className={`text-xs font-medium uppercase tracking-wider ${allDone ? "text-emerald-500" : "text-zinc-500"}`}>
+                {dayLabel}
+              </p>
+              <h3 className={`text-lg font-bold tracking-tight ${allDone ? "text-emerald-400" : "text-white"}`}>
+                {dayTitle}
+              </h3>
+              {goalBlock && goalBlock.content && (
+                <p className="mt-0.5 text-xs italic text-zinc-500">{goalBlock.content}</p>
+              )}
+
+              {/* Progress bar */}
+              {adherence && dayProgress && dayProgress.total > 0 && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-zinc-500">Progress</span>
+                    <span className="text-xs font-semibold tabular-nums text-zinc-400">
+                      {dayProgress.done} / {dayProgress.total}
+                    </span>
+                  </div>
+                  <div
+                    className="h-1.5 overflow-hidden rounded-full bg-zinc-700"
+                    role="progressbar"
+                    aria-valuenow={dayProgress.done}
+                    aria-valuemin={0}
+                    aria-valuemax={dayProgress.total}
+                    aria-label={`${dayProgress.done} of ${dayProgress.total} exercises completed`}
+                  >
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                      style={{ width: dayProgress.total > 0 ? `${Math.round((dayProgress.done / dayProgress.total) * 100)}%` : "0%" }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Exercise list — always visible */}
+            {day.blocks.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-zinc-500">No exercises added yet.</p>
+            ) : (
+              <div className="divide-y divide-zinc-800/60">
+                {(() => {
+                  let exerciseNum = 0;
+                  return day.blocks.map((block) => {
+                    const badgeClass = BLOCK_TYPE_BADGE[block.type];
+                    const badgeLabel = BLOCK_TYPE_LABELS[block.type];
+                    const isExercise = EXERCISE_TYPES.has(block.type) || (!badgeLabel && block.title);
+
+                    if (block.type === ("INSTRUCTION" as BlockType) && block.title?.toLowerCase().includes("goal")) {
+                      return null;
+                    }
+
+                    const currentExerciseIndex = isExercise ? exerciseNum : -1;
+                    if (isExercise) exerciseNum++;
+                    const parsed = isExercise ? parseExerciseContent(block.content || "") : null;
+                    const setCount = parsed ? parseSetCount(parsed.details) : 1;
+
+                    const isChecked = isExercise && adherence
+                      ? completedExercises.has(exerciseKey(day.dayName, currentExerciseIndex))
+                      : false;
+
+                    return (
+                      <div key={block.id} className={`px-3.5 sm:px-5 py-3 sm:py-3.5 ${isChecked ? "bg-emerald-950/10" : ""}`}>
+                        <div className="flex items-start gap-3">
+                          {isExercise && adherence ? (
+                            <label
+                              className="mt-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
+                              aria-label={`${block.title}: ${isChecked ? "mark incomplete" : "mark complete"}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleExerciseToggle(day.dayName, block.title, currentExerciseIndex)}
+                                disabled={isPending}
+                                className="h-[18px] w-[18px] cursor-pointer rounded border-2 border-zinc-600 accent-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a1224] disabled:opacity-50"
+                              />
+                            </label>
+                          ) : isExercise ? (
+                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-zinc-400">
+                              {currentExerciseIndex + 1}
+                            </span>
+                          ) : null}
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                              {block.title && (
+                                <span className={`text-sm font-semibold ${isChecked ? "text-emerald-400" : ""}`}>
+                                  {block.title}
+                                </span>
+                              )}
+                              {badgeLabel && (
+                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClass}`}>
+                                  {badgeLabel}
+                                </span>
+                              )}
+                              {parsed?.equipment.map((eq, eqI) => (
+                                <span key={eqI} className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400">
+                                  {eq}
+                                </span>
+                              ))}
+                            </div>
+
+                            {parsed && parsed.details.length > 0 && (
+                              <p className="mt-1 text-sm text-zinc-400">{parsed.details.join(" · ")}</p>
+                            )}
+
+                            {parsed && parsed.notes.length > 0 && (
+                              <p className="mt-0.5 text-xs italic text-zinc-500">{parsed.notes.join(" · ")}</p>
+                            )}
+
+                            {!isExercise && block.content && (
+                              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-400">{block.content}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {isExercise && progress && (
+                          <ExerciseProgressInput
+                            exerciseName={block.title}
+                            programDay={day.dayName}
+                            setCount={setCount}
+                            currentAll={progress.currentWeek}
+                            previousAll={progress.previousWeek}
+                          />
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Cardio section — extracted from __CARDIO__ day */}
       {(() => {
         const cardioDay = program.days.find((d) => d.dayName === "__CARDIO__");
@@ -275,271 +461,6 @@ export function TrainingProgram({
           </div>
         );
       })()}
-
-      {/* Workout day cards with custom expand/collapse */}
-      {workoutDays.map((day, dayIndex) => {
-        const isExpanded = expandedIds.has(day.id);
-        const dayProgress = adherence ? getDayProgress(day) : null;
-        const allDone = dayProgress ? dayProgress.total > 0 && dayProgress.done === dayProgress.total : false;
-
-        // Parse day name: e.g. "Day 1 — Chest" => label: "Day 1", name: "Chest"
-        const dashMatch = day.dayName?.match(/^(Day\s*\d+)\s*[—–-]\s*(.+)$/i);
-        const dayLabel = dashMatch ? dashMatch[1] : `Day ${dayIndex + 1}`;
-        const dayTitle = dashMatch ? dashMatch[2] : day.dayName || "Untitled Day";
-
-        // Find the goal/instruction block if any
-        const goalBlock = day.blocks.find(
-          (b) => b.type === ("INSTRUCTION" as BlockType) && b.title?.toLowerCase().includes("goal")
-        );
-
-        return (
-          <div
-            key={day.id}
-            className={`overflow-hidden sf-glass-card ${
-              allDone
-                ? "border-emerald-900/40"
-                : ""
-            }`}
-          >
-            {/* Card header row */}
-            <button
-              type="button"
-              onClick={() => toggleExpand(day.id)}
-              className="flex w-full items-center gap-3 sm:border-l-4 px-3.5 sm:px-5 py-3.5 sm:py-4 text-left transition-colors hover:bg-zinc-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 cursor-pointer"
-              style={{
-                borderLeftColor: isExpanded
-                  ? allDone ? "rgb(16 185 129)" : "currentColor"
-                  : "transparent",
-              }}
-              aria-expanded={isExpanded}
-              aria-controls={`day-body-${day.id}`}
-              aria-label={`${dayLabel}: ${dayTitle}, ${dayProgress ? `${dayProgress.done}/${dayProgress.total} completed` : ""}`}
-            >
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-xs font-medium uppercase tracking-wider ${
-                    allDone
-                      ? "text-emerald-500"
-                      : "text-zinc-500"
-                  }`}
-                >
-                  {dayLabel}
-                </p>
-                <h3
-                  className={`text-base font-semibold tracking-tight ${
-                    allDone
-                      ? "text-emerald-400"
-                      : ""
-                  }`}
-                >
-                  {dayTitle}
-                </h3>
-                {goalBlock && goalBlock.content && (
-                  <p className="mt-0.5 text-xs italic text-zinc-500 truncate">
-                    {goalBlock.content}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {allDone && (
-                  <svg
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-emerald-500"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-                {dayProgress && (
-                  <span className="sf-section-label text-xs">
-                    {dayProgress.done}/{dayProgress.total}
-                  </span>
-                )}
-                <svg
-                  className={`h-4 w-4 text-zinc-500 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? "rotate-180" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </button>
-
-            {/* Per-day progress bar */}
-            {isExpanded && adherence && dayProgress && dayProgress.total > 0 && (
-              <div className="border-t border-zinc-800 px-5 py-2.5">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium text-zinc-500">
-                    Progress
-                  </span>
-                  <span className="text-xs font-semibold tabular-nums text-zinc-400">
-                    {dayProgress.done} / {dayProgress.total}
-                  </span>
-                </div>
-                <div
-                  className="h-1.5 overflow-hidden rounded-full bg-zinc-700"
-                  role="progressbar"
-                  aria-valuenow={dayProgress.done}
-                  aria-valuemin={0}
-                  aria-valuemax={dayProgress.total}
-                  aria-label={`${dayProgress.done} of ${dayProgress.total} exercises completed`}
-                >
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                    style={{ width: dayProgress.total > 0 ? `${Math.round((dayProgress.done / dayProgress.total) * 100)}%` : "0%" }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Collapsible body — animated */}
-            <div
-              id={`day-body-${day.id}`}
-              className={`grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isExpanded
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
-              }`}
-            >
-              <div className="overflow-hidden">
-                {day.blocks.length === 0 ? (
-                  <p className="px-5 py-4 text-sm text-zinc-500">
-                    No exercises added yet.
-                  </p>
-                ) : (
-                  <div className="divide-y divide-zinc-800/60 border-t border-zinc-800">
-                    {(() => {
-                      let exerciseNum = 0;
-                      return day.blocks.map((block) => {
-                        const badgeClass = BLOCK_TYPE_BADGE[block.type];
-                        const badgeLabel = BLOCK_TYPE_LABELS[block.type];
-                        const isExercise =
-                          EXERCISE_TYPES.has(block.type) || (!badgeLabel && block.title);
-
-                        // Skip the goal block in the body since it's shown in the header
-                        if (
-                          block.type === ("INSTRUCTION" as BlockType) &&
-                          block.title?.toLowerCase().includes("goal")
-                        ) {
-                          return null;
-                        }
-
-                        const currentExerciseIndex = isExercise ? exerciseNum : -1;
-                        if (isExercise) exerciseNum++;
-                        const parsed = isExercise
-                          ? parseExerciseContent(block.content || "")
-                          : null;
-                        const setCount = parsed ? parseSetCount(parsed.details) : 1;
-
-                        const isChecked = isExercise && adherence
-                          ? completedExercises.has(exerciseKey(day.dayName, currentExerciseIndex))
-                          : false;
-
-                        return (
-                          <div key={block.id} className={`px-3.5 sm:px-5 py-3 sm:py-3.5 ${isChecked ? "bg-emerald-950/10" : ""}`}>
-                            <div className="flex items-start gap-3">
-                              {/* Exercise checkbox or number */}
-                              {isExercise && adherence ? (
-                                <label
-                                  className="mt-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
-                                  aria-label={`${block.title}: ${isChecked ? "mark incomplete" : "mark complete"}`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={() => handleExerciseToggle(day.dayName, block.title, currentExerciseIndex)}
-                                    disabled={isPending}
-                                    className="h-[18px] w-[18px] cursor-pointer rounded border-2 border-zinc-600 accent-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a1224] disabled:opacity-50"
-                                  />
-                                </label>
-                              ) : isExercise ? (
-                                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-zinc-400">
-                                  {currentExerciseIndex + 1}
-                                </span>
-                              ) : null}
-
-                              <div className="min-w-0 flex-1">
-                                {/* Title + badge */}
-                                <div className="flex flex-wrap items-baseline gap-2">
-                                  {block.title && (
-                                    <span className={`text-sm font-semibold ${isChecked ? "text-emerald-400" : ""}`}>
-                                      {block.title}
-                                    </span>
-                                  )}
-                                  {badgeLabel && (
-                                    <span
-                                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClass}`}
-                                    >
-                                      {badgeLabel}
-                                    </span>
-                                  )}
-                                  {/* Equipment pills */}
-                                  {parsed?.equipment.map((eq, eqI) => (
-                                    <span
-                                      key={eqI}
-                                      className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400"
-                                    >
-                                      {eq}
-                                    </span>
-                                  ))}
-                                </div>
-
-                                {/* Inline details for exercises */}
-                                {parsed && parsed.details.length > 0 && (
-                                  <p className="mt-1 text-sm text-zinc-400">
-                                    {parsed.details.join(" · ")}
-                                  </p>
-                                )}
-
-                                {/* Notes as italic */}
-                                {parsed && parsed.notes.length > 0 && (
-                                  <p className="mt-0.5 text-xs italic text-zinc-500">
-                                    {parsed.notes.join(" · ")}
-                                  </p>
-                                )}
-
-                                {/* Non-exercise content (instructions etc) */}
-                                {!isExercise && block.content && (
-                                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-400">
-                                    {block.content}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Inline exercise progress logging */}
-                            {isExercise && progress && (
-                              <ExerciseProgressInput
-                                exerciseName={block.title}
-                                programDay={day.dayName}
-                                setCount={setCount}
-                                currentAll={progress.currentWeek}
-                                previousAll={progress.previousWeek}
-                              />
-                            )}
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
 
       {program.publishedAt && (
         <p className="text-xs text-zinc-500">

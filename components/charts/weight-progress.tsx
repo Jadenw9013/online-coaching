@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -12,7 +11,6 @@ import {
 } from "recharts";
 
 type WeightDataPoint = { date: string; weight: number };
-type Range = "30d" | "90d" | "all";
 
 /**
  * Format a date string like "Feb 17" → "Feb 17", but thin it out
@@ -27,34 +25,14 @@ function formatAxisDate(dateStr: string) {
 
 export function WeightProgress({
   data,
-  clientId,
   className,
 }: {
   data: WeightDataPoint[];
-  clientId: string;
+  /** @deprecated clientId is no longer needed — range selector removed */
+  clientId?: string;
   className?: string;
 }) {
-  const [range, setRange] = useState<Range>("all");
-  const [chartData, setChartData] = useState(data);
-  const [loading, setLoading] = useState(false);
-
-  async function handleRangeChange(newRange: Range) {
-    if (newRange === range) return;
-    setRange(newRange);
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/clients/${clientId}/weight-history?range=${newRange}`
-      );
-      if (res.ok) {
-        setChartData(await res.json());
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (chartData.length < 2) {
+  if (data.length < 2) {
     return (
       <div className={className}>
         <p className="text-sm text-zinc-400">
@@ -65,45 +43,20 @@ export function WeightProgress({
     );
   }
 
-  const weights = chartData.map((d) => d.weight);
+  const weights = data.map((d) => d.weight);
   const minW = Math.floor(Math.min(...weights) - 1);
   const maxW = Math.ceil(Math.max(...weights) + 1);
 
   // Compute a clean tick count — aim for 3-4 ticks
   const yTickCount = Math.min(4, maxW - minW + 1);
 
-  const ranges: { key: Range; label: string }[] = [
-    { key: "30d", label: "30d" },
-    { key: "90d", label: "90d" },
-    { key: "all", label: "All" },
-  ];
-
   return (
     <div className={className} role="img" aria-label="Weight progress chart">
-      {/* Range selector — right-aligned pill group */}
-      <div className="mb-4 flex items-center justify-end">
-        <div className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
-          {ranges.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => handleRangeChange(r.key)}
-              className={`rounded-md px-3 py-1.5 text-[11px] font-semibold tracking-wide transition-all ${
-                range === r.key
-                  ? "bg-white/[0.12] text-white shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chart — taller with clean area fill */}
-      <div className={`h-40 sm:h-52 ${loading ? "opacity-40 transition-opacity" : "transition-opacity"}`}>
+      {/* Chart — clean area fill */}
+      <div className="h-40 sm:h-52 transition-opacity">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={chartData}
+            data={data}
             margin={{ top: 4, right: 4, left: -24, bottom: 0 }}
           >
             <defs>

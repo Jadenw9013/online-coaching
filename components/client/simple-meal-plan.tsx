@@ -290,13 +290,13 @@ function MetadataSection({ extras }: { extras: PlanExtras }) {
   ].filter(Boolean) as { label: string; value: string }[];
   if (!items.length && !m.coachNotes && !m.highlightedChanges) return null;
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {items.length > 0 && (
-        <div className="flex items-center gap-6">
+        <div className="grid grid-cols-3 gap-2">
           {items.map(({ label, value }) => (
-            <div key={label}>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">{label}</p>
-              <p className="text-sm font-bold text-zinc-200">{value}</p>
+            <div key={label} className="rounded-2xl bg-white/[0.04] border border-zinc-800/50 px-4 py-3 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{label}</p>
+              <p className="mt-0.5 text-sm font-bold text-zinc-200">{value}</p>
             </div>
           ))}
         </div>
@@ -336,11 +336,11 @@ function MacroSummary({ items }: { items: ResolvedItem[] }) {
   ];
 
   return (
-    <div className="flex items-center gap-5 text-sm">
+    <div className="flex items-center gap-4 rounded-xl bg-white/[0.03] px-4 py-2.5 text-xs">
       {macros.map(({ label, value }) => (
         <span key={label} className="tabular-nums">
-          <span className="font-semibold text-zinc-200">{value}</span>
-          <span className="ml-1 text-zinc-600">{label}</span>
+          <span className="font-bold text-zinc-300">{value}</span>
+          <span className="ml-0.5 text-zinc-600">{label}</span>
         </span>
       ))}
     </div>
@@ -545,26 +545,23 @@ export function SimpleMealPlan({
   const progressDone = meals.filter(([name]) => completedMeals.has(name)).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {extras && <MetadataSection extras={extras} />}
-
-      {/* Macro summary pills */}
-      <MacroSummary items={resolvedItems} />
 
       {/* Meal progress bar — only visible when viewing today's tab */}
       {adherence && isViewingToday && progressTotal > 0 && (
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-zinc-400">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs font-medium text-zinc-500">
               Today&rsquo;s Meals
             </span>
-            <span className="text-sm font-semibold tabular-nums text-zinc-300">
+            <span className="text-xs font-semibold tabular-nums text-zinc-400">
               {progressDone} / {progressTotal}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800/60">
+          <div className="h-1 overflow-hidden rounded-full bg-zinc-800/60">
             <div
-              className="h-full rounded-full bg-white/30 transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-emerald-500/70 transition-all duration-500 ease-out"
               style={{ width: progressTotal > 0 ? `${Math.round((progressDone / progressTotal) * 100)}%` : "0%" }}
               role="progressbar"
               aria-valuenow={progressDone}
@@ -582,6 +579,9 @@ export function SimpleMealPlan({
 
       {activeOverrides.length > 0 && <ActiveOverrideBanner overrides={activeOverrides} />}
 
+      {/* Macro summary — compact bar below day selector */}
+      <MacroSummary items={resolvedItems} />
+
       {/* Meal cards */}
       {meals.map(([mealName, items], mealIndex) => {
         const overriddenItems = items.filter((i) => i.overridden);
@@ -590,13 +590,13 @@ export function SimpleMealPlan({
         const isMealDone = isViewingToday ? completedMeals.has(mealName) : false;
 
         return (
-          <div key={mealName} className="transition-all">
-            {/* Meal header — open, no card */}
-            <div className={`flex items-center gap-3 ${mealIndex > 0 ? "mt-2" : ""}`}>
+          <div key={mealName} className={`sf-glass-card overflow-hidden transition-all ${isMealDone ? "border-emerald-900/30" : ""}`}>
+            {/* Meal header — compact */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800/40">
               {/* Adherence checkbox — circle style */}
               {isViewingToday && (
                 <label
-                  className="flex shrink-0 cursor-pointer items-center justify-center"
+                  className="relative flex shrink-0 cursor-pointer items-center justify-center"
                   aria-label={`${mealName}: ${isMealDone ? "mark incomplete" : "mark complete"}`}
                 >
                   <input
@@ -604,15 +604,27 @@ export function SimpleMealPlan({
                     checked={isMealDone}
                     onChange={() => handleMealToggle(mealName, mealIndex)}
                     disabled={isPending}
-                    className="h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-zinc-600 bg-transparent checked:border-emerald-500 checked:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
+                    className="peer sr-only"
                   />
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
+                    isMealDone
+                      ? "border-emerald-500 bg-emerald-500"
+                      : "border-zinc-600 bg-transparent"
+                  } peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 peer-disabled:opacity-50`}>
+                    {isMealDone && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    )}
+                  </span>
                 </label>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className={`text-lg font-bold tracking-tight ${isMealDone ? "text-emerald-400 line-through decoration-emerald-500/30" : "text-white"}`}>
+                  <h3 className={`text-sm font-bold tracking-tight ${isMealDone ? "text-emerald-400 line-through decoration-emerald-500/30" : "text-white"}`}>
                     {mealName}
                   </h3>
+                  <span className="text-[11px] text-zinc-600">
+                    {items.length} {items.length === 1 ? "item" : "items"}
+                  </span>
                   {hasOverriddenItems && overrideLabels.map((label) => {
                     const colorId = overriddenItems.find((i) => i.overridden?.overrideLabel === label)?.overridden?.overrideColor;
                     const color = getOverrideColor(colorId);
@@ -623,14 +635,12 @@ export function SimpleMealPlan({
                     );
                   })}
                 </div>
-                <span className="text-xs text-zinc-600">
-                  {items.length} {items.length === 1 ? "item" : "items"}
-                </span>
               </div>
+              <MealMacroBar items={items} />
             </div>
 
-            {/* Food items — flat list with bullet dots */}
-            <ul className="mt-2 space-y-0">
+            {/* Food items — tight rows */}
+            <ul>
               {items.map((item) => {
                 const color = item.overridden ? getOverrideColor(item.overridden.overrideColor) : null;
                 const changeLabel = item.overridden ? getChangeTypeLabel(item.overridden.changeType) : null;
@@ -639,17 +649,17 @@ export function SimpleMealPlan({
                 return (
                   <li
                     key={item.id}
-                    className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.02]"
+                    className="flex items-center gap-3 border-b border-zinc-800/20 last:border-0 px-4 py-3"
                   >
                     {/* Bullet dot */}
-                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                    <span className={`h-1 w-1 shrink-0 rounded-full ${
                       color ? color.dot : "bg-zinc-600"
                     }`} />
 
                     <div className="min-w-0 flex-1">
                       <span className={`text-sm font-semibold ${isMealDone ? "text-zinc-500" : "text-zinc-200"}`}>{item.foodName}</span>
                       {item.overridden && (
-                        <p className={`text-[11px] font-medium ${color?.text ?? "text-zinc-500"}`}>
+                        <p className={`text-[10px] font-medium ${color?.text ?? "text-zinc-500"}`}>
                           {changeLabel}
                           {item.overridden.originalServing && ` from ${item.overridden.originalServing}`}
                         </p>
@@ -657,7 +667,7 @@ export function SimpleMealPlan({
                     </div>
 
                     {/* Serving — plain text */}
-                    <span className={`shrink-0 text-sm font-medium tabular-nums ${
+                    <span className={`shrink-0 text-sm font-semibold tabular-nums ${
                       color ? `${color.text}` : "text-zinc-300"
                     }`}>
                       {servingLabel}

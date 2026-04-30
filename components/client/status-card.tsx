@@ -111,10 +111,10 @@ export function StatusCard({ data }: { data: StatusCardData }) {
         </svg>
       </div>
 
-      {/* Central headline */}
-      <div className="relative z-[1] flex flex-col items-center gap-1.5 py-6">
+      {/* Headline */}
+      <div className="relative z-[1] flex flex-col items-center gap-1 py-3">
         <h2
-          className="text-center text-[30px] font-black tracking-wider"
+          className="text-[24px] font-black tracking-wider"
           style={{ color: "white" }}
         >
           {config.headline}
