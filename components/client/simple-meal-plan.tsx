@@ -174,7 +174,7 @@ function resolveForDay(
             unit: change.newPortion || item.unit,
             servingDescription: change.newPortion || item.servingDescription,
             overridden: {
-              originalServing: formatQuantityUnit(item.quantity, item.unit),
+              originalServing: item.servingDescription?.trim() || formatQuantityUnit(item.quantity, item.unit),
               overrideLabel,
               overrideColor,
               changeType: "update",
@@ -644,7 +644,9 @@ export function SimpleMealPlan({
               {items.map((item) => {
                 const color = item.overridden ? getOverrideColor(item.overridden.overrideColor) : null;
                 const changeLabel = item.overridden ? getChangeTypeLabel(item.overridden.changeType) : null;
-                const servingLabel = formatQuantityUnit(item.quantity, item.unit);
+                const servingLabel = item.servingDescription?.trim()
+                  ? item.servingDescription.trim()
+                  : formatQuantityUnit(item.quantity, item.unit);
 
                 return (
                   <li

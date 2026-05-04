@@ -53,7 +53,7 @@ export const MealCard = memo(function MealCard({
   const formattedIndex = String(mealIndex + 1).padStart(2, "0");
 
   return (
-    <div className="group/card overflow-hidden sf-glass-card transition-all hover:shadow-lg hover:shadow-blue-500/[0.05] hover:border-white/[0.14]">
+    <div className="group/card overflow-hidden sf-glass-card">
       {/* Meal header */}
       <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-3.5">
         <div className="flex items-center gap-3 min-w-0">
