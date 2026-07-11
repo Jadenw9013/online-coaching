@@ -55,7 +55,7 @@ export const MealCard = memo(function MealCard({
   return (
     <div className="group/card overflow-hidden sf-glass-card">
       {/* Meal header */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-3.5">
+      <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-3 min-w-0">
           {/* Meal number badge */}
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-[10px] font-bold tabular-nums text-blue-300">

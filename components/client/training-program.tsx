@@ -529,6 +529,7 @@ function ExerciseProgressInput({
   initialLogged.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const [logged, setLogged] = useState<LoggedSet[]>(initialLogged);
+  const [open, setOpen] = useState(false);
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -602,11 +603,44 @@ function ExerciseProgressInput({
   const totalReps = logged.reduce((sum, s) => sum + (parseInt(s.reps, 10) || 0), 0);
   const bestWeight = logged.length > 0 ? Math.max(...logged.map((s) => parseFloat(s.weight) || 0)) : 0;
 
+  // Collapsed: one compact row with a summary — keeps the day view scannable
+  if (!open) {
+    return (
+      <div className="ml-0 sm:ml-9 mt-2">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-expanded={false}
+          aria-label={`Log a set for ${exerciseName}`}
+          className="flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-left transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
+        >
+          <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-zinc-400">
+            <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            Log set
+          </span>
+          <span className="flex min-w-0 items-center gap-2 text-xs text-zinc-500">
+            {logged.length > 0 && (
+              <span className="shrink-0 rounded-full bg-emerald-900/30 px-2 py-0.5 font-semibold text-emerald-400">
+                {logged.length} logged
+              </span>
+            )}
+            {prevResult && (
+              <span className="truncate">
+                Last week: <span className="font-semibold text-zinc-400">{prevResult.weight} × {prevResult.reps}</span>
+              </span>
+            )}
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600"><path d="m6 9 6 6 6-6" /></svg>
+          </span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="ml-0 sm:ml-9 mt-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 space-y-2.5">
       {/* Summary metrics */}
       {logged.length > 0 && (
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 font-semibold text-emerald-400">
             {logged.length} logged
           </span>
@@ -625,8 +659,17 @@ function ExerciseProgressInput({
 
       {/* Current set editor */}
       <div>
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-xs font-medium text-zinc-500">Log a set</span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-expanded={true}
+          aria-label={`Collapse set logging for ${exerciseName}`}
+          className="mb-1.5 flex w-full cursor-pointer items-center justify-between gap-2 text-left"
+        >
+          <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600"><path d="m18 15-6-6-6 6" /></svg>
+            Log a set
+          </span>
           {prevResult && (
             <span className="text-xs text-zinc-500">
               Last week:{" "}
@@ -635,7 +678,7 @@ function ExerciseProgressInput({
               </span>
             </span>
           )}
-        </div>
+        </button>
 
         <div className="flex items-center gap-1.5">
           <input
@@ -733,7 +776,7 @@ function ExerciseProgressInput({
                 type="button"
                 onClick={() => handleDeleteSingle(s.id)}
                 disabled={deletingId === s.id}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 rounded hover:bg-red-500/20"
+                className="ml-2 rounded p-2 transition-opacity hover:bg-red-500/20 sm:opacity-0 sm:group-hover:opacity-100"
                 aria-label="Delete this log entry"
               >
                 {deletingId === s.id ? (

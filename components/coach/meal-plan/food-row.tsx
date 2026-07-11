@@ -17,9 +17,9 @@ export const FoodRow = memo(function FoodRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="group relative flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/[0.04]">
-      {/* Portion input */}
-      <div className="w-28 shrink-0 sm:w-36">
+    <div className="group relative flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 transition-colors hover:bg-white/[0.04] sm:flex-nowrap sm:px-5">
+      {/* Portion input — second line on mobile, left column on sm+ */}
+      <div className="order-2 w-32 shrink-0 sm:order-none sm:w-36">
         <label className="sr-only" htmlFor={`portion-${item.id}`}>
           Portion for {item.foodName}
         </label>
@@ -36,8 +36,8 @@ export const FoodRow = memo(function FoodRow({
         />
       </div>
 
-      {/* Food name — directly editable */}
-      <div className="min-w-0 flex-1">
+      {/* Food name — directly editable; full-width first line on mobile */}
+      <div className="order-1 w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
         <label className="sr-only" htmlFor={`food-${item.id}`}>
           Food name
         </label>
@@ -71,11 +71,11 @@ export const FoodRow = memo(function FoodRow({
         )}
       </div>
 
-      {/* Remove button — icon only */}
+      {/* Remove button — icon only; always visible on touch, hover-reveal on sm+ */}
       <button
         type="button"
         onClick={onRemove}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-zinc-500 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/15 hover:text-red-400"
+        className="order-3 ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-all hover:bg-red-500/15 hover:text-red-400 sm:order-none sm:ml-0 sm:h-7 sm:w-7 sm:opacity-0 sm:group-hover:opacity-100"
         aria-label={`Remove ${item.foodName}`}
         title="Remove"
       >
