@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function LeadDetailError({
     error,
     reset,
@@ -30,13 +32,13 @@ export default function LeadDetailError({
                     >
                         Try Again
                     </button>
-                    <a
+                    <Link
                         href="/coach/leads"
                         className="sf-button-secondary flex items-center justify-center"
                         style={{ minHeight: "44px" }}
                     >
                         ← Back to Leads
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

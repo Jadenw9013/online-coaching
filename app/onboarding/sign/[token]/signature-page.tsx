@@ -33,7 +33,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
     const [fontSize, setFontSize] = useState<"normal" | "large">("normal");
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawingRef = useRef(false);
-    const hasDrawnRef = useRef(false);
+    const [hasDrawn, setHasDrawn] = useState(false);
 
     // Parse answers — support both self-describing shape and legacy flat shape
     const answerSections: AnswerSection[] = (() => {
@@ -54,10 +54,12 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
         }];
     })();
 
-    // Font size toggle
+    // Font size toggle — one-time hydration from localStorage; must run in an
+    // effect (not lazy useState) so SSR and client initial render match.
     useEffect(() => {
         try {
             const saved = localStorage.getItem("sign-font-size");
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (saved === "large") setFontSize("large");
         } catch { /* */ }
     }, []);
@@ -106,7 +108,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
     const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
         e.preventDefault();
         isDrawingRef.current = true;
-        hasDrawnRef.current = true;
+        setHasDrawn(true);
         const ctx = getCanvasContext();
         if (!ctx) return;
         const pos = getPos(e);
@@ -132,7 +134,7 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasDrawnRef.current = false;
+        setHasDrawn(false);
     };
 
     const handleSubmit = async () => {
@@ -169,13 +171,13 @@ export function SignaturePage({ token, prospectName, coachName, answers, prospec
         setSubmitting(false);
     };
 
-    const canSubmit = agreed && !submitting && (tab === "type" ? typedName.trim().length > 0 : hasDrawnRef.current);
+    const canSubmit = agreed && !submitting && (tab === "type" ? typedName.trim().length > 0 : hasDrawn);
     const textSize = fontSize === "large" ? "text-lg" : "text-base";
 
     // Success state
     if (success) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4">
+            <div className="min-h-[100dvh] flex items-center justify-center px-4">
                 <div className="max-w-md text-center space-y-5">
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><path d="M20 6 9 17l-5-5" /></svg>

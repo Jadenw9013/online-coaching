@@ -56,20 +56,23 @@ export function IntakeSession({ requestId, prospectName, prospectEmail, prefillG
     const localKey = `intake-draft-${requestId}`;
     const fontKey = `intake-font-size-${requestId}`;
 
-    // Restore font preference
+    // Restore font preference — one-time hydration from localStorage; must run in
+    // an effect (not lazy useState) so SSR and client initial render match.
     useEffect(() => {
         try {
             const saved = localStorage.getItem(fontKey);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (saved === "large") setFontSize("large");
         } catch { /* */ }
     }, [fontKey]);
 
-    // Check for local draft on mount
+    // Check for local draft on mount — same one-time localStorage hydration.
     useEffect(() => {
         try {
             const local = localStorage.getItem(localKey);
             if (local) {
                 const parsed = JSON.parse(local);
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 if (parsed._savedAt) setShowRestoreBanner(true);
             }
         } catch { /* */ }

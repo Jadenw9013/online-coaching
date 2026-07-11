@@ -143,12 +143,9 @@ export function ReviewSession({
         return missing;
     }, [answers]);
 
-    useEffect(() => {
-        if (missingFields.length > 0) {
-            const still = computeMissing();
-            if (still.length === 0) setMissingFields([]);
-        }
-    }, [answers, missingFields.length, computeMissing]);
+    // Shown only after a failed activate attempt; recomputed each render so the
+    // checklist updates live as the coach fills fields (empty = banner hidden).
+    const visibleMissingFields = missingFields.length > 0 ? computeMissing() : [];
 
     const handleActivateClick = () => {
         setError(null);
@@ -394,11 +391,11 @@ export function ReviewSession({
             )}
 
             {/* Missing fields checklist */}
-            {missingFields.length > 0 && (
+            {visibleMissingFields.length > 0 && (
                 <div role="alert" className="rounded-2xl border border-amber-500/15 bg-amber-500/5 px-5 py-4 mb-6">
                     <p className="text-sm font-semibold text-amber-300 mb-3">Complete these fields before activating</p>
                     <ul className="space-y-1.5">
-                        {missingFields.map(f => (
+                        {visibleMissingFields.map(f => (
                             <li key={f.questionId}>
                                 <button
                                     type="button"
@@ -412,9 +409,6 @@ export function ReviewSession({
                             </li>
                         ))}
                     </ul>
-                    {missingFields.length === 0 && (
-                        <p className="text-sm text-emerald-400">✓ All required fields complete</p>
-                    )}
                 </div>
             )}
 
