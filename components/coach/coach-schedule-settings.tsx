@@ -89,8 +89,8 @@ export function CoachScheduleSettings({
                                 key={day.index}
                                 onClick={() => toggleDay(day.index)}
                                 className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${isActive
-                                        ? "bg-zinc-900 text-white"
-                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                        ? "bg-zinc-100 text-zinc-900"
+                                        : "bg-white/[0.08] text-zinc-500 hover:bg-white/[0.1]"
                                     }`}
                                 aria-pressed={isActive}
                                 type="button"
@@ -117,7 +117,7 @@ export function CoachScheduleSettings({
                         setTimezone(e.target.value);
                         setFeedback(null);
                     }}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm transition-colors focus:border-zinc-400 focus:outline-none"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm transition-colors focus:border-zinc-400 focus:outline-none"
                 >
                     {COMMON_TIMEZONES.map((tz) => (
                         <option key={tz} value={tz}>
@@ -132,7 +132,7 @@ export function CoachScheduleSettings({
                 <button
                     onClick={handleSave}
                     disabled={saving || !hasChanges}
-                    className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-zinc-700 disabled:opacity-50"
+                    className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 transition-all hover:bg-white disabled:opacity-50"
                 >
                     {saving ? "Saving..." : "Save Schedule"}
                 </button>
@@ -140,8 +140,8 @@ export function CoachScheduleSettings({
                 {feedback && (
                     <p
                         className={`text-xs font-medium ${feedback.success
-                                ? "text-emerald-600"
-                                : "text-red-600"
+                                ? "text-emerald-400"
+                                : "text-red-400"
                             }`}
                     >
                         {feedback.message}

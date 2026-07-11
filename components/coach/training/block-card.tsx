@@ -15,7 +15,7 @@ const BLOCK_META: BlockMeta[] = [
     value: "EXERCISE",
     label: "Exercise",
     borderColor: "border-blue-400",
-    badgeColor: "bg-blue-50 text-blue-700",
+    badgeColor: "bg-blue-500/10 text-blue-400",
     placeholder: "Exercise details — sets × reps, rest periods, tempo…",
   },
   {
@@ -36,21 +36,21 @@ const BLOCK_META: BlockMeta[] = [
     value: "CARDIO",
     label: "Cardio",
     borderColor: "border-green-400",
-    badgeColor: "bg-green-50 text-green-700",
+    badgeColor: "bg-green-500/10 text-green-400",
     placeholder: "Cardio modality, duration, intensity or heart-rate zone…",
   },
   {
     value: "INSTRUCTION",
     label: "Instruction",
     borderColor: "border-zinc-400",
-    badgeColor: "bg-zinc-100 text-zinc-600",
+    badgeColor: "bg-white/[0.08] text-zinc-400",
     placeholder: "Coach notes or instructions for the client…",
   },
   {
     value: "OPTIONAL",
     label: "Optional",
-    borderColor: "border-zinc-300",
-    badgeColor: "bg-zinc-50 text-zinc-500",
+    borderColor: "border-white/[0.1]",
+    badgeColor: "bg-white/[0.04] text-zinc-500",
     placeholder: "Optional exercise — do if time / energy allows…",
   },
 ];
@@ -73,7 +73,7 @@ export function BlockCard({
   const meta = getMeta(block.type);
 
   return (
-    <div className={`flex gap-0 rounded-lg border border-zinc-200 overflow-hidden`}>
+    <div className={`flex gap-0 rounded-lg border border-white/[0.08] overflow-hidden`}>
       {/* Color stripe */}
       <div className={`w-1 shrink-0 ${meta.borderColor.replace("border-", "bg-")}`} />
 
@@ -111,7 +111,7 @@ export function BlockCard({
             type="button"
             onClick={onRemove}
             aria-label={`Remove block ${index + 1}`}
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             ×
           </button>

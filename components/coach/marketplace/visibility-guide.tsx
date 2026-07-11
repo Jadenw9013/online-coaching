@@ -14,9 +14,9 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
             : "visible";
 
     return (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-sm">
-            <div className="border-b border-zinc-100 px-6 py-4">
-                <h3 className="text-sm font-semibold text-zinc-900">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-sm">
+            <div className="border-b border-white/[0.06] px-6 py-4">
+                <h3 className="text-sm font-semibold text-zinc-100">
                     Profile Visibility
                 </h3>
                 <p className="mt-1 text-xs text-zinc-500">
@@ -27,13 +27,13 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                 {/* State 1: Private */}
                 <div className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     state === "private"
-                        ? "bg-zinc-100"
+                        ? "bg-white/[0.08]"
                         : ""
                 }`}>
                     <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                         state === "private"
-                            ? "bg-zinc-500"
-                            : "border border-zinc-300"
+                            ? "bg-white/[0.04]0"
+                            : "border border-white/[0.1]"
                     }`}>
                         {state === "private" && (
                             <span className="h-2 w-2 rounded-full bg-white" />
@@ -42,7 +42,7 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                     <div className="min-w-0">
                         <p className={`text-sm font-medium ${
                             state === "private"
-                                ? "text-zinc-900"
+                                ? "text-zinc-100"
                                 : "text-zinc-400"
                         }`}>
                             Hidden (Draft)
@@ -56,13 +56,13 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                 {/* State 2: Public but not accepting */}
                 <div className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     state === "visible"
-                        ? "bg-amber-50"
+                        ? "bg-amber-500/10"
                         : ""
                 }`}>
                     <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                         state === "visible"
                             ? "bg-amber-500"
-                            : "border border-zinc-300"
+                            : "border border-white/[0.1]"
                     }`}>
                         {state === "visible" && (
                             <span className="h-2 w-2 rounded-full bg-white" />
@@ -71,7 +71,7 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                     <div className="min-w-0">
                         <p className={`text-sm font-medium ${
                             state === "visible"
-                                ? "text-zinc-900"
+                                ? "text-zinc-100"
                                 : "text-zinc-400"
                         }`}>
                             Visible · Not Accepting
@@ -85,13 +85,13 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                 {/* State 3: Public + accepting */}
                 <div className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     state === "live"
-                        ? "bg-emerald-50"
+                        ? "bg-emerald-500/10"
                         : ""
                 }`}>
                     <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                         state === "live"
                             ? "bg-emerald-500"
-                            : "border border-zinc-300"
+                            : "border border-white/[0.1]"
                     }`}>
                         {state === "live" && (
                             <span className="h-2 w-2 rounded-full bg-white" />
@@ -100,7 +100,7 @@ export function VisibilityGuide({ isPublished, acceptingClients }: VisibilityGui
                     <div className="min-w-0">
                         <p className={`text-sm font-medium ${
                             state === "live"
-                                ? "text-zinc-900"
+                                ? "text-zinc-100"
                                 : "text-zinc-400"
                         }`}>
                             Live · Accepting Clients

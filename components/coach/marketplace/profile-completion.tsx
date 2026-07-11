@@ -92,11 +92,11 @@ export function ProfileCompletion({ profile, hasPhoto, testimonialCount }: Compl
         pct >= 80 ? "Strong" : pct >= 50 ? "Getting there" : "Needs work";
 
     return (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-sm">
-            <div className="border-b border-zinc-100 px-6 py-4">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-sm">
+            <div className="border-b border-white/[0.06] px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-sm font-semibold text-zinc-900">
+                        <h3 className="text-sm font-semibold text-zinc-100">
                             Profile Strength
                         </h3>
                         <p className="mt-0.5 text-xs text-zinc-500">
@@ -105,15 +105,15 @@ export function ProfileCompletion({ profile, hasPhoto, testimonialCount }: Compl
                     </div>
                     <div className="text-right">
                         <span className={`text-sm font-bold ${
-                            pct >= 80 ? "text-emerald-600"
-                            : pct >= 50 ? "text-amber-600"
+                            pct >= 80 ? "text-emerald-400"
+                            : pct >= 50 ? "text-amber-400"
                             : "text-zinc-500"
                         }`}>
                             {pct}%
                         </span>
                         <p className={`text-[10px] font-medium ${
-                            pct >= 80 ? "text-emerald-600"
-                            : pct >= 50 ? "text-amber-600"
+                            pct >= 80 ? "text-emerald-400"
+                            : pct >= 50 ? "text-amber-400"
                             : "text-zinc-400"
                         }`}>
                             {strengthLabel}
@@ -121,7 +121,7 @@ export function ProfileCompletion({ profile, hasPhoto, testimonialCount }: Compl
                     </div>
                 </div>
                 {/* Progress bar */}
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
                     <div
                         className={`h-full rounded-full transition-all duration-500 ${
                             pct >= 80 ? "bg-emerald-500"
@@ -145,14 +145,14 @@ export function ProfileCompletion({ profile, hasPhoto, testimonialCount }: Compl
                         return (
                             <li key={item.key} className="flex items-start gap-2.5">
                                 {done ? (
-                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                                     </span>
                                 ) : (
-                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-zinc-300" />
+                                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/[0.1]" />
                                 )}
                                 <div className="min-w-0">
-                                    <span className={`text-sm ${done ? "font-medium text-zinc-700" : "text-zinc-400"}`}>
+                                    <span className={`text-sm ${done ? "font-medium text-zinc-300" : "text-zinc-400"}`}>
                                         {item.label}
                                     </span>
                                     {!done && (

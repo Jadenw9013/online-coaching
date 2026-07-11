@@ -57,9 +57,9 @@ export function ProcessingIndicator({ mode = "paste" }: { mode?: "paste" | "uplo
   const currentStage = stages[stageIndex] ?? stages[stages.length - 1];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04]">
       {/* Progress bar */}
-      <div className="h-1.5 w-full bg-zinc-100">
+      <div className="h-1.5 w-full bg-white/[0.08]">
         <div
           className="h-full rounded-r-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300 ease-out"
           style={{ width: `${overallProgress * 100}%` }}
@@ -73,11 +73,11 @@ export function ProcessingIndicator({ mode = "paste" }: { mode?: "paste" | "uplo
             <div className="relative flex h-5 w-5 items-center justify-center">
               <div className="absolute h-5 w-5 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-500" />
             </div>
-            <span className="text-sm font-medium text-zinc-700">
+            <span className="text-sm font-medium text-zinc-300">
               {currentStage.label}
             </span>
           </div>
-          <span className="text-sm font-bold tabular-nums text-emerald-600">
+          <span className="text-sm font-bold tabular-nums text-emerald-400">
             {percentDisplay}%
           </span>
         </div>
@@ -92,13 +92,13 @@ export function ProcessingIndicator({ mode = "paste" }: { mode?: "paste" | "uplo
                     ? "bg-emerald-500"
                     : i === stageIndex
                       ? "bg-emerald-500 ring-2 ring-emerald-500/20"
-                      : "bg-zinc-200"
+                      : "bg-white/[0.1]"
                 }`}
               />
               {i < stages.length - 1 && (
                 <div
                   className={`h-px w-3 transition-colors duration-300 ${
-                    i < stageIndex ? "bg-emerald-500" : "bg-zinc-200"
+                    i < stageIndex ? "bg-emerald-500" : "bg-white/[0.1]"
                   }`}
                 />
               )}

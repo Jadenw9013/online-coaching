@@ -90,38 +90,38 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {message?.type === "error" && (
-                <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
+                <div className="rounded-md bg-red-500/10 p-4 text-sm text-red-400">
                     {message.text}
                 </div>
             )}
             {message?.type === "success" && (
-                <div className="rounded-md bg-green-50 p-4 text-sm text-green-600">
+                <div className="rounded-md bg-green-500/10 p-4 text-sm text-green-400">
                     {message.text}
                 </div>
             )}
 
-            <div className="flex items-center gap-3 py-2 border-b border-zinc-200 pb-4">
+            <div className="flex items-center gap-3 py-2 border-b border-white/[0.08] pb-4">
                 <input
                     {...form.register("isActive")}
                     id="isActive"
                     type="checkbox"
-                    className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500"
+                    className="rounded border-white/[0.1] text-zinc-100 focus:ring-zinc-500"
                 />
-                <label htmlFor="isActive" className="text-sm font-medium text-zinc-700">
+                <label htmlFor="isActive" className="text-sm font-medium text-zinc-300">
                     Require new clients to complete this intake questionnaire
                 </label>
             </div>
 
             <div className="space-y-4">
                 {fields.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-zinc-200 p-8 text-center">
+                    <div className="rounded-xl border border-dashed border-white/[0.08] p-8 text-center">
                         <p className="text-sm text-zinc-500">No questions added yet.</p>
                     </div>
                 ) : (
                     fields.map((field, index) => {
                         const type = form.watch(`questions.${index}.type`);
                         return (
-                            <div key={field.id} className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+                            <div key={field.id} className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-5 shadow-sm">
 
                                 {/* Hidden input to track generated ID logic across reorders without conflicts */}
                                 <input type="hidden" {...form.register(`questions.${index}.id`)} />
@@ -137,7 +137,7 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                                 <input
                                                     {...form.register(`questions.${index}.label`)}
                                                     placeholder="e.g. What are your primary fitness goals?"
-                                                    className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                                    className="w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                                 />
                                             </div>
 
@@ -147,7 +147,7 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                                 </label>
                                                 <select
                                                     {...form.register(`questions.${index}.type`)}
-                                                    className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                                    className="w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                                 >
                                                     <option value="shortText">Short Text</option>
                                                     <option value="longText">Long Text</option>
@@ -166,7 +166,7 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                                 <input
                                                     {...form.register(`questions.${index}.optionsString`)}
                                                     placeholder="Option A, Option B, Option C"
-                                                    className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                                    className="w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                                 />
                                             </div>
                                         )}
@@ -176,9 +176,9 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                                 {...form.register(`questions.${index}.required`)}
                                                 type="checkbox"
                                                 id={`req-${field.id}`}
-                                                className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500"
+                                                className="rounded border-white/[0.1] text-zinc-100 focus:ring-zinc-500"
                                             />
-                                            <label htmlFor={`req-${field.id}`} className="text-xs font-medium text-zinc-600">
+                                            <label htmlFor={`req-${field.id}`} className="text-xs font-medium text-zinc-400">
                                                 Required Question
                                             </label>
                                         </div>
@@ -190,14 +190,14 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                             type="button"
                                             onClick={() => move(index, index - 1)}
                                             disabled={index === 0}
-                                            className="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-30"
+                                            className="rounded p-1.5 text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 disabled:opacity-30"
                                         >
                                             <ArrowUpIcon className="h-4 w-4" />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => remove(index)}
-                                            className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+                                            className="rounded p-1.5 text-zinc-400 hover:bg-red-500/10 hover:text-red-400"
                                         >
                                             <Trash2Icon className="h-4 w-4" />
                                         </button>
@@ -205,7 +205,7 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
                                             type="button"
                                             onClick={() => move(index, index + 1)}
                                             disabled={index === fields.length - 1}
-                                            className="rounded p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-30"
+                                            className="rounded p-1.5 text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 disabled:opacity-30"
                                         >
                                             <ArrowDownIcon className="h-4 w-4" />
                                         </button>
@@ -220,17 +220,17 @@ export function OnboardingEditor({ initialData }: { initialData: any }) {
             <button
                 type="button"
                 onClick={() => append({ id: generateId(), type: "shortText", label: "", required: false, optionsString: "" })}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 py-4 text-sm font-medium text-zinc-600 transition hover:border-zinc-400 hover:bg-zinc-100"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/[0.1] bg-white/[0.04] py-4 text-sm font-medium text-zinc-400 transition hover:border-white/[0.2] hover:bg-white/[0.06]"
             >
                 <PlusIcon className="h-4 w-4" />
                 Add Question
             </button>
 
-            <div className="pt-6 border-t border-zinc-200 flex justify-end">
+            <div className="pt-6 border-t border-white/[0.08] flex justify-end">
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50"
+                    className="rounded-lg bg-zinc-100 px-6 py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-white disabled:opacity-50"
                 >
                     {isSubmitting ? "Saving..." : "Save Questionnaire"}
                 </button>

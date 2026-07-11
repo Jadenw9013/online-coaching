@@ -23,7 +23,7 @@ export function ResetTemplateButton() {
       type="button"
       onClick={handleReset}
       disabled={isPending}
-      className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
+      className="rounded-lg border border-white/[0.1] px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
     >
       {isPending ? "Resetting..." : "Reset to Default"}
     </button>

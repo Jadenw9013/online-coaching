@@ -179,8 +179,8 @@ export function WorkoutUploadStep({
         aria-label="Drop file here or click to browse"
         className={`relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${
           dragOver
-            ? "border-zinc-500 bg-zinc-100"
-            : "border-zinc-300 bg-white hover:border-zinc-400"
+            ? "border-zinc-500 bg-white/[0.08]"
+            : "border-white/[0.1] bg-white/[0.06] hover:border-white/[0.2]"
         } ${isProcessing ? "pointer-events-none opacity-60" : ""}`}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -207,8 +207,8 @@ export function WorkoutUploadStep({
             <span
               className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
                 isPdf
-                  ? "bg-red-100 text-red-700"
-                  : "bg-blue-100 text-blue-700"
+                  ? "bg-red-500/10 text-red-400"
+                  : "bg-blue-500/10 text-blue-400"
               }`}
             >
               {isPdf ? "PDF" : file.type.split("/")[1]?.toUpperCase() ?? "FILE"}
@@ -219,7 +219,7 @@ export function WorkoutUploadStep({
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); clearFile(); }}
-                className="mt-1 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                className="mt-1 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 Choose a different file
               </button>
@@ -227,7 +227,7 @@ export function WorkoutUploadStep({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 px-4 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08] text-xl">
               &#128196;
             </div>
             <p className="text-sm font-medium">Drop file here or click to browse</p>
@@ -239,9 +239,9 @@ export function WorkoutUploadStep({
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm"
+          className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm"
         >
-          <p className="font-medium text-red-700">
+          <p className="font-medium text-red-400">
             {error.includes("bucket") || error.includes("storage")
               ? "Storage is not configured."
               : error.includes("No text detected")
@@ -250,14 +250,14 @@ export function WorkoutUploadStep({
                   ? "OCR service is not configured."
                   : "Processing failed"}
           </p>
-          <p className="mt-1 text-xs text-red-600">{error}</p>
+          <p className="mt-1 text-xs text-red-400">{error}</p>
         </div>
       )}
 
       {isProcessing && (
-        <div className="flex items-center gap-3 rounded-lg bg-zinc-100 px-4 py-3">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
-          <p className="text-sm text-zinc-600">
+        <div className="flex items-center gap-3 rounded-lg bg-white/[0.08] px-4 py-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/[0.1] border-t-zinc-600" />
+          <p className="text-sm text-zinc-400">
             {status === "uploading" ? "Uploading file…" : "Reading and parsing workout program…"}
           </p>
         </div>
@@ -268,7 +268,7 @@ export function WorkoutUploadStep({
           <button
             type="button"
             onClick={handleRetry}
-            className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
+            className="rounded-lg border border-white/[0.1] px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
           >
             Retry
           </button>
@@ -277,7 +277,7 @@ export function WorkoutUploadStep({
           type="button"
           onClick={handleUploadAndProcess}
           disabled={!file || isProcessing}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isProcessing ? "Processing…" : "Upload & Parse"}
         </button>

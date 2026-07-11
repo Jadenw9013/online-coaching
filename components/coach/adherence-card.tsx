@@ -23,10 +23,10 @@ export function AdherenceCard({ clientId, adherenceEnabled, summary }: Props) {
   return (
     <section
       aria-labelledby="adherence-heading"
-      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm"
+      className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-sm"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
         <h2 id="adherence-heading" className="text-sm font-semibold tracking-tight">
           Daily Adherence
         </h2>
@@ -113,11 +113,11 @@ function StatCell({
   completed?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-gray-100 p-3">
+    <div className="rounded-xl border border-white/[0.06] p-3">
       <p className="text-[11px] font-medium text-gray-500">{label}</p>
       <p
         className={`mt-1 text-lg font-bold tabular-nums ${
-          completed ? "text-emerald-600" : "text-gray-900"
+          completed ? "text-emerald-400" : "text-zinc-100"
         }`}
       >
         {value}
@@ -144,12 +144,12 @@ function DayBar({ days }: { days: { date: string; mealsCompleted: number; mealsT
               aria-hidden="true"
               className={`h-6 w-full rounded-md ${
                 !hasData
-                  ? "bg-gray-100"
+                  ? "bg-white/[0.1]"
                   : allMealsDone && d.workoutCompleted
                   ? "bg-emerald-500"
                   : d.mealsCompleted > 0 || d.workoutCompleted
-                  ? "bg-emerald-200"
-                  : "bg-gray-100"
+                  ? "bg-emerald-500/40"
+                  : "bg-white/[0.1]"
               }`}
             />
             <span className="text-[10px] font-medium text-gray-400">

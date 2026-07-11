@@ -79,10 +79,10 @@ export function PasteTextStep({
           disabled={isProcessing}
           placeholder={`Example:\nBreakfast\n3 whole eggs\n2 slices sourdough toast\n1 tbsp butter\n\nLunch\n6oz chicken breast\n1 cup white rice\n1 cup steamed broccoli`}
           rows={10}
-          className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-sm transition-colors placeholder:text-zinc-400 focus:outline-none ${
+          className={`w-full rounded-xl border-2 bg-white/[0.06] px-4 py-3 text-zinc-100 text-sm transition-colors placeholder:text-zinc-400 focus:outline-none ${
             tooLong
               ? "border-red-400 focus:border-red-500"
-              : "border-zinc-200 focus:border-zinc-400"
+              : "border-white/[0.08] focus:border-zinc-400"
           } ${isProcessing ? "opacity-60" : ""}`}
         />
         <div className="mt-1.5 flex items-center justify-between">
@@ -107,12 +107,12 @@ export function PasteTextStep({
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm"
+          className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm"
         >
-          <p className="font-medium text-red-700">
+          <p className="font-medium text-red-400">
             Processing failed
           </p>
-          <p className="mt-1 text-xs text-red-600">
+          <p className="mt-1 text-xs text-red-400">
             {error}
           </p>
         </div>
@@ -127,7 +127,7 @@ export function PasteTextStep({
           type="button"
           onClick={handleProcess}
           disabled={!isValid || isProcessing}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isProcessing ? "Processing..." : "Process Text"}
         </button>

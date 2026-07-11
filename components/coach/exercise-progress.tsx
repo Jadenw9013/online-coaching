@@ -13,7 +13,7 @@ type ExerciseProgressResult = {
 export function ExerciseProgress({ results }: { results: ExerciseProgressResult[] }) {
   if (results.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center">
+      <div className="rounded-2xl border border-dashed border-white/[0.1] bg-white/[0.06] px-6 py-10 text-center">
         <p className="text-sm font-medium text-zinc-500">No exercise results yet</p>
         <p className="mt-1 text-xs text-zinc-400">
           Results will appear here once the client logs their workouts.
@@ -43,7 +43,7 @@ export function ExerciseProgress({ results }: { results: ExerciseProgressResult[
       {Array.from(grouped.values()).map((group) => (
         <div
           key={`${group.programDay}::${group.exerciseName}`}
-          className="rounded-xl border border-zinc-200 bg-white px-4 py-3"
+          className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3"
         >
           <div className="mb-2">
             <span className="text-sm font-semibold">{group.exerciseName}</span>
@@ -63,7 +63,7 @@ export function ExerciseProgress({ results }: { results: ExerciseProgressResult[
                   <span className="text-xs text-zinc-400">
                     Week of {weekLabel}
                   </span>
-                  <span className="font-medium tabular-nums text-zinc-700">
+                  <span className="font-medium tabular-nums text-zinc-300">
                     {entry.weight} × {entry.reps}
                   </span>
                 </div>

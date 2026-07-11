@@ -197,7 +197,7 @@ export function PlanExtrasEditor({
     <div className="space-y-3">
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white shadow-lg">
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-zinc-100 px-4 py-2 text-xs font-medium text-zinc-900 shadow-lg">
           {toast}
         </div>
       )}
@@ -237,7 +237,7 @@ export function PlanExtrasEditor({
       <button
         type="button"
         onClick={() => setPlanDetailsOpen((v) => !v)}
-        className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition-all hover:border-zinc-300 hover:bg-zinc-100"
+        className="group flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-white/[0.15] hover:bg-white/[0.06]"
         aria-expanded={planDetailsOpen}
       >
         <div className="flex items-center gap-2.5">
@@ -245,13 +245,13 @@ export function PlanExtrasEditor({
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
           </span>
           <div>
-            <span className="text-sm font-semibold text-zinc-700">Plan Details</span>
+            <span className="text-sm font-semibold text-zinc-300">Plan Details</span>
             <span className="ml-2 text-xs text-zinc-400">
               {planDetailsOpen ? "Click to collapse" : "Special day rules & plan metadata"}
             </span>
           </div>
         </div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-600 ${planDetailsOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 text-zinc-400 transition-transform duration-200 group-hover:text-zinc-400 ${planDetailsOpen ? "rotate-180" : ""}`} aria-hidden><path d="m6 9 6 6 6-6" /></svg>
       </button>
 
       {/* Metadata section (unchanged) */}
@@ -298,7 +298,7 @@ export function PlanExtrasEditor({
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">Special Day Rules</span>
                 {overrides.length > 0 && (
-                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500">{overrides.length}</span>
+                  <span className="rounded-full bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500">{overrides.length}</span>
                 )}
               </div>
               <p className="mt-0.5 text-[11px] leading-snug text-zinc-400">
@@ -323,12 +323,12 @@ export function PlanExtrasEditor({
 
           {/* Empty state */}
           {overrides.length === 0 ? (
-            <div className="mt-3 flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 px-6 py-8 text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
+            <div className="mt-3 flex flex-col items-center gap-4 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.04]/50 px-6 py-8 text-center">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </span>
               <div>
-                <p className="text-sm font-semibold text-zinc-600">No special days yet</p>
+                <p className="text-sm font-semibold text-zinc-400">No special days yet</p>
                 <p className="mx-auto mt-1 max-w-[240px] text-[12px] leading-relaxed text-zinc-400">
                   Add a rule for days when your client&apos;s plan looks different.<br />
                   For example: &ldquo;High Carb Day&rdquo; on Mondays and Fridays, or &ldquo;Free Meal&rdquo; on Saturdays.
@@ -337,7 +337,7 @@ export function PlanExtrasEditor({
               <button
                 type="button"
                 onClick={openAddSheet}
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700"
+                className="rounded-lg bg-zinc-100 px-4 py-2 text-xs font-bold text-zinc-900 transition-colors hover:bg-white"
               >
                 + Add a Special Day
               </button>
@@ -354,13 +354,13 @@ export function PlanExtrasEditor({
                   return (
                     <div
                       key={oi}
-                      className="relative flex items-start gap-3 overflow-hidden rounded-xl border border-zinc-200 bg-white py-3 pl-0 pr-3"
+                      className="relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] py-3 pl-0 pr-3"
                     >
                       {/* Colored left accent bar */}
                       <span className={`absolute bottom-0 left-0 top-0 w-1 rounded-l-xl ${color.dot}`} />
 
                       <div className="min-w-0 flex-1 pl-4">
-                        <p className="truncate text-sm font-bold text-zinc-800">{override.label}</p>
+                        <p className="truncate text-sm font-bold text-zinc-200">{override.label}</p>
                         {days.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
                             {days.map((day) => (
@@ -382,7 +382,7 @@ export function PlanExtrasEditor({
                         <button
                           type="button"
                           onClick={() => openEditSheet(oi)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-300"
                           aria-label={`Edit ${override.label}`}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -390,7 +390,7 @@ export function PlanExtrasEditor({
                         <button
                           type="button"
                           onClick={() => setDeleteIdx(oi)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-500/10 hover:text-red-500"
                           aria-label={`Delete ${override.label}`}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -416,7 +416,7 @@ export function PlanExtrasEditor({
               <button
                 type="button"
                 onClick={openAddSheet}
-                className="mt-3 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:text-zinc-600"
+                className="mt-3 w-full rounded-lg border border-dashed border-white/[0.1] py-2 text-[11px] font-medium text-zinc-400 transition-colors hover:border-white/[0.2] hover:text-zinc-400"
               >
                 + Add a Special Day
               </button>
@@ -472,16 +472,16 @@ function OverrideSheetModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4">
-      <div className="flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl">
+      <div className="flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-white/[0.08] bg-zinc-900 shadow-2xl sm:max-w-lg sm:rounded-2xl">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 px-5 py-4">
-          <h2 className="text-base font-bold text-zinc-800">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-5 py-4">
+          <h2 className="text-base font-bold text-zinc-200">
             {state.mode === "add" ? "Add a Special Day" : "Edit Special Day"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-400"
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -495,7 +495,7 @@ function OverrideSheetModal({
             {/* Step 1 — Name & Color */}
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-zinc-700">
+                <label className="mb-1.5 block text-sm font-semibold text-zinc-300">
                   What do you call this day?
                 </label>
                 <input
@@ -503,7 +503,7 @@ function OverrideSheetModal({
                   value={state.label}
                   onChange={(e) => onChange({ ...state, label: e.target.value })}
                   placeholder="e.g. High Carb Day, Free Meal, Refeed Day"
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white/[0.08] focus:outline-none focus:ring-1 focus:ring-zinc-400"
                   style={{ fontSize: "max(1rem, 16px)" }}
                   autoFocus
                 />
@@ -511,7 +511,7 @@ function OverrideSheetModal({
               </div>
 
               <div>
-                <p className="mb-2 text-sm font-semibold text-zinc-700">Pick a color</p>
+                <p className="mb-2 text-sm font-semibold text-zinc-300">Pick a color</p>
                 <div className="flex gap-3">
                   {OVERRIDE_COLORS.map((c) => (
                     <button
@@ -531,11 +531,11 @@ function OverrideSheetModal({
               </div>
             </div>
 
-            <hr className="border-zinc-100" />
+            <hr className="border-white/[0.06]" />
 
             {/* Step 2 — Which days? */}
             <div>
-              <p className="mb-2 text-sm font-semibold text-zinc-700">Which days of the week?</p>
+              <p className="mb-2 text-sm font-semibold text-zinc-300">Which days of the week?</p>
               <div className="flex flex-wrap gap-1.5">
                 {SHEET_DAYS.map((day) => {
                   const selected = state.weekdays.includes(day);
@@ -547,7 +547,7 @@ function OverrideSheetModal({
                       className={`min-h-[36px] rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
                         selected
                           ? `${color.bg} ${color.text} ring-1 ring-inset ${color.border}`
-                          : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                          : "bg-white/[0.08] text-zinc-500 hover:bg-white/[0.1]"
                       }`}
                     >
                       {day.slice(0, 3)}
@@ -558,19 +558,19 @@ function OverrideSheetModal({
               <p className="mt-1.5 text-[11px] text-zinc-400">Tap to select multiple days.</p>
             </div>
 
-            <hr className="border-zinc-100" />
+            <hr className="border-white/[0.06]" />
 
             {/* Step 3 — Meal changes */}
             <div>
-              <p className="mb-0.5 text-sm font-semibold text-zinc-700">What&apos;s different on these days?</p>
+              <p className="mb-0.5 text-sm font-semibold text-zinc-300">What&apos;s different on these days?</p>
               <p className="mb-3 text-[11px] text-zinc-400">Optional — describe what changes. Or just add a note below.</p>
 
               {/* Existing changes */}
               {state.uiChanges.length > 0 && (
                 <div className="mb-3 space-y-1.5">
                   {state.uiChanges.map((uc) => (
-                    <div key={uc.id} className="flex items-center gap-2 rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2">
-                      <p className="flex-1 text-xs text-zinc-600">{formatChangeSentence(uc)}</p>
+                    <div key={uc.id} className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.04] px-3 py-2">
+                      <p className="flex-1 text-xs text-zinc-400">{formatChangeSentence(uc)}</p>
                       <button
                         type="button"
                         onClick={() => removeChange(uc.id)}
@@ -586,15 +586,15 @@ function OverrideSheetModal({
 
               {/* Inline add-change form */}
               {addChangeForm ? (
-                <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50/50 p-3.5">
+                <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.04]/50 p-3.5">
                   {/* Meal selector */}
                   <div>
-                    <p className="mb-1 text-xs font-semibold text-zinc-600">Which meal?</p>
+                    <p className="mb-1 text-xs font-semibold text-zinc-400">Which meal?</p>
                     {effectiveMealNames.length > 1 ? (
                       <select
                         value={addChangeForm.mealName}
                         onChange={(e) => setAddChangeForm({ ...addChangeForm, mealName: e.target.value })}
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400"
                       >
                         {effectiveMealNames.map((m) => <option key={m} value={m}>{m}</option>)}
                       </select>
@@ -603,7 +603,7 @@ function OverrideSheetModal({
                         type="text"
                         value={addChangeForm.mealName}
                         onChange={(e) => setAddChangeForm({ ...addChangeForm, mealName: e.target.value })}
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400"
                         placeholder="e.g. Meal 1"
                         style={{ fontSize: "max(1rem, 16px)" }}
                       />
@@ -613,7 +613,7 @@ function OverrideSheetModal({
                   {/* Change type selector */}
                   {!addChangeForm.changeType ? (
                     <div>
-                      <p className="mb-2 text-xs font-semibold text-zinc-600">What kind of change?</p>
+                      <p className="mb-2 text-xs font-semibold text-zinc-400">What kind of change?</p>
                       <div className="grid grid-cols-2 gap-2">
                         {([
                           {
@@ -664,11 +664,11 @@ function OverrideSheetModal({
                             key={type}
                             type="button"
                             onClick={() => setAddChangeForm({ ...addChangeForm, changeType: type })}
-                            className="flex min-h-[56px] items-start gap-2 rounded-lg border border-zinc-200 bg-white p-3 text-left transition-all hover:border-zinc-400 hover:bg-zinc-50 active:scale-[0.98]"
+                            className="flex min-h-[56px] items-start gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] p-3 text-left transition-all hover:border-white/[0.2] hover:bg-white/[0.04] active:scale-[0.98]"
                           >
                             <span className="mt-0.5 shrink-0 text-zinc-500">{icon}</span>
                             <div>
-                              <p className="text-xs font-semibold text-zinc-700">{label}</p>
+                              <p className="text-xs font-semibold text-zinc-300">{label}</p>
                               <p className="text-[10px] leading-snug text-zinc-400">{sub}</p>
                             </div>
                           </button>
@@ -681,7 +681,7 @@ function OverrideSheetModal({
                       <button
                         type="button"
                         onClick={() => setAddChangeForm({ ...addChangeForm, changeType: null, food: "", newPortion: "", replacementFood: "", replacementPortion: "" })}
-                        className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600"
+                        className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-400"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                         Change type
@@ -691,12 +691,12 @@ function OverrideSheetModal({
                       {addChangeForm.changeType === "update" && (
                         <>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">Which food?</p>
-                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Oats" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">Which food?</p>
+                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Oats" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">New amount?</p>
-                            <input type="text" value={addChangeForm.newPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, newPortion: e.target.value })} placeholder="e.g. 150g, 2 cups, 1 scoop" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">New amount?</p>
+                            <input type="text" value={addChangeForm.newPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, newPortion: e.target.value })} placeholder="e.g. 150g, 2 cups, 1 scoop" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                         </>
                       )}
@@ -705,12 +705,12 @@ function OverrideSheetModal({
                       {addChangeForm.changeType === "add" && (
                         <>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">What food?</p>
-                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Rice Cakes" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">What food?</p>
+                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Rice Cakes" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">How much?</p>
-                            <input type="text" value={addChangeForm.newPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, newPortion: e.target.value })} placeholder="e.g. 2 cakes, 1 serving" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">How much?</p>
+                            <input type="text" value={addChangeForm.newPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, newPortion: e.target.value })} placeholder="e.g. 2 cakes, 1 serving" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                         </>
                       )}
@@ -718,8 +718,8 @@ function OverrideSheetModal({
                       {/* remove fields */}
                       {addChangeForm.changeType === "remove" && (
                         <div>
-                          <p className="mb-1 text-xs font-semibold text-zinc-600">Which food to skip?</p>
-                          <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Peanut Butter" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                          <p className="mb-1 text-xs font-semibold text-zinc-400">Which food to skip?</p>
+                          <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Peanut Butter" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                         </div>
                       )}
 
@@ -727,16 +727,16 @@ function OverrideSheetModal({
                       {addChangeForm.changeType === "replace" && (
                         <>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">Which food to swap out?</p>
-                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Sweet Potato" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">Which food to swap out?</p>
+                            <input type="text" value={addChangeForm.food} onChange={(e) => setAddChangeForm({ ...addChangeForm, food: e.target.value })} placeholder="e.g. Sweet Potato" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">Replace it with?</p>
-                            <input type="text" value={addChangeForm.replacementFood} onChange={(e) => setAddChangeForm({ ...addChangeForm, replacementFood: e.target.value })} placeholder="e.g. White Rice" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">Replace it with?</p>
+                            <input type="text" value={addChangeForm.replacementFood} onChange={(e) => setAddChangeForm({ ...addChangeForm, replacementFood: e.target.value })} placeholder="e.g. White Rice" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-zinc-600">New amount?</p>
-                            <input type="text" value={addChangeForm.replacementPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, replacementPortion: e.target.value })} placeholder="e.g. 250g" className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
+                            <p className="mb-1 text-xs font-semibold text-zinc-400">New amount?</p>
+                            <input type="text" value={addChangeForm.replacementPortion} onChange={(e) => setAddChangeForm({ ...addChangeForm, replacementPortion: e.target.value })} placeholder="e.g. 250g" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400" style={{ fontSize: "max(1rem, 16px)" }} />
                           </div>
                         </>
                       )}
@@ -745,7 +745,7 @@ function OverrideSheetModal({
                         type="button"
                         onClick={commitChange}
                         disabled={!addChangeForm.food.trim()}
-                        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border border-white/[0.1] px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         + Save this change
                       </button>
@@ -763,18 +763,18 @@ function OverrideSheetModal({
                     replacementFood: "",
                     replacementPortion: "",
                   })}
-                  className="text-xs font-semibold text-blue-600 transition-colors hover:text-blue-800"
+                  className="text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300"
                 >
                   + Add a change
                 </button>
               )}
             </div>
 
-            <hr className="border-zinc-100" />
+            <hr className="border-white/[0.06]" />
 
             {/* Step 4 — Notes */}
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-zinc-700">
+              <label className="mb-1.5 block text-sm font-semibold text-zinc-300">
                 Any extra notes for your client?
               </label>
               <textarea
@@ -782,7 +782,7 @@ function OverrideSheetModal({
                 onChange={(e) => onChange({ ...state, notes: e.target.value })}
                 placeholder="e.g. These are your training days — prioritize carbs before your workout."
                 rows={3}
-                className="w-full resize-none rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full resize-none rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white/[0.08] focus:outline-none focus:ring-1 focus:ring-zinc-400"
                 style={{ fontSize: "max(1rem, 16px)" }}
               />
               <p className="mt-1 text-[11px] text-zinc-400">This note will appear on your client&apos;s plan on these days.</p>
@@ -792,7 +792,7 @@ function OverrideSheetModal({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 flex-col gap-2 border-t border-zinc-100 bg-white px-5 py-4">
+        <div className="flex shrink-0 flex-col gap-2 border-t border-white/[0.06] bg-zinc-900 px-5 py-4">
           <button
             type="button"
             onClick={onSave}
@@ -804,7 +804,7 @@ function OverrideSheetModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-xl py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-50"
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-white/[0.04]"
           >
             Cancel
           </button>
@@ -827,8 +827,8 @@ function DeleteConfirmDialog({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-        <h3 className="text-sm font-bold text-zinc-800">Remove &ldquo;{label}&rdquo;?</h3>
+      <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl">
+        <h3 className="text-sm font-bold text-zinc-200">Remove &ldquo;{label}&rdquo;?</h3>
         <p className="mt-1.5 text-sm text-zinc-500">
           This will remove the special day rule from your plan. Your client won&apos;t see it anymore.
         </p>
@@ -843,7 +843,7 @@ function DeleteConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-zinc-200 px-3 py-2.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+            className="flex-1 rounded-lg border border-white/[0.08] px-3 py-2.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.04]"
           >
             Keep it
           </button>
@@ -862,7 +862,7 @@ function SectionMenu({ actions }: { actions: { label: string; onClick: () => voi
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
+        className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-400"
         aria-label="More actions"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -874,14 +874,14 @@ function SectionMenu({ actions }: { actions: { label: string; onClick: () => voi
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-7 z-50 min-w-[160px] rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+          <div className="absolute right-0 top-7 z-50 min-w-[160px] rounded-lg border border-white/[0.08] bg-zinc-900 py-1 shadow-lg">
             {actions.map((action, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => { setOpen(false); action.onClick(); }}
                 className={`w-full px-3 py-1.5 text-left text-xs font-medium transition-colors ${
-                  action.danger ? "text-red-500 hover:bg-red-50" : "text-zinc-700 hover:bg-zinc-50"
+                  action.danger ? "text-red-500 hover:bg-red-500/10" : "text-zinc-300 hover:bg-white/[0.04]"
                 }`}
               >
                 {action.label}
@@ -950,8 +950,8 @@ function TemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
-        <h3 className="text-sm font-bold text-zinc-800">
+      <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-zinc-900 p-5 shadow-xl">
+        <h3 className="text-sm font-bold text-zinc-200">
           {mode === "save" ? `Save ${typeLabel} Template` : `Apply ${typeLabel} Template`}
         </h3>
 
@@ -962,14 +962,14 @@ function TemplateModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={`e.g. Default ${typeLabel}`}
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               autoFocus
             />
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={handleSave} disabled={saving || !name.trim()} className="flex-1 rounded-lg bg-zinc-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50">
+              <button type="button" onClick={handleSave} disabled={saving || !name.trim()} className="flex-1 rounded-lg bg-zinc-100 px-3 py-2 text-xs font-bold text-zinc-900 transition-colors hover:bg-white disabled:opacity-50">
                 {saving ? "Saving…" : "Save Template"}
               </button>
-              <button type="button" onClick={onClose} className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50">Cancel</button>
+              <button type="button" onClick={onClose} className="rounded-lg border border-white/[0.08] px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-white/[0.04]">Cancel</button>
             </div>
           </div>
         )}
@@ -982,18 +982,18 @@ function TemplateModal({
             )}
             <div className="max-h-60 space-y-1 overflow-y-auto">
               {snippets.map((s) => (
-                <div key={s.id} className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50">
-                  <button type="button" onClick={() => handleApply(s.id)} className="flex-1 text-left text-sm font-medium text-zinc-700">{s.name}</button>
+                <div key={s.id} className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.04]">
+                  <button type="button" onClick={() => handleApply(s.id)} className="flex-1 text-left text-sm font-medium text-zinc-300">{s.name}</button>
                   <button type="button" onClick={() => handleDelete(s.id)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">&times;</button>
                 </div>
               ))}
             </div>
-            <button type="button" onClick={onClose} className="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50">Close</button>
+            <button type="button" onClick={onClose} className="mt-3 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-white/[0.04]">Close</button>
           </div>
         )}
 
         {mode === "save" && snippets.length > 0 && (
-          <div className="mt-3 border-t border-zinc-100 pt-3">
+          <div className="mt-3 border-t border-white/[0.06] pt-3">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">Existing Templates</p>
             <div className="max-h-32 space-y-0.5 overflow-y-auto">
               {snippets.map((s) => (
@@ -1013,7 +1013,7 @@ function TemplateModal({
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
 function ExtrasCard({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-xl border border-zinc-200 bg-white p-3.5">{children}</div>;
+  return <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-3.5">{children}</div>;
 }
 
 function ExtrasCardHeader({ label, count }: { label: string; count?: number }) {
@@ -1021,14 +1021,14 @@ function ExtrasCardHeader({ label, count }: { label: string; count?: number }) {
     <div className="flex items-center gap-2">
       <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">{label}</span>
       {count != null && count > 0 && (
-        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500">{count}</span>
+        <span className="rounded-full bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-zinc-500">{count}</span>
       )}
     </div>
   );
 }
 
 function EditableField({ label, value, onChange, placeholder, multiline }: { label?: string; value: string; onChange: (value: string) => void; placeholder?: string; multiline?: boolean }) {
-  const cls = "w-full rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400";
+  const cls = "w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400";
   return (
     <div>
       {label && <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</span>}

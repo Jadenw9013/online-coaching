@@ -170,8 +170,8 @@ export function ProfileForm({
             {/* ── Success/Error toast ── */}
             {message && (
                 <div className={`mb-4 rounded-xl px-4 py-3 text-sm font-medium ${message.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-600"
-                    : "bg-red-500/10 text-red-600"
+                    ? "bg-emerald-500/10 text-emerald-400"
+                    : "bg-red-500/10 text-red-400"
                     }`}>
                     {message.text}
                 </div>
@@ -182,7 +182,7 @@ export function ProfileForm({
                 <button
                     type="button"
                     onClick={() => setShowEditModal(true)}
-                    className="flex-1 rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:border-zinc-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-zinc-100 transition-all hover:border-white/[0.15] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                 >
                     Edit Profile
                 </button>
@@ -190,7 +190,7 @@ export function ProfileForm({
                     <Link
                         href={`/coaches/${initialData.slug}`}
                         target="_blank"
-                        className="flex-1 rounded-xl bg-zinc-900 px-5 py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                        className="flex-1 rounded-xl bg-zinc-100 px-5 py-2.5 text-center text-sm font-semibold text-zinc-900 transition-all hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                     >
                         Preview Profile
                     </Link>
@@ -208,13 +208,13 @@ export function ProfileForm({
                         />
 
                         {/* Modal */}
-                        <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-zinc-200 bg-white shadow-2xl">
-                            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
-                                <h2 className="text-lg font-semibold text-zinc-900">Edit Profile</h2>
+                        <div className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/[0.08] bg-zinc-900 shadow-2xl">
+                            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.06] bg-zinc-900 px-6 py-4">
+                                <h2 className="text-lg font-semibold text-zinc-100">Edit Profile</h2>
                                 <button
                                     type="button"
                                     onClick={() => setShowEditModal(false)}
-                                    className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
+                                    className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-400"
                                     aria-label="Close"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -223,16 +223,16 @@ export function ProfileForm({
 
                             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-5">
                                 {message?.type === "error" && (
-                                    <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
+                                    <div className="rounded-md bg-red-500/10 p-4 text-sm text-red-400">
                                         {message.text}
                                     </div>
                                 )}
 
                                 {/* ── Visibility & Availability ── */}
-                                <div className="space-y-4 rounded-xl border border-zinc-100 p-4">
+                                <div className="space-y-4 rounded-xl border border-white/[0.06] p-4">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="text-sm font-semibold text-zinc-900">Public Visibility</h3>
+                                            <h3 className="text-sm font-semibold text-zinc-100">Public Visibility</h3>
                                             <p className="mt-0.5 text-xs text-zinc-500">
                                                 {isPublished ? "Your coaching page is visible." : "Your page is hidden."}
                                             </p>
@@ -243,10 +243,10 @@ export function ProfileForm({
                                             label="Show my coaching page publicly"
                                         />
                                     </div>
-                                    <div className="h-px bg-zinc-100" />
+                                    <div className="h-px bg-white/[0.08]" />
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="text-sm font-semibold text-zinc-900">Accepting Clients</h3>
+                                            <h3 className="text-sm font-semibold text-zinc-100">Accepting Clients</h3>
                                             <p className="mt-0.5 text-xs text-zinc-500">
                                                 {isAccepting ? "Clients can request coaching." : "Roster is full."}
                                             </p>
@@ -260,111 +260,111 @@ export function ProfileForm({
                                 </div>
 
                                 <div>
-                                    <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                    <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                         Profile URL
                                     </label>
                                     <div className="flex rounded-md shadow-sm">
-                                        <span className="inline-flex items-center rounded-l-md border border-r-0 border-zinc-300 bg-zinc-50 px-3 text-sm text-zinc-500">
+                                        <span className="inline-flex items-center rounded-l-md border border-r-0 border-white/[0.1] bg-white/[0.04] px-3 text-sm text-zinc-500">
                                             /coaches/
                                         </span>
                                         <input
                                             {...form.register("slug")}
                                             type="text"
-                                            className="block w-full flex-1 rounded-none rounded-r-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                            className="block w-full flex-1 rounded-none rounded-r-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                             placeholder="john-smith"
                                         />
                                     </div>
                                     {form.formState.errors.slug && (
-                                        <p className="mt-1 text-xs text-red-600">{form.formState.errors.slug.message}</p>
+                                        <p className="mt-1 text-xs text-red-400">{form.formState.errors.slug.message}</p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                    <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                         Professional Headline
                                     </label>
                                     <input
                                         {...form.register("headline")}
                                         type="text"
-                                        className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                        className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                         placeholder="e.g. Strength & Conditioning Coach"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                    <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                         About / Coaching Philosophy
                                     </label>
                                     <textarea
                                         {...form.register("bio")}
                                         rows={4}
-                                        className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                        className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                         placeholder="Tell prospective clients about your coaching approach..."
                                     />
                                 </div>
 
                                 <div className="grid gap-5 sm:grid-cols-2">
                                     <div>
-                                        <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                        <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                             Specialties
                                         </label>
                                         <input
                                             {...form.register("specialties")}
                                             type="text"
-                                            className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                            className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                             placeholder="Powerlifting, Hypertrophy"
                                         />
                                         <p className="mt-1 text-xs text-zinc-400">Comma separated</p>
                                     </div>
 
                                     <div>
-                                        <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                        <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                             Pricing
                                         </label>
                                         <input
                                             {...form.register("pricing")}
                                             type="text"
-                                            className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                            className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                             placeholder="e.g. $150/mo"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                    <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                         Welcome Message
                                     </label>
                                     <textarea
                                         {...form.register("welcomeMessage")}
                                         rows={3}
-                                        className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                                        className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
                                         placeholder="e.g. Welcome to coaching — check in every week and message me anytime."
                                     />
                                     <p className="mt-1 text-xs text-zinc-400">Shown to your clients on their dashboard</p>
                                 </div>
 
                                 {/* ── Experience & Certs ── */}
-                                <div className="border-t border-zinc-100 pt-5">
+                                <div className="border-t border-white/[0.06] pt-5">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">Experience & Credentials</p>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Coaching Experience</label>
-                                            <textarea {...form.register("experience")} rows={3} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="Tell clients about your coaching background..." />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Coaching Experience</label>
+                                            <textarea {...form.register("experience")} rows={3} className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="Tell clients about your coaching background..." />
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Certifications</label>
-                                            <textarea {...form.register("certifications")} rows={2} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="NASM, ISSA, CSCS, etc." />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Certifications</label>
+                                            <textarea {...form.register("certifications")} rows={2} className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="NASM, ISSA, CSCS, etc." />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* ── Coaching Details ── */}
-                                <div className="border-t border-zinc-100 pt-5">
+                                <div className="border-t border-white/[0.06] pt-5">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">Coaching Details</p>
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Coaching Mode</label>
-                                            <select {...form.register("coachingType")} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500">
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Coaching Mode</label>
+                                            <select {...form.register("coachingType")} className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500">
                                                 <option value="">Select mode</option>
                                                 <option value="online">Online</option>
                                                 <option value="in-person">In-Person</option>
@@ -372,8 +372,8 @@ export function ProfileForm({
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Service Tier</label>
-                                            <select {...form.register("serviceTier")} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500">
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Service Tier</label>
+                                            <select {...form.register("serviceTier")} className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500">
                                                 <option value="">Not specified</option>
                                                 <option value="training-only">Training plans only</option>
                                                 <option value="nutrition-only">Nutrition plans only</option>
@@ -382,44 +382,44 @@ export function ProfileForm({
                                             <p className="mt-1 text-xs text-zinc-400">Helps clients find coaches who match their needs</p>
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Location (display)</label>
-                                            <input {...form.register("location")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Austin, TX" />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Location (display)</label>
+                                            <input {...form.register("location")} type="text" className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Austin, TX" />
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Gym Name</label>
-                                            <input {...form.register("gymName")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Gold's Gym" />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Gym Name</label>
+                                            <input {...form.register("gymName")} type="text" className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Gold's Gym" />
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">City <span className="font-normal text-zinc-400">(for local search)</span></label>
-                                            <input {...form.register("city")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Austin" />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">City <span className="font-normal text-zinc-400">(for local search)</span></label>
+                                            <input {...form.register("city")} type="text" className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. Austin" />
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">State / Province <span className="font-normal text-zinc-400">(for local search)</span></label>
-                                            <input {...form.register("state")} type="text" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. TX" />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">State / Province <span className="font-normal text-zinc-400">(for local search)</span></label>
+                                            <input {...form.register("state")} type="text" className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. TX" />
                                         </div>
                                         <div>
-                                            <label className="mb-1.5 block text-sm font-medium text-zinc-700">Years Coaching</label>
-                                            <input {...form.register("yearsCoaching", { valueAsNumber: true })} type="number" min={0} max={50} className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. 5" />
+                                            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Years Coaching</label>
+                                            <input {...form.register("yearsCoaching", { valueAsNumber: true })} type="number" min={0} max={50} className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. 5" />
                                         </div>
                                         <div>
-                                             <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                                             <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                                                  Contact Phone <span className="font-normal text-zinc-400">(shown on your public profile)</span>
                                              </label>
-                                             <input {...form.register("phoneNumber")} type="tel" className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. +1 (512) 555-0100" />
+                                             <input {...form.register("phoneNumber")} type="tel" className="block w-full rounded-md border border-white/[0.1] px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500" placeholder="e.g. +1 (512) 555-0100" />
                                              <p className="mt-1 text-xs text-zinc-400">Optional — helps prospective clients reach you directly</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* ── Services Offered ── */}
-                                <div className="border-t border-zinc-100 pt-5">
+                                <div className="border-t border-white/[0.06] pt-5">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Services Offered</p>
                                     <div className="grid grid-cols-2 gap-2">
                                         {SERVICES_OPTIONS.map((service) => {
                                             const services = form.watch("services") ?? [];
                                             const checked = services.includes(service);
                                             return (
-                                                <label key={service} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm cursor-pointer transition-colors hover:bg-zinc-50">
+                                                <label key={service} className="flex items-center gap-2 rounded-lg border border-white/[0.08] px-3 py-2 text-sm cursor-pointer transition-colors hover:bg-white/[0.04]">
                                                     <input
                                                         type="checkbox"
                                                         checked={checked}
@@ -429,9 +429,9 @@ export function ProfileForm({
                                                                 : services.filter((s: string) => s !== service);
                                                             form.setValue("services", next, { shouldDirty: true });
                                                         }}
-                                                        className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500"
+                                                        className="rounded border-white/[0.1] text-zinc-100 focus:ring-zinc-500"
                                                     />
-                                                    <span className="text-zinc-700">{service}</span>
+                                                    <span className="text-zinc-300">{service}</span>
                                                 </label>
                                             );
                                         })}
@@ -439,7 +439,7 @@ export function ProfileForm({
                                 </div>
 
                                 {/* ── Client Goals ── */}
-                                <div className="border-t border-zinc-100 pt-5">
+                                <div className="border-t border-white/[0.06] pt-5">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Client Goals Supported</p>
                                     <div className="flex flex-wrap gap-2">
                                         {GOALS_OPTIONS.map((goal) => {
@@ -456,8 +456,8 @@ export function ProfileForm({
                                                         form.setValue("clientGoals", next, { shouldDirty: true });
                                                     }}
                                                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${active
-                                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-700"
-                                                        : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                                                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                                        : "border-white/[0.08] text-zinc-500 hover:border-white/[0.15]"
                                                     }`}
                                                 >
                                                     {active ? "✓ " : ""}{goal}
@@ -468,7 +468,7 @@ export function ProfileForm({
                                 </div>
 
                                 {/* ── Client Types ── */}
-                                <div className="border-t border-zinc-100 pt-5">
+                                <div className="border-t border-white/[0.06] pt-5">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Client Experience Levels</p>
                                     <div className="flex flex-wrap gap-2">
                                         {CLIENT_TYPES_OPTIONS.map((type) => {
@@ -486,7 +486,7 @@ export function ProfileForm({
                                                     }}
                                                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${active
                                                         ? "border-violet-500 bg-violet-500/10 text-violet-700"
-                                                        : "border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                                                        : "border-white/[0.08] text-zinc-500 hover:border-white/[0.15]"
                                                     }`}
                                                 >
                                                     {active ? "✓ " : ""}{type}
@@ -496,18 +496,18 @@ export function ProfileForm({
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-5">
+                                <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5">
                                     <button
                                         type="button"
                                         onClick={() => setShowEditModal(false)}
-                                        className="rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100"
+                                        className="rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.06]"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+                                        className="rounded-xl bg-zinc-100 px-6 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
                                     >
                                         {isSubmitting ? "Saving..." : "Save Changes"}
                                     </button>

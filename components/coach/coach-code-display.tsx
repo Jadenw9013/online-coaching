@@ -13,7 +13,7 @@ export function CoachCodeDisplay({ code }: { code: string }) {
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-2.5">
+      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-white/[0.1] bg-white/[0.04] px-4 py-2.5">
         <span className="text-xs text-zinc-500">Coach Code</span>
         <code className="font-mono text-sm font-semibold tracking-wider">
           {code}
@@ -21,7 +21,7 @@ export function CoachCodeDisplay({ code }: { code: string }) {
         <button
           onClick={handleCopy}
           aria-label={copied ? "Code copied" : "Copy coach code to clipboard"}
-          className="rounded px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+          className="rounded px-2 py-1 text-xs font-medium text-zinc-500 transition-colors hover:bg-white/[0.1] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
           {copied ? "Copied!" : "Copy"}
         </button>

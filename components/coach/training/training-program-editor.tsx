@@ -91,10 +91,10 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 const BLOCK_TYPE_BADGE: Record<BlockType, string> = {
   EXERCISE: "",
   ACTIVATION: "bg-yellow-50 text-yellow-700",
-  INSTRUCTION: "bg-zinc-100 text-zinc-600",
+  INSTRUCTION: "bg-white/[0.08] text-zinc-400",
   SUPERSET: "bg-purple-50 text-purple-700",
-  CARDIO: "bg-green-50 text-green-700",
-  OPTIONAL: "bg-zinc-50 text-zinc-500",
+  CARDIO: "bg-green-500/10 text-green-400",
+  OPTIONAL: "bg-white/[0.04] text-zinc-500",
 };
 
 function ProgramPreview({
@@ -109,7 +109,7 @@ function ProgramPreview({
   return (
     <div className="space-y-3">
       {(weeklyFrequency || clientNotes) && (
-        <div className="rounded-xl border border-zinc-200/80 bg-white px-4 py-3">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3">
           {weeklyFrequency && (
             <p className="text-sm">
               <span className="font-semibold">{weeklyFrequency}×</span>{" "}
@@ -124,15 +124,15 @@ function ProgramPreview({
       {days.map((day, i) => (
         <div
           key={i}
-          className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white"
+          className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04]"
         >
-          <div className="border-b border-zinc-100 px-4 py-3">
+          <div className="border-b border-white/[0.06] px-4 py-3">
             <h3 className="text-sm font-semibold">{day.dayName || `Day ${i + 1}`}</h3>
           </div>
           {day.blocks.length === 0 ? (
             <p className="px-4 py-3 text-sm text-zinc-400">No blocks yet.</p>
           ) : (
-            <div className="divide-y divide-zinc-100/80">
+            <div className="divide-y divide-white/[0.06]/80">
               {day.blocks.map((block, j) => (
                 <div key={j} className="px-4 py-3">
                   <div className="flex items-baseline gap-2">
@@ -148,7 +148,7 @@ function ProgramPreview({
                     )}
                   </div>
                   {block.content && (
-                    <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-600">
+                    <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-400">
                       {block.content}
                     </p>
                   )}
@@ -405,7 +405,7 @@ export function TrainingProgramEditor({
           <button
             type="button"
             onClick={() => setMode(templates.length > 0 ? "assign" : "edit")}
-            className="w-full rounded-xl bg-white py-3.5 text-sm font-bold text-zinc-900 transition-all hover:bg-zinc-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="w-full rounded-xl bg-white py-3.5 text-sm font-bold text-zinc-900 transition-all hover:bg-white/[0.1] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             {templates.length > 0 ? "Assign from Template" : "Create Training Plan"}
           </button>
@@ -439,7 +439,7 @@ export function TrainingProgramEditor({
           <button
             type="button"
             onClick={() => setMode(programId ? "edit" : "empty")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label="Back"
           >
             &larr;
@@ -447,9 +447,9 @@ export function TrainingProgramEditor({
           <h2 className="text-sm font-semibold">Assign Training Plan</h2>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200/80 bg-white">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04]">
           {/* Template picker — card list */}
-          <div className="border-b border-zinc-100">
+          <div className="border-b border-white/[0.06]">
             <p className="px-5 pt-4 pb-2 text-xs font-semibold text-zinc-500">
               Choose a template
             </p>
@@ -458,14 +458,14 @@ export function TrainingProgramEditor({
                 No templates yet.{" "}
                 <Link
                   href="/coach/templates/workouts"
-                  className="font-semibold text-zinc-700 underline underline-offset-2"
+                  className="font-semibold text-zinc-300 underline underline-offset-2"
                 >
                   Create one
                 </Link>{" "}
                 first.
               </p>
             ) : (
-              <div className="divide-y divide-zinc-100/80">
+              <div className="divide-y divide-white/[0.06]/80">
                 {templates.map((t) => {
                   const isSelected = selectedTemplateId === t.id;
                   return (
@@ -475,8 +475,8 @@ export function TrainingProgramEditor({
                       onClick={() => setSelectedTemplateId(t.id)}
                       aria-pressed={isSelected}
                       className={`w-full px-5 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 ${isSelected
-                        ? "bg-zinc-50"
-                        : "hover:bg-zinc-50/60"
+                        ? "bg-white/[0.04]"
+                        : "hover:bg-white/[0.04]/60"
                         }`}
                     >
                       <div className="flex items-center justify-between gap-3">
@@ -486,7 +486,7 @@ export function TrainingProgramEditor({
                             {t.days.length} {t.days.length === 1 ? "day" : "days"}
                           </span>
                           {isSelected && (
-                            <span className="text-xs font-semibold text-emerald-600">
+                            <span className="text-xs font-semibold text-emerald-400">
                               ✓
                             </span>
                           )}
@@ -519,7 +519,7 @@ export function TrainingProgramEditor({
                     value={weeklyFrequency}
                     onChange={(e) => setWeeklyFrequency(e.target.value)}
                     placeholder="e.g. 4"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -532,7 +532,7 @@ export function TrainingProgramEditor({
                     value={injuries}
                     onChange={(e) => setInjuries(e.target.value)}
                     placeholder="e.g. right shoulder"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -545,7 +545,7 @@ export function TrainingProgramEditor({
                     value={equipment}
                     onChange={(e) => setEquipment(e.target.value)}
                     placeholder="e.g. full gym, home dumbbells"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -558,7 +558,7 @@ export function TrainingProgramEditor({
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
                     placeholder="Anything the client should know"
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   />
                 </div>
               </div>
@@ -577,7 +577,7 @@ export function TrainingProgramEditor({
             type="button"
             onClick={handleSave}
             disabled={!selectedTemplateId || saving || publishing}
-            className="flex-1 rounded-xl border border-zinc-200 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="flex-1 rounded-xl border border-white/[0.08] py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             {saving ? "Saving…" : "Save as Draft"}
           </button>
@@ -585,7 +585,7 @@ export function TrainingProgramEditor({
             type="button"
             onClick={handlePublish}
             disabled={!selectedTemplateId || saving || publishing}
-            className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="flex-1 rounded-xl bg-zinc-100 py-3 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             {publishing ? "Publishing…" : "Assign & Publish"}
           </button>
@@ -605,8 +605,8 @@ export function TrainingProgramEditor({
             <span
               aria-live="polite"
               className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${status === "PUBLISHED"
-                ? "bg-emerald-500/10 text-emerald-600"
-                : "bg-amber-500/10 text-amber-600"
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-amber-500/10 text-amber-400"
                 }`}
             >
               {status === "PUBLISHED" ? "Published" : "Draft"}
@@ -618,13 +618,13 @@ export function TrainingProgramEditor({
         </div>
         <div className="flex items-center gap-2">
           {/* Editor / Preview toggle */}
-          <div className="flex rounded-lg border border-zinc-200 p-0.5 text-xs">
+          <div className="flex rounded-lg border border-white/[0.08] p-0.5 text-xs">
             <button
               type="button"
               onClick={() => setViewMode("editor")}
               className={`rounded-md px-2.5 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${viewMode === "editor"
-                ? "bg-zinc-900 text-white"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-zinc-100 text-zinc-900"
+                : "text-zinc-500 hover:text-zinc-300"
                 }`}
             >
               Editor
@@ -633,8 +633,8 @@ export function TrainingProgramEditor({
               type="button"
               onClick={() => setViewMode("preview")}
               className={`rounded-md px-2.5 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 ${viewMode === "preview"
-                ? "bg-zinc-900 text-white"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-zinc-100 text-zinc-900"
+                : "text-zinc-500 hover:text-zinc-300"
                 }`}
             >
               Preview
@@ -644,7 +644,7 @@ export function TrainingProgramEditor({
             <button
               type="button"
               onClick={() => setMode("assign")}
-              className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+              className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             >
               Change Template
             </button>
@@ -654,7 +654,7 @@ export function TrainingProgramEditor({
             type="button"
             onClick={handleSave}
             disabled={saving || publishing}
-            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -662,7 +662,7 @@ export function TrainingProgramEditor({
             type="button"
             onClick={handlePublish}
             disabled={saving || publishing}
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="rounded-lg bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
           >
             {publishing ? "Publishing…" : status === "PUBLISHED" ? "Republish" : "Publish"}
           </button>
@@ -683,7 +683,7 @@ export function TrainingProgramEditor({
             <button
               type="button"
               onClick={() => setShowCardio(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-green-300 py-4 text-sm font-semibold text-green-700 transition-colors hover:border-green-400 hover:bg-green-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-green-500/40 py-4 text-sm font-semibold text-green-400 transition-colors hover:border-green-500/60 hover:bg-green-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -691,9 +691,9 @@ export function TrainingProgramEditor({
               Add Cardio
             </button>
           ) : (
-            <div className="rounded-2xl border-2 border-green-200 bg-white">
+            <div className="rounded-2xl border-2 border-green-500/30 bg-white/[0.04]">
               <div className="flex items-center justify-between border-b border-green-100 px-5 py-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-green-700">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-green-400">
                   Cardio Prescription
                 </h3>
                 <button
@@ -706,7 +706,7 @@ export function TrainingProgramEditor({
                     setCardioIntensity("");
                     setCardioNotes("");
                   }}
-                  className="rounded-lg px-2 py-1 text-[11px] font-semibold text-red-500 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  className="rounded-lg px-2 py-1 text-[11px] font-semibold text-red-500 transition-colors hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 >
                   Remove
                 </button>
@@ -723,7 +723,7 @@ export function TrainingProgramEditor({
                       value={cardioModality}
                       onChange={(e) => setCardioModality(e.target.value)}
                       placeholder="e.g. Stairmaster, Incline walk"
-                      className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -736,7 +736,7 @@ export function TrainingProgramEditor({
                       value={cardioFrequency}
                       onChange={(e) => setCardioFrequency(e.target.value)}
                       placeholder="e.g. 5 days/week"
-                      className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -749,7 +749,7 @@ export function TrainingProgramEditor({
                       value={cardioDuration}
                       onChange={(e) => setCardioDuration(e.target.value)}
                       placeholder="e.g. 30 min"
-                      className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -762,7 +762,7 @@ export function TrainingProgramEditor({
                       value={cardioIntensity}
                       onChange={(e) => setCardioIntensity(e.target.value)}
                       placeholder="e.g. Level 5, Zone 2"
-                      className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     />
                   </div>
                 </div>
@@ -776,7 +776,7 @@ export function TrainingProgramEditor({
                     onChange={(e) => setCardioNotes(e.target.value)}
                     placeholder="Any additional cardio instructions"
                     rows={2}
-                    className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                    className="rounded-lg border border-white/[0.08] bg-transparent px-3 py-2 text-sm placeholder-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                   />
                 </div>
               </div>
@@ -784,28 +784,28 @@ export function TrainingProgramEditor({
           )}
 
           {/* Training Days */}
-          <div className="rounded-2xl border border-zinc-200/80 bg-white">
-            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 Training Days
               </h3>
               <button
                 type="button"
                 onClick={addDay}
-                className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
               >
                 + Add Day
               </button>
             </div>
 
-            <div className="divide-y divide-zinc-100/80">
+            <div className="divide-y divide-white/[0.06]/80">
               {days.length === 0 ? (
                 <div className="px-5 py-12 text-center">
                   <p className="text-sm text-zinc-400">No training days yet.</p>
                   <button
                     type="button"
                     onClick={addDay}
-                    className="mt-3 text-sm font-semibold text-zinc-900 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+                    className="mt-3 text-sm font-semibold text-zinc-100 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
                   >
                     Add a day to start
                   </button>
@@ -839,7 +839,7 @@ export function TrainingProgramEditor({
           type="button"
           onClick={handleSave}
           disabled={saving || publishing}
-          className="flex-1 rounded-xl border border-zinc-200 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+          className="flex-1 rounded-xl border border-white/[0.08] py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
           {saving ? "Saving…" : "Save Draft"}
         </button>
@@ -847,7 +847,7 @@ export function TrainingProgramEditor({
           type="button"
           onClick={handlePublish}
           disabled={saving || publishing}
-          className="flex-1 rounded-xl bg-zinc-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+          className="flex-1 rounded-xl bg-zinc-100 py-3 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >
           {publishing ? "Publishing…" : status === "PUBLISHED" ? "Republish" : "Publish"}
         </button>

@@ -99,8 +99,8 @@ function LegacyDayPicker({
           <span
             key={i}
             className={`rounded-md px-2 py-1 text-xs font-medium ${effectiveDays.includes(i)
-                ? "bg-zinc-900 text-white"
-                : "bg-zinc-100 text-zinc-400"
+                ? "bg-zinc-100 text-zinc-900"
+                : "bg-white/[0.08] text-zinc-400"
               }`}
           >
             {label}
@@ -111,7 +111,7 @@ function LegacyDayPicker({
         )}
         <button
           onClick={() => setEditing(true)}
-          className="ml-1 text-xs font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+          className="ml-1 text-xs font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
         >
           Customize
         </button>
@@ -127,8 +127,8 @@ function LegacyDayPicker({
             key={i}
             onClick={() => toggleDay(i)}
             className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${selected.includes(i)
-                ? "bg-zinc-900 text-white"
-                : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                ? "bg-zinc-100 text-zinc-900"
+                : "bg-white/[0.08] text-zinc-500 hover:bg-white/[0.1]"
               }`}
           >
             {label}
@@ -139,7 +139,7 @@ function LegacyDayPicker({
         <button
           onClick={handleSave}
           disabled={isPending || selected.length === 0}
-          className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+          className="rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
         >
           {isPending ? "Saving..." : "Save"}
         </button>
@@ -147,7 +147,7 @@ function LegacyDayPicker({
           <button
             onClick={handleReset}
             disabled={isPending}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-100 disabled:opacity-50"
+            className="rounded-md border border-white/[0.1] px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.06] disabled:opacity-50"
           >
             Reset to default
           </button>
@@ -157,7 +157,7 @@ function LegacyDayPicker({
             setSelected(hasOverride ? clientOverride : coachDays);
             setEditing(false);
           }}
-          className="text-xs font-medium text-zinc-500 hover:text-zinc-700"
+          className="text-xs font-medium text-zinc-500 hover:text-zinc-300"
         >
           Cancel
         </button>
