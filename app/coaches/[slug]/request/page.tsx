@@ -75,7 +75,7 @@ export default async function CoachingRequestPage({ params }: PageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-[100dvh] bg-black">
             {/* ── Nav ── */}
             <header className="sticky top-0 z-30 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
                 <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-5 sm:px-8">

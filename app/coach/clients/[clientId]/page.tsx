@@ -182,7 +182,7 @@ export default async function ClientProfilePage({
         <div className="flex items-center gap-3">
           <Link
             href="/coach/dashboard"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
             aria-label="Back to dashboard"
           >
             &larr;
@@ -200,8 +200,8 @@ export default async function ClientProfilePage({
               </div>
             )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-bold tracking-tight">
                 {client.firstName} {client.lastName}
               </h1>
@@ -211,8 +211,8 @@ export default async function ClientProfilePage({
                 {statusBadge.label}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-zinc-500">
-              <span>{client.email}</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+              <span className="break-all">{client.email}</span>
               {lastMessageAt && (
                 <>
                   <span className="text-zinc-500">&middot;</span>
@@ -393,8 +393,8 @@ export default async function ClientProfilePage({
           <h2 id="intake-pending-heading" className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Intake Questionnaire
           </h2>
-          <div className="sf-glass-card flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
+          <div className="sf-glass-card flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <div className="flex flex-wrap items-center gap-3">
               {(() => {
                 const cfg = intakeStatusConfig[clientIntake.status];
                 return (

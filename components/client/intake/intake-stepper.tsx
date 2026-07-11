@@ -271,7 +271,7 @@ export function IntakeStepper() {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-6 py-12 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="28"
@@ -282,7 +282,7 @@ export function IntakeStepper() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-emerald-600"
+            className="text-emerald-400"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -318,9 +318,9 @@ export function IntakeStepper() {
           </span>
           <span className="text-xs font-medium text-zinc-400">{progress}%</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.1]">
           <div
-            className="h-full rounded-full bg-zinc-900 transition-all duration-300"
+            className="h-full rounded-full bg-zinc-100 transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -328,7 +328,7 @@ export function IntakeStepper() {
 
       {/* Question */}
       <div className="min-h-[220px]">
-        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-zinc-900 sm:text-3xl">
+        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-zinc-100 sm:text-3xl">
           {question.label}
         </h2>
         {question.hint && (
@@ -348,7 +348,8 @@ export function IntakeStepper() {
                 placeholder={question.placeholder}
                 min={question.min}
                 max={question.max}
-                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-4 text-xl font-semibold tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full rounded-xl border border-white/[0.1] bg-white/[0.06] px-4 py-4 text-xl font-semibold text-zinc-100 tabular-nums focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                style={{ fontSize: 'max(1rem, 16px)' }}
                 autoFocus
               />
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-400">
@@ -367,7 +368,7 @@ export function IntakeStepper() {
                   className={`w-full rounded-xl border px-5 py-4 text-left text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 ${
                     inputValue === opt
                       ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50"
+                      : "border-white/[0.1] bg-white/[0.04] text-zinc-200 hover:border-white/[0.2] hover:bg-white/[0.08]"
                   }`}
                 >
                   {opt}
@@ -383,7 +384,8 @@ export function IntakeStepper() {
               placeholder={question.placeholder}
               rows={4}
               maxLength={2000}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
+              className="w-full rounded-xl border border-white/[0.1] bg-white/[0.06] px-4 py-3 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
+              style={{ fontSize: 'max(1rem, 16px)' }}
               autoFocus
             />
           )}
@@ -403,7 +405,7 @@ export function IntakeStepper() {
           type="button"
           onClick={() => { if (step > 0) goToStep(step - 1); }}
           disabled={step === 0}
-          className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+          className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-white/[0.06] disabled:pointer-events-none disabled:opacity-30"
           aria-label="Previous question"
         >
           &larr; Back
@@ -415,7 +417,7 @@ export function IntakeStepper() {
             <button
               type="button"
               onClick={() => saveAndAdvance("")}
-              className="text-xs font-medium text-zinc-400 underline underline-offset-2 hover:text-zinc-600"
+              className="text-xs font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
             >
               Skip
             </button>

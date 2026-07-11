@@ -61,7 +61,7 @@ export function ClientEmailSettings({
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-zinc-900">
+            <p className="text-sm font-medium text-zinc-100">
               Check-in Reminders
             </p>
             <p className="text-xs text-zinc-500">
@@ -78,7 +78,7 @@ export function ClientEmailSettings({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-zinc-900">
+            <p className="text-sm font-medium text-zinc-100">
               Meal Plan Updates
             </p>
             <p className="text-xs text-zinc-500">
@@ -95,7 +95,7 @@ export function ClientEmailSettings({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-zinc-900">
+            <p className="text-sm font-medium text-zinc-100">
               Coach Messages
             </p>
             <p className="text-xs text-zinc-500">
@@ -111,7 +111,7 @@ export function ClientEmailSettings({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-4 border-t border-zinc-200">
+      <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/[0.08]">
         {hasUnsavedChanges && (
           <p className="text-xs font-medium text-amber-600" role="status">
             Unsaved changes
@@ -127,7 +127,7 @@ export function ClientEmailSettings({
             type="button"
             disabled={isPending || !hasUnsavedChanges}
             onClick={handleSave}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 whitespace-nowrap"
+            className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:opacity-50 whitespace-nowrap"
           >
             {isPending ? "Saving..." : "Save Preferences"}
           </button>

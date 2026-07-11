@@ -288,7 +288,7 @@ export function CheckInForm({
   const stepCard = "rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5";
   const stepLabel = "mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400";
   const stepTitle = "text-lg sm:text-xl font-bold text-white";
-  const emojiBtn = "flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 sm:py-3 text-[10px] sm:text-[11px] font-medium text-zinc-400 transition-all duration-150 active:scale-95 cursor-pointer";
+  const emojiBtn = "flex min-h-[48px] flex-col items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] py-2.5 sm:py-3 text-[10px] sm:text-[11px] font-medium text-zinc-400 transition-all duration-150 active:scale-95 cursor-pointer";
   const emojiBtnActive = "scale-[1.02]";
 
 

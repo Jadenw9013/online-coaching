@@ -146,7 +146,7 @@ export default async function ClientProfilePage() {
                     <SignOutButton>
                         <button
                             type="button"
-                            className="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                            className="min-h-[44px] rounded-lg bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
                         >
                             Sign Out
                         </button>

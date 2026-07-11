@@ -50,6 +50,7 @@
   --surface-elevated: #222222;
   --border: rgba(255, 255, 255, 0.08);
   --muted: #b4bbc7;  /* 5.5:1 contrast on near-black */
+  --nav-height: 56px; /* keep in sync with h-14 in components/ui/nav-bar.tsx */
 
   /* ── Steadfast iOS Design Tokens (canonical) ── */
 

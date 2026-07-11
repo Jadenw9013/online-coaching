@@ -18,7 +18,7 @@ export default async function CoachLayout({
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-[100dvh] bg-black">
       <NavBar
         role="coach"
         canSwitchRole={user.isCoach && user.isClient}

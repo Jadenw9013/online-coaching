@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function RootLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-zinc-50">
       <div className="flex flex-col items-center gap-8">
 
         {/* Logo — responsive: ~112px mobile, ~144px tablet, ~160px desktop */}

@@ -265,7 +265,7 @@ export default function IntakePacketPage({
 
     if (submitted) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-8">
+            <div className="flex min-h-[100dvh] items-center justify-center bg-zinc-950 p-8">
                 <div className="max-w-md text-center">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400"><path d="M20 6 9 17l-5-5"/></svg>
@@ -280,7 +280,7 @@ export default function IntakePacketPage({
     const step = steps[currentStep];
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100" style={{ fontSize: `${fontSize}px` }}>
+        <div className="min-h-[100dvh] bg-zinc-950 text-zinc-100" style={{ fontSize: `${fontSize}px` }}>
             {/* Header */}
             <header className="sticky top-0 z-10 border-b border-white/[0.06] bg-zinc-950/95 backdrop-blur-sm px-6 py-4">
                 <div className="mx-auto flex max-w-2xl items-center justify-between">

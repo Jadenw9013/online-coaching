@@ -26,7 +26,7 @@ export default async function ClientMessagesPage() {
           <h1 className="text-2xl font-black tracking-tight text-white">Messages</h1>
         </div>
         <div
-          className="sf-surface-card flex flex-col items-center gap-5 px-8 py-20 text-center"
+          className="sf-surface-card flex flex-col items-center gap-5 px-5 py-14 text-center sm:px-8 sm:py-20"
           style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800/60">
@@ -58,8 +58,8 @@ export default async function ClientMessagesPage() {
 
   return (
     <div
-      className="flex flex-col -mx-4 -mt-6 sm:-mx-8 sm:-mt-8"
-      style={{ height: "calc(100dvh - 56px)" }}
+      className="flex flex-col -mx-4 -mt-6 -mb-24 pb-14 sm:-mx-8 sm:-mt-8 sm:-mb-8 sm:pb-0"
+      style={{ height: "calc(100dvh - var(--nav-height))" }}
     >
       {/* DM header bar */}
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-6">

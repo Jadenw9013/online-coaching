@@ -21,7 +21,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col landing-dark-bg text-white">
+    <div className="flex min-h-[100dvh] flex-col landing-dark-bg text-white">
       {/* ── Nav ── */}
       <header className="sticky top-0 z-30 bg-[#010612]/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:px-8">
@@ -34,13 +34,13 @@ export default async function Home() {
           <nav className="flex items-center gap-3" aria-label="Main navigation">
             <Link
               href="/sign-in"
-              className="text-sm font-medium text-gray-400 transition-colors hover:text-white"
+              className="flex min-h-[44px] items-center px-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"
             >
               Sign In
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-lg bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-200 hover:shadow-sm active:scale-[0.97]"
+              className="flex min-h-[40px] items-center rounded-lg bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-200 hover:shadow-sm active:scale-[0.97]"
             >
               Get Started
             </Link>
@@ -53,7 +53,7 @@ export default async function Home() {
         {/* ════════════════════════════════════════════
             HERO
         ════════════════════════════════════════════ */}
-        <section className="relative flex min-h-[calc(100vh-56px)] items-center justify-center overflow-hidden px-5 sm:px-8">
+        <section className="relative flex min-h-[calc(100dvh-var(--nav-height))] items-center justify-center overflow-hidden px-5 sm:px-8">
           {/* Double glow */}
           <div className="pointer-events-none absolute left-1/2 top-[32%] h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/8 blur-[120px] animate-pulse-glow sm:h-[500px] sm:w-[500px]" />
           <div className="pointer-events-none absolute left-1/2 top-[32%] h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/15 blur-[50px] animate-pulse-glow-inner sm:h-[220px] sm:w-[220px]" />

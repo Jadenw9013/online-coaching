@@ -78,7 +78,7 @@ const BADGE_MAP: Record<string, BadgeInfo> = {
     defaultLabel: "Review",
   },
   missing: {
-    classes: "bg-red-500/15 text-red-400 border border-red-500/20",
+    classes: "bg-red-500/25 text-red-300 border border-red-500/40",
     icon: "pulse-red",
     defaultLabel: "Missing",
   },

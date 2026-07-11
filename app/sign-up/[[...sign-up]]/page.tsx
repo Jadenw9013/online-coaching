@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-[100dvh] bg-zinc-50">
       {/* Left panel — brand / hero (hidden on mobile) */}
       <div className="relative hidden w-1/2 overflow-hidden lg:flex lg:flex-col lg:items-center lg:justify-center" style={{ background: "linear-gradient(135deg, #020815 0%, #071228 50%, #0a1832 100%)" }}>
         {/* Dot mesh pattern */}

@@ -25,7 +25,7 @@ export default async function IntakePage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
           Getting started
         </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-100">
           Intake Questionnaire
         </h1>
         <p className="mt-2 text-sm text-zinc-500">

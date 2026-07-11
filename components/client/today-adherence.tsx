@@ -72,21 +72,21 @@ export function TodayAdherence({ date, planMeals, existingMeals, workoutComplete
   return (
     <section
       aria-labelledby="today-adherence-heading"
-      className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm"
+      className="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] shadow-sm"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
         <h2 id="today-adherence-heading" className="text-sm font-semibold tracking-tight">
           Today
         </h2>
         {hasMeals && (
-          <span className="text-xs font-medium text-gray-400">
+          <span className="text-xs font-medium text-zinc-500">
             {completedCount}/{meals.length} meals
           </span>
         )}
       </div>
 
-      <ul role="list" className="divide-y divide-gray-100">
+      <ul role="list" className="divide-y divide-white/[0.06]">
         {/* Meal rows */}
         {hasMeals ? (
           meals.map((meal) => (
@@ -99,7 +99,7 @@ export function TodayAdherence({ date, planMeals, existingMeals, workoutComplete
           ))
         ) : (
           <li className="px-5 py-4">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-zinc-500">
               No active meal plan to track today
             </p>
           </li>
@@ -131,13 +131,13 @@ function MealRow({
         aria-label={`${meal.mealNameSnapshot} — ${meal.completed ? "Mark incomplete" : "Mark done"}`}
         className={`flex min-h-[44px] w-full items-center justify-between gap-4 px-5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 disabled:opacity-60 ${
           meal.completed
-            ? "bg-emerald-50/60"
-            : "hover:bg-gray-50"
+            ? "bg-emerald-500/[0.08]"
+            : "hover:bg-white/[0.04]"
         }`}
       >
         <span
           className={`text-sm font-medium ${
-            meal.completed ? "text-emerald-700" : "text-gray-700"
+            meal.completed ? "text-emerald-400" : "text-zinc-300"
           }`}
         >
           {meal.mealNameSnapshot}
@@ -167,13 +167,13 @@ function WorkoutRow({
         aria-label={`Workout — ${workout.completed ? "Mark incomplete" : "Mark complete"}`}
         className={`flex min-h-[44px] w-full items-center justify-between gap-4 px-5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-500 disabled:opacity-60 ${
           workout.completed
-            ? "bg-emerald-50/60"
-            : "hover:bg-gray-50"
+            ? "bg-emerald-500/[0.08]"
+            : "hover:bg-white/[0.04]"
         }`}
       >
         <span
           className={`text-sm font-medium ${
-            workout.completed ? "text-emerald-700" : "text-gray-700"
+            workout.completed ? "text-emerald-400" : "text-zinc-300"
           }`}
         >
           Workout
@@ -187,7 +187,7 @@ function WorkoutRow({
 function CompletionBadge({ completed }: { completed: boolean }) {
   if (completed) {
     return (
-      <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-emerald-600">
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-emerald-400">
         {/* Checkmark icon */}
         <svg
           aria-hidden="true"
@@ -208,7 +208,7 @@ function CompletionBadge({ completed }: { completed: boolean }) {
     );
   }
   return (
-    <span className="shrink-0 text-xs font-medium text-gray-400">
+    <span className="shrink-0 text-xs font-medium text-zinc-500">
       Mark done
     </span>
   );

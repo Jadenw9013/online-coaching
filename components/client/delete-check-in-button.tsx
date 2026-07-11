@@ -77,7 +77,7 @@ export function DeleteCheckInButton({ checkInId }: { checkInId: string }) {
       <button
         type="button"
         onClick={(e) => { e.preventDefault(); setOpen(true); }}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         aria-label="Check-in options"
       >
         <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">

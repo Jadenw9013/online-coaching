@@ -102,7 +102,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
     const initials = `${profile.user.firstName?.[0] ?? ""}${profile.user.lastName?.[0] ?? ""}`.toUpperCase() || "?";
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-[100dvh] bg-black">
             {/* ── Nav ── */}
             <header className="sticky top-0 z-30 border-b border-white/[0.04] bg-black/80 backdrop-blur-xl">
                 <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-5 sm:px-8">
@@ -426,7 +426,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
                                 {profile.certifications && (
                                     <div className="flex items-center justify-between">
                                         <dt className="text-zinc-400">Certified</dt>
-                                        <dd className="truncate max-w-[140px] font-medium text-zinc-200" title={profile.certifications}>{profile.certifications}</dd>
+                                        <dd className="truncate max-w-[60%] lg:max-w-[140px] font-medium text-zinc-200" title={profile.certifications}>{profile.certifications}</dd>
                                     </div>
                                 )}
                                 {(profile.services?.length ?? 0) > 0 && (

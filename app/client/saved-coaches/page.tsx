@@ -36,7 +36,7 @@ export default async function SavedCoachesPage() {
             </div>
 
             {coachesWithPhotos.length === 0 ? (
-                <div className="sf-surface-card p-12 text-center" style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.06)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}>
+                <div className="sf-surface-card p-8 text-center" style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.06)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}>
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400">
                             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
@@ -72,13 +72,13 @@ export default async function SavedCoachesPage() {
                                                 className="rounded-full object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-lg font-semibold text-zinc-500">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.08] text-lg font-semibold text-zinc-400">
                                                 {(sc.coachProfile.user.firstName?.[0] ?? "C").toUpperCase()}
                                             </div>
                                         )}
                                     </Link>
                                     <div className="min-w-0 flex-1">
-                                        <Link href={`/coaches/${sc.coachProfile.slug}`} className="text-base font-semibold text-zinc-900 hover:underline">
+                                        <Link href={`/coaches/${sc.coachProfile.slug}`} className="text-base font-semibold text-zinc-100 hover:underline">
                                             {name}
                                         </Link>
                                         {sc.coachProfile.headline && (

@@ -45,9 +45,9 @@ export default async function WriteReviewPage({ params }: PageProps) {
     const existing = await getMyTestimonialForCoach(coachId);
 
     return (
-        <div className="mx-auto max-w-xl px-5 py-12">
+        <div className="mx-auto max-w-xl px-5 py-6">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+                <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
                     {existing ? "Edit Your Review" : "Write a Review"}
                 </h1>
                 <p className="mt-2 text-sm text-zinc-500">
@@ -57,7 +57,7 @@ export default async function WriteReviewPage({ params }: PageProps) {
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-6 shadow-sm">
                 <TestimonialForm
                     coachId={coachId}
                     coachName={coachName}

@@ -44,7 +44,7 @@ export default async function ClientWeekMessagesPage({
 
   return (
     <div
-      className="flex flex-col -mx-4 -mt-6 -mb-24 h-[calc(100dvh-56px)] sm:-mx-8 sm:-mt-8 sm:-mb-8 sm:h-[calc(100dvh-56px)]"
+      className="flex flex-col -mx-4 -mt-6 -mb-24 pb-14 h-[calc(100dvh-var(--nav-height))] sm:-mx-8 sm:-mt-8 sm:-mb-8 sm:pb-0 sm:h-[calc(100dvh-var(--nav-height))]"
     >
       {/* DM header bar */}
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-6">

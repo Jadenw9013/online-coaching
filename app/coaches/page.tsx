@@ -194,7 +194,7 @@ export default async function CoachesDirectoryPage({ searchParams }: PageProps) 
         : null;
 
     return (
-        <div className="min-h-screen bg-black text-zinc-100">
+        <div className="min-h-[100dvh] bg-black text-zinc-100">
             {/* ── Nav ── */}
             <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-black/85 backdrop-blur-2xl" style={{ backdropFilter: "blur(40px) saturate(180%)", WebkitBackdropFilter: "blur(40px) saturate(180%)" }}>
                 <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:px-8">

@@ -101,7 +101,7 @@ export function ClientProfileForm({
             {showEditModal && (
                 <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Edit Profile">
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowEditModal(false)} />
-                    <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/[0.08] bg-[#111113] shadow-2xl shadow-black/50">
+                    <div className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/[0.08] bg-[#111113] shadow-2xl shadow-black/50">
 
                         {/* Header */}
                         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.06] bg-[#111113]/95 backdrop-blur-sm px-5 py-4 sm:px-6">
@@ -181,7 +181,10 @@ export function ClientProfileForm({
                             </div>
 
                             {/* Actions */}
-                            <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5 pb-safe">
+                            <div
+                                className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5"
+                                style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+                            >
                                 <button
                                     type="button"
                                     onClick={() => setShowEditModal(false)}

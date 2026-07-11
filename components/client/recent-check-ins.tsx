@@ -149,7 +149,7 @@ export function RecentCheckIns({ checkIns }: { checkIns: CheckInItem[] }) {
                               <span>{checkIn._count.photos} photo{checkIn._count.photos > 1 ? "s" : ""}</span>
                             )}
                             {checkIn.notes && (
-                              <span className="truncate max-w-[200px] sm:max-w-[180px]">{checkIn.notes}</span>
+                              <span className="truncate max-w-[180px] sm:max-w-[280px]">{checkIn.notes}</span>
                             )}
                           </div>
                         </div>

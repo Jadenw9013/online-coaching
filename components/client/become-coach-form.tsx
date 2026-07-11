@@ -28,7 +28,7 @@ export function BecomeCoachForm() {
   }
 
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-4">
+    <div className="rounded-lg border border-dashed border-white/[0.08] bg-white/[0.04] px-5 py-4">
       <p className="text-sm font-medium">Become a Coach</p>
       <p className="mt-0.5 text-xs text-zinc-500">
         Have a coach access code? Enter it below.
@@ -37,7 +37,7 @@ export function BecomeCoachForm() {
       {error && (
         <div
           role="alert"
-          className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+          className="mt-2 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-400"
         >
           {error}
         </div>
@@ -53,12 +53,12 @@ export function BecomeCoachForm() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Access code"
-          className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm focus-visible:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+          className="flex-1 rounded-lg border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/20"
         />
         <button
           type="submit"
           disabled={submitting || !code.trim()}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
+          className="rounded-lg border border-white/[0.1] px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50"
         >
           {submitting ? "Verifying..." : "Activate"}
         </button>

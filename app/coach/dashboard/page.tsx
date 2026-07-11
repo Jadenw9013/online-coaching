@@ -113,7 +113,7 @@ export default async function CoachDashboard() {
         </div>
       )}
       {clients.length === 0 ? (
-        <div className="animate-fade-in-up sf-surface-card flex flex-col items-center gap-5 px-8 py-20 text-center" style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}>
+        <div className="animate-fade-in-up sf-surface-card flex flex-col items-center gap-5 px-5 py-14 text-center sm:px-8 sm:py-20" style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}>
           {/* Abstract coaching illustration — pure CSS/SVG */}
           <div className="relative flex h-16 w-16 items-center justify-center">
             {/* Outer ring */}

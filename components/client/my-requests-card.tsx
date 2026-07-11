@@ -91,7 +91,7 @@ export function MyRequestsCard({ requests }: { requests: Request[] }) {
                                         <button
                                             onClick={() => handleCancel(req.id)}
                                             disabled={cancelingId !== null}
-                                            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                                            className={`shrink-0 rounded-lg min-h-[44px] px-4 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                                                 confirmId === req.id
                                                     ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
                                                     : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]"

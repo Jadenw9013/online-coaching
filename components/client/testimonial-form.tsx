@@ -165,8 +165,8 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
             {message && (
                 <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
                     message.type === "success"
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-red-500/10 text-red-600"
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : "bg-red-500/10 text-red-400"
                 }`}>
                     {message.text}
                 </div>
@@ -174,7 +174,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
 
             {/* Star Rating */}
             <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700">
+                <label className="mb-2 block text-sm font-medium text-zinc-300">
                     Rating
                 </label>
                 <div className="flex gap-1">
@@ -185,7 +185,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                             onClick={() => setRating(star)}
                             onMouseEnter={() => setHoverRating(star)}
                             onMouseLeave={() => setHoverRating(0)}
-                            className="p-0.5 transition-transform hover:scale-110"
+                            className="flex h-11 w-11 items-center justify-center transition-transform hover:scale-110"
                             aria-label={`Rate ${star} stars`}
                         >
                             <svg
@@ -199,7 +199,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                                 className={`transition-colors ${
                                     (hoverRating || rating) >= star
                                         ? "text-amber-400"
-                                        : "text-zinc-300"
+                                        : "text-zinc-600"
                                 }`}
                             >
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -211,24 +211,25 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
 
             {/* Review Text — optional */}
             <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700">
-                    Your Review <span className="font-normal text-zinc-400">(optional)</span>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+                    Your Review <span className="font-normal text-zinc-500">(optional)</span>
                 </label>
                 <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     rows={5}
-                    className="block w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm leading-relaxed focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                    className="block w-full rounded-xl border border-white/[0.1] bg-white/[0.06] px-4 py-3 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                    style={{ fontSize: "max(1rem, 16px)" }}
                     placeholder={`Share your experience working with ${coachName}... (leave blank to submit a star-only rating)`}
                     maxLength={2000}
                 />
-                <p className="mt-1.5 text-xs text-zinc-400">
+                <p className="mt-1.5 text-xs text-zinc-500">
                     {reviewText.length}/2000 characters
                 </p>
             </div>
 
             {/* Anonymous toggle */}
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 transition-colors hover:border-zinc-300">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3.5 transition-colors hover:border-white/[0.15]">
                 <div className="relative mt-0.5 shrink-0">
                     <input
                         type="checkbox"
@@ -237,7 +238,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                         onChange={(e) => setAnonymous(e.target.checked)}
                         id="anonymous-toggle"
                     />
-                    <div className="h-5 w-5 rounded border-2 border-zinc-300 bg-white transition-colors peer-checked:border-blue-500 peer-checked:bg-blue-500">
+                    <div className="h-5 w-5 rounded border-2 border-zinc-600 bg-transparent transition-colors peer-checked:border-blue-500 peer-checked:bg-blue-500">
                         {anonymous && (
                             <svg className="ml-0.5 mt-0.5 h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
@@ -246,22 +247,22 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                     </div>
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-zinc-700">Submit anonymously</p>
+                    <p className="text-sm font-medium text-zinc-300">Submit anonymously</p>
                     <p className="mt-0.5 text-xs text-zinc-500">Your name won&apos;t appear on the coach&apos;s public profile. Your review is still verified.</p>
                 </div>
             </label>
 
             {/* Image Upload */}
             <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700">
-                    Photos <span className="font-normal text-zinc-400">(optional, up to 4)</span>
+                <label className="mb-2 block text-sm font-medium text-zinc-300">
+                    Photos <span className="font-normal text-zinc-500">(optional, up to 4)</span>
                 </label>
 
                 {/* Image Preview Grid */}
                 {images.length > 0 && (
                     <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {images.map((img, i) => (
-                            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+                            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-white/[0.08] bg-white/[0.04]">
                                 {img.previewUrl ? (
                                     <Image
                                         src={img.previewUrl}
@@ -277,7 +278,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                                 <button
                                     type="button"
                                     onClick={() => removeImage(i)}
-                                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                    className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                                     aria-label={`Remove image ${i + 1}`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -300,8 +301,8 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                         />
                         <label
                             htmlFor="testimonial-images"
-                            className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 px-4 py-3 text-sm font-medium transition-colors hover:border-zinc-400 hover:bg-zinc-50 ${
-                                isUploading ? "opacity-50 pointer-events-none" : "text-zinc-500"
+                            className={`flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-600 px-4 py-3 text-sm font-medium transition-colors hover:border-zinc-500 hover:bg-white/[0.04] ${
+                                isUploading ? "opacity-50 pointer-events-none" : "text-zinc-400"
                             }`}
                         >
                             {isUploading ? (
@@ -316,7 +317,7 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
                                 </>
                             )}
                         </label>
-                        <p className="mt-1.5 text-[11px] text-zinc-400">
+                        <p className="mt-1.5 text-[11px] text-zinc-500">
                             JPEG, PNG, or WebP · Max 5MB each
                         </p>
                     </div>
@@ -324,18 +325,18 @@ export function TestimonialForm({ coachId, coachName, existingTestimonial }: Tes
             </div>
 
             {/* Submit */}
-            <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-5">
+            <div className="flex items-center justify-end gap-3 border-t border-white/[0.08] pt-5">
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100"
+                    className="min-h-[44px] rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-200"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={isSubmitting || rating === 0}
-                    className="rounded-xl bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+                    className="min-h-[44px] rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
                 >
                     {isSubmitting ? "Submitting..." : isEditing ? "Update Review" : "Submit Review"}
                 </button>

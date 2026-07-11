@@ -49,7 +49,7 @@ export default async function ClientPlanPage() {
   // ── Meal Plan content ──
   const mealPlanContent = !mealPlan ? (
     <div
-      className="sf-surface-card flex flex-col items-center gap-4 px-8 py-20 text-center"
+      className="sf-surface-card flex flex-col items-center gap-4 px-5 py-14 text-center sm:px-8 sm:py-20"
       style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}
     >
       <p className="text-sm font-semibold">No meal plan yet</p>
@@ -108,7 +108,7 @@ export default async function ClientPlanPage() {
   // ── Training content ──
   const trainingContent = !trainingProgram || trainingProgram.days.length === 0 ? (
     <div
-      className="sf-surface-card flex flex-col items-center gap-3 px-8 py-16 text-center"
+      className="sf-surface-card flex flex-col items-center gap-3 px-5 py-12 text-center sm:px-8 sm:py-16"
       style={{ "--sf-card-highlight": "rgba(59, 91, 219, 0.08)", "--sf-card-atmosphere": "#0e1420" } as React.CSSProperties}
     >
       <p className="text-sm font-semibold text-zinc-300">No training program yet</p>

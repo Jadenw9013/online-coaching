@@ -662,8 +662,8 @@ export function MessageThread({
               type="submit"
               disabled={sending || !body.trim()}
               aria-label="Send message"
-              style={{ minHeight: "40px", minWidth: "40px" }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:bg-zinc-700 hover:bg-blue-500"
+              style={{ minHeight: "44px", minWidth: "44px" }}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:bg-zinc-700 hover:bg-blue-500"
             >
               {sending ? (
                 <svg
