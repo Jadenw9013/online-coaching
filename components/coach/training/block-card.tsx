@@ -22,14 +22,14 @@ const BLOCK_META: BlockMeta[] = [
     value: "ACTIVATION",
     label: "Activation",
     borderColor: "border-yellow-400",
-    badgeColor: "bg-yellow-50 text-yellow-700",
+    badgeColor: "bg-yellow-900/30 text-yellow-300",
     placeholder: "Activation / warm-up exercises and cues…",
   },
   {
     value: "SUPERSET",
     label: "Superset",
     borderColor: "border-purple-400",
-    badgeColor: "bg-purple-50 text-purple-700",
+    badgeColor: "bg-purple-900/30 text-purple-300",
     placeholder: "Superset A / B — exercises, sets × reps, rest between sets…",
   },
   {

@@ -32,9 +32,9 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
 
 const BLOCK_TYPE_BADGE: Record<BlockType, string> = {
   EXERCISE: "",
-  ACTIVATION: "bg-yellow-50 text-yellow-700",
+  ACTIVATION: "bg-yellow-900/30 text-yellow-300",
   INSTRUCTION: "bg-white/[0.08] text-zinc-400",
-  SUPERSET: "bg-purple-50 text-purple-700",
+  SUPERSET: "bg-purple-900/30 text-purple-300",
   CARDIO: "bg-green-500/10 text-green-400",
   OPTIONAL: "bg-white/[0.04] text-zinc-500",
 };
