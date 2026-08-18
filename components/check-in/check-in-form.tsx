@@ -56,6 +56,7 @@ export function CheckInForm({
     pendingValues: FormValues;
     pendingPhotoPaths: string[];
   } | null>(null);
+  const [incompleteConfirm, setIncompleteConfirm] = useState<{ values: FormValues } | null>(null);
   const [, setToast] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [customResponses, setCustomResponses] = useState<Record<string, string>>({});
@@ -201,9 +202,7 @@ export function CheckInForm({
     setTimeout(() => { router.push("/client"); router.refresh(); }, 1800);
   }
 
-  async function onSubmit(values: FormValues) {
-    setError(null);
-    if (!validateCustomQuestions()) return;
+  async function proceedWithSubmit(values: FormValues) {
     setUploadState("getting-urls");
     try {
       const photoPaths = await uploadPhotos();
@@ -213,6 +212,26 @@ export function CheckInForm({
     } finally {
       setUploadState("idle");
     }
+  }
+
+  async function onSubmit(values: FormValues) {
+    setError(null);
+    if (!validateCustomQuestions()) return;
+    // Both nutrition and energy are optional, but skipping both usually means
+    // the client tapped the floating submit button before scrolling past
+    // Weight/Photos to the Details section — confirm before sending.
+    if (!values.dietCompliance && !values.energyLevel) {
+      setIncompleteConfirm({ values });
+      return;
+    }
+    await proceedWithSubmit(values);
+  }
+
+  async function handleConfirmIncomplete() {
+    if (!incompleteConfirm) return;
+    const { values } = incompleteConfirm;
+    setIncompleteConfirm(null);
+    await proceedWithSubmit(values);
   }
 
   async function handleOverwrite() {
@@ -328,6 +347,26 @@ export function CheckInForm({
               </button>
               <button onClick={() => setConflictModal(null)} className="sf-button-ghost w-full">
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Incomplete details confirmation */}
+      {incompleteConfirm && (
+        <div className="sf-modal-backdrop">
+          <div className="sf-modal-card">
+            <h3 className="text-lg font-bold text-white">Send without details?</h3>
+            <p className="mt-2 text-sm text-zinc-400">
+              You haven&apos;t rated your nutrition or energy this week. Your coach sees more context when you fill those in.
+            </p>
+            <div className="mt-5 flex flex-col gap-2.5">
+              <button onClick={() => setIncompleteConfirm(null)} className="sf-button-primary w-full">
+                Go back and fill in
+              </button>
+              <button onClick={handleConfirmIncomplete} className="sf-button-ghost w-full">
+                Send anyway
               </button>
             </div>
           </div>

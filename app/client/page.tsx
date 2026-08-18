@@ -5,6 +5,7 @@ import { getPublishedTrainingProgram } from "@/lib/queries/training-programs";
 import { formatDateUTC, getLocalDate } from "@/lib/utils/date";
 import { getMyIntake } from "@/lib/queries/client-intake";
 import { parseCadenceConfig, getEffectiveCadence, getClientCadenceStatus, cadenceFromLegacyDays, getCadencePreview } from "@/lib/scheduling/cadence";
+import { parseCheckInMessage } from "@/lib/messages/check-in-message";
 
 import { getAdherenceEnabled, getTodayAdherence, getTodayMealNames } from "@/lib/queries/adherence";
 import { db } from "@/lib/db";
@@ -522,11 +523,11 @@ export default async function ClientDashboard() {
 
       {latestCoachMessage && (() => {
         // Parse check-in protocol messages — don't show raw [CHECKIN:...] strings
-        const checkinMatch = latestCoachMessage.body.match(/^\[CHECKIN:([a-zA-Z0-9_-]+):([^\]]+)\]([\s\S]*)$/);
+        const checkinMatch = parseCheckInMessage(latestCoachMessage.body);
         const isCheckIn = !!checkinMatch;
-        const checkInId = checkinMatch?.[1];
-        const checkInDate = checkinMatch?.[2];
-        const checkInNotes = checkinMatch?.[3]?.trim();
+        const checkInId = checkinMatch?.checkInId;
+        const checkInDate = checkinMatch?.date;
+        const checkInNotes = checkinMatch?.notes;
 
         const href = isCheckIn && checkInId
           ? `/client/check-ins/${checkInId}`

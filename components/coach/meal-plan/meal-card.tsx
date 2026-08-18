@@ -55,7 +55,7 @@ export const MealCard = memo(function MealCard({
   return (
     <div className="group/card overflow-hidden sf-glass-card">
       {/* Meal header */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3.5 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-y-1 border-b border-white/[0.08] px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-3 min-w-0">
           {/* Meal number badge */}
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-[10px] font-bold tabular-nums text-blue-300">
@@ -90,7 +90,7 @@ export const MealCard = memo(function MealCard({
                 setTempName(meal.mealName);
                 setEditingName(true);
               }}
-              className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:text-blue-100"
+              className="flex items-center gap-2 whitespace-nowrap text-sm font-bold uppercase tracking-wider text-white transition-colors hover:text-blue-100"
             >
               {meal.mealName}
               {/* Edit pencil hint */}
@@ -118,7 +118,7 @@ export const MealCard = memo(function MealCard({
             type="button"
             onClick={onMoveMealUp}
             disabled={isFirst}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 disabled:opacity-20 disabled:cursor-not-allowed"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 disabled:opacity-20 disabled:cursor-not-allowed"
             aria-label={`Move ${meal.mealName} up`}
             title="Move up"
           >
@@ -131,7 +131,7 @@ export const MealCard = memo(function MealCard({
             type="button"
             onClick={onMoveMealDown}
             disabled={isLast}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 disabled:opacity-20 disabled:cursor-not-allowed"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 disabled:opacity-20 disabled:cursor-not-allowed"
             aria-label={`Move ${meal.mealName} down`}
             title="Move down"
           >
@@ -141,13 +141,13 @@ export const MealCard = memo(function MealCard({
           </button>
 
           {/* Separator */}
-          <span className="mx-0.5 h-4 w-px bg-white/[0.06]" aria-hidden />
+          <span className="mx-0.5 h-4 w-px shrink-0 bg-white/[0.06]" aria-hidden />
 
           {/* Duplicate */}
           <button
             type="button"
             onClick={onDuplicateMeal}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-blue-400"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-blue-400"
             aria-label={`Duplicate ${meal.mealName}`}
             title="Duplicate"
           >
@@ -159,7 +159,7 @@ export const MealCard = memo(function MealCard({
           <button
             type="button"
             onClick={onRemoveMeal}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
             aria-label={`Remove ${meal.mealName}`}
             title="Remove meal"
           >
@@ -185,11 +185,11 @@ export const MealCard = memo(function MealCard({
       </div>
 
       {/* Add food */}
-      <div className="relative border-t border-white/[0.08] px-5 py-3">
+      <div className="relative border-t border-white/[0.08] px-5">
         <button
           type="button"
           onClick={() => setAddingFood(true)}
-          className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-white"
+          className="flex min-h-[48px] w-full items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-white"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>

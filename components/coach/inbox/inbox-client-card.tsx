@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CadenceStatus } from "@/lib/scheduling/cadence";
+import { StatusBadge, BADGE_MAP } from "@/components/coach/status-badge";
 
 type WeekStatus = "new" | "reviewed" | "missing" | "not_due";
 
@@ -35,91 +36,6 @@ const RING_GRADIENT: Record<string, string> = {
   missing:   "linear-gradient(135deg, #ef4444 0%, #f97316 100%)",
   not_due:   "linear-gradient(180deg, #334155 0%, #1e293b 100%)",
 };
-
-// ── Status badge config: icon + color per status ──────────────────────────────
-type BadgeIcon = "pulse-red" | "pulse-amber" | "check" | "clock" | "arrow";
-
-type BadgeInfo = {
-  classes: string;
-  icon: BadgeIcon;
-  defaultLabel: string;
-};
-
-const BADGE_MAP: Record<string, BadgeInfo> = {
-  overdue: {
-    classes: "bg-red-500/15 text-red-400 border border-red-500/20",
-    icon: "pulse-red",
-    defaultLabel: "Overdue",
-  },
-  due: {
-    classes: "bg-amber-500/15 text-amber-400 border border-amber-500/20",
-    icon: "pulse-amber",
-    defaultLabel: "Due Today",
-  },
-  submitted: {
-    classes: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
-    icon: "arrow",
-    defaultLabel: "Review",
-  },
-  reviewed: {
-    classes: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
-    icon: "check",
-    defaultLabel: "Reviewed",
-  },
-  upcoming: {
-    classes: "bg-slate-500/15 text-slate-300 border border-slate-500/20",
-    icon: "clock",
-    defaultLabel: "Upcoming",
-  },
-  // weekStatus fallbacks
-  new: {
-    classes: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
-    icon: "arrow",
-    defaultLabel: "Review",
-  },
-  missing: {
-    classes: "bg-red-500/25 text-red-300 border border-red-500/40",
-    icon: "pulse-red",
-    defaultLabel: "Missing",
-  },
-  not_due: {
-    classes: "bg-slate-500/15 text-slate-300 border border-slate-500/20",
-    icon: "clock",
-    defaultLabel: "Upcoming",
-  },
-};
-
-function StatusBadge({ info, label }: { info: BadgeInfo; label: string }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${info.classes}`}
-    >
-      {/* Icon */}
-      {info.icon === "pulse-red" && (
-        <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 motion-safe:animate-pulse" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-400" />
-        </span>
-      )}
-      {info.icon === "pulse-amber" && (
-        <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-pulse" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-        </span>
-      )}
-      {info.icon === "check" && (
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
-      )}
-      {info.icon === "clock" && (
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-      )}
-      {info.icon === "arrow" && (
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-      )}
-      {label}
-    </span>
-  );
-}
 
 function ArrowDown() {
   return (
@@ -235,9 +151,9 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
           </div>
         )}
 
-        {/* Status badge — fades to 0 on hover when reviewable */}
+        {/* Status badge — hidden on mobile in favor of the always-visible Review CTA; fades to 0 on hover on desktop */}
         <div
-          className={`shrink-0 transition-opacity duration-200 ${canReview ? "group-hover:opacity-0" : ""}`}
+          className={`shrink-0 transition-opacity duration-200 ${canReview ? "opacity-0 sm:opacity-100 sm:group-hover:opacity-0" : ""}`}
         >
           <StatusBadge info={badgeInfo} label={badgeLabel} />
         </div>
@@ -266,9 +182,9 @@ export function InboxClientCard({ client }: { client: InboxClient }) {
         </div>
       )}
 
-      {/* Review CTA — fades in over badge position on hover */}
+      {/* Review CTA — always visible on mobile (no hover); fades in on hover on desktop */}
       {canReview && (
-        <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 sm:right-5">
+        <div className="pointer-events-auto absolute inset-y-0 right-4 flex items-center opacity-100 transition-opacity duration-200 sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:right-5">
           <Link
             href={reviewHref}
             className="sf-button-secondary !px-3.5 !py-2 text-xs shadow-lg"

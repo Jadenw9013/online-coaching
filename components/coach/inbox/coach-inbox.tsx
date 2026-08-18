@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { InboxClientCard, type InboxClient } from "./inbox-client-card";
 import { reorderClients } from "@/app/actions/coach-client";
+import { isReviewedThisWeek } from "@/lib/scheduling/cadence";
 
 type Filter = "all" | "new" | "reviewed" | "missing";
 
@@ -53,7 +54,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
       : activeFilter === "missing"
       ? orderedClients.filter(isMissing)
       : activeFilter === "reviewed"
-      ? orderedClients.filter((c) => c.weekStatus === "reviewed" && c.cadenceStatus !== "overdue")
+      ? orderedClients.filter((c) => isReviewedThisWeek(c.weekStatus, c.cadenceStatus))
       : orderedClients.filter((c) => c.weekStatus === activeFilter);
 
   const filtered = query.trim()
@@ -189,7 +190,7 @@ export function CoachInbox({ clients }: { clients: InboxClient[] }) {
               : f.key === "missing"
               ? clients.filter((c) => c.weekStatus === "missing" || c.cadenceStatus === "overdue").length
               : f.key === "reviewed"
-              ? clients.filter((c) => c.weekStatus === "reviewed" && c.cadenceStatus !== "overdue").length
+              ? clients.filter((c) => isReviewedThisWeek(c.weekStatus, c.cadenceStatus)).length
               : clients.filter((c) => c.weekStatus === f.key).length;
           return (
             <button

@@ -9,6 +9,7 @@ import {
     getClientCadenceStatus,
     getCoachStatusLabel,
     formatTime12h,
+    isReviewedThisWeek,
 } from "@/lib/scheduling/cadence";
 import type { CadenceConfig, CadenceStatus } from "@/lib/scheduling/cadence";
 
@@ -587,5 +588,26 @@ describe("getClientCadenceStatus long-inactivity", () => {
             "UTC"
         );
         expect(result.status).toBe("overdue");
+    });
+});
+
+// ── isReviewedThisWeek ───────────────────────────────────────────────────────
+// Regression guard: the dashboard header stat and the inbox "Reviewed" tab
+// must always agree on what counts as reviewed, or the coach sees two
+// different numbers for the same thing on the same screen.
+
+describe("isReviewedThisWeek", () => {
+    it("counts a client as reviewed when weekStatus is reviewed and not currently overdue", () => {
+        expect(isReviewedThisWeek("reviewed", "reviewed")).toBe(true);
+        expect(isReviewedThisWeek("reviewed", undefined)).toBe(true);
+    });
+
+    it("excludes a client whose last cycle was reviewed but who is overdue again", () => {
+        expect(isReviewedThisWeek("reviewed", "overdue")).toBe(false);
+    });
+
+    it("excludes clients whose weekStatus isn't reviewed", () => {
+        expect(isReviewedThisWeek("missing", undefined)).toBe(false);
+        expect(isReviewedThisWeek("new", "due")).toBe(false);
     });
 });

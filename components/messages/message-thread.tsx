@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { sendMessage } from "@/app/actions/messages";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { parseCheckInMessage, formatMessagePreview } from "@/lib/messages/check-in-message";
 
 type Message = {
   id: string;
@@ -31,16 +32,6 @@ function Avatar({ name, isCoach }: { name: string; isCoach: boolean }) {
       {initial}
     </div>
   );
-}
-
-// ── Check-in message parsing ────────────────────────────────────────────────
-
-const CHECKIN_REGEX = /^\[CHECKIN:([a-zA-Z0-9_-]+):([^\]]+)\]([\s\S]*)$/;
-
-function parseCheckInMessage(body: string): { checkInId: string; date: string; notes: string } | null {
-  const match = body.match(CHECKIN_REGEX);
-  if (!match) return null;
-  return { checkInId: match[1], date: match[2], notes: match[3].trim() };
 }
 
 function CheckInCard({
@@ -297,9 +288,7 @@ export function MessageThread({
   const previewSender = latestMsg
     ? `${latestMsg.sender.firstName ?? "User"}${latestMsg.sender.activeRole === "COACH" ? " (Coach)" : ""}`
     : null;
-  const previewBody = latestMsg
-    ? latestMsg.body.slice(0, 60) + (latestMsg.body.length > 60 ? "…" : "")
-    : null;
+  const previewBody = latestMsg ? formatMessagePreview(latestMsg.body) : null;
 
   // When fullScreen, force expanded
   const isExpanded = fullScreen || expanded || alwaysExpanded;

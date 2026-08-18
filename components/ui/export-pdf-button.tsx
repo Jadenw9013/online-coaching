@@ -63,7 +63,7 @@ export function ExportPdfButton({
           type="button"
           onClick={handleExport}
           disabled={loading}
-          className="cursor-pointer rounded-lg px-2 py-1 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
+          className="cursor-pointer rounded-lg px-2.5 py-1 min-h-[44px] text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:opacity-50"
           aria-label={label}
         >
           {loading ? "Exporting\u2026" : "Export PDF"}

@@ -25,21 +25,8 @@ import { SendIntakeButton } from "@/components/coach/send-intake-button";
 import { DismissibleIntakeBanner } from "@/components/coach/dismissible-intake-banner";
 import { AdherenceCard } from "@/components/coach/adherence-card";
 import { ExerciseProgress } from "@/components/coach/exercise-progress";
-
-const weekStatusConfig = {
-  submitted: {
-    label: "Submitted",
-    bg: "bg-blue-500/20 text-blue-400",
-  },
-  reviewed: {
-    label: "Reviewed",
-    bg: "bg-emerald-500/20 text-emerald-400",
-  },
-  missing: {
-    label: "Missing",
-    bg: "bg-zinc-700 text-zinc-400",
-  },
-} as const;
+import { StatusBadge, BADGE_MAP } from "@/components/coach/status-badge";
+import { getCoachStatusLabel } from "@/lib/scheduling/cadence";
 
 const checkInStatusConfig = {
   SUBMITTED: {
@@ -104,9 +91,14 @@ export default async function ClientProfilePage({
     effectiveScheduleDays,
     coachCadence,
     clientCadenceOverride,
+    cadenceStatus,
   } = profile;
 
-  const statusBadge = weekStatusConfig[currentWeekStatus];
+  // Cadence-aware badge — carries real urgency (overdue/due/upcoming) instead
+  // of collapsing everything that isn't submitted/reviewed into one flat
+  // "Missing" state, so this matches what the dashboard already shows.
+  const badgeInfo = BADGE_MAP[cadenceStatus.status] ?? BADGE_MAP.upcoming;
+  const badgeLabel = getCoachStatusLabel(cadenceStatus.status);
 
 
 
@@ -205,11 +197,7 @@ export default async function ClientProfilePage({
               <h1 className="text-lg font-bold tracking-tight">
                 {client.firstName} {client.lastName}
               </h1>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge.bg}`}
-              >
-                {statusBadge.label}
-              </span>
+              <StatusBadge info={badgeInfo} label={badgeLabel} />
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
               <span className="break-all">{client.email}</span>
@@ -231,7 +219,7 @@ export default async function ClientProfilePage({
             className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-md transition-all hover:shadow-lg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:justify-start ${
               currentWeekStatus === "submitted"
                 ? "bg-amber-400 text-zinc-900 shadow-amber-400/30 hover:bg-amber-300 focus-visible:ring-amber-400"
-                : "bg-zinc-800 text-zinc-100 shadow-black/20 hover:bg-zinc-700 focus-visible:ring-zinc-500"
+                : "bg-blue-600 text-white shadow-blue-600/20 hover:bg-blue-500 focus-visible:ring-blue-500"
             }`}
           >
             {currentWeekStatus === "submitted" && (

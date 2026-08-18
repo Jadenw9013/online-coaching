@@ -3,7 +3,7 @@ import { getCoachClientsWithWeekStatus } from "@/lib/queries/check-ins";
 import { CoachInbox } from "@/components/coach/inbox/coach-inbox";
 import type { InboxClient } from "@/components/coach/inbox/inbox-client-card";
 import { computeCurrentPeriod } from "@/lib/scheduling/periods";
-import { parseCadenceConfig, getCadencePreview, cadenceFromLegacyDays } from "@/lib/scheduling/cadence";
+import { parseCadenceConfig, getCadencePreview, cadenceFromLegacyDays, isReviewedThisWeek } from "@/lib/scheduling/cadence";
 import Link from "next/link";
 
 function getGreeting(): string {
@@ -34,7 +34,7 @@ export default async function CoachDashboard() {
   const overdueCount = clients.filter(
     (c) => c.cadenceStatus === "overdue" || c.cadenceStatus === "due"
   ).length;
-  const reviewedCount = clients.filter((c) => c.weekStatus === "reviewed").length;
+  const reviewedCount = clients.filter((c) => isReviewedThisWeek(c.weekStatus, c.cadenceStatus)).length;
 
   const greeting = getGreeting();
   const coachFirstName = user.firstName ?? "Coach";
@@ -104,7 +104,7 @@ export default async function CoachDashboard() {
           </h2>
           <Link
             href="/coach/clients/invite"
-            className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-2 text-xs font-semibold text-zinc-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
+            className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-2 text-xs font-semibold text-zinc-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
             aria-label="Invite a client"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>

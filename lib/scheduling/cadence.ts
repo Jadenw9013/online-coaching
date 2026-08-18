@@ -253,6 +253,16 @@ export function cadenceFromLegacyDays(days: number[]): CadenceConfig {
 export type CadenceStatus = "due" | "overdue" | "upcoming" | "submitted" | "reviewed";
 
 /**
+ * A client counts as "reviewed" for dashboard stats/filters only if their
+ * current cadence status isn't overdue — a client reviewed last cycle who has
+ * since gone overdue again should not still show as reviewed. Shared here so
+ * the header stat and the inbox filter tab can't drift out of sync.
+ */
+export function isReviewedThisWeek(weekStatus: string, cadenceStatus?: CadenceStatus): boolean {
+  return weekStatus === "reviewed" && cadenceStatus !== "overdue";
+}
+
+/**
  * Derive the cadence-aware workflow status for a client.
  *
  * @param config       - Effective cadence for this client

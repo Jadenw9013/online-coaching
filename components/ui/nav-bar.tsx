@@ -110,7 +110,14 @@ export function NavBar({
           <div className="mx-1 hidden h-5 w-px bg-white/[0.08] sm:block" aria-hidden="true" />
 
           <SignedIn>
-            <UserButton />
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonTrigger:
+                    "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full",
+                },
+              }}
+            />
           </SignedIn>
         </nav>
       </div>

@@ -43,7 +43,7 @@ export function MealPlanActions({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:opacity-50 lg:w-auto"
+          className="min-h-[48px] w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:opacity-50 lg:w-auto"
         >
           {saving ? "Saving..." : isUnsaved ? "Save Draft" : "Save"}
         </button>
@@ -51,7 +51,7 @@ export function MealPlanActions({
           type="button"
           onClick={onPublish}
           disabled={publishing || itemCount === 0}
-          className="w-full rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none lg:w-auto"
+          className="min-h-[48px] w-full rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none lg:w-auto"
         >
           {publishing ? "Publishing..." : "Publish"}
         </button>
